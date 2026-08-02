@@ -1,31 +1,40 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-async function bootstrap() {
+import { AppModule } from './app.module';
+import { setupApp } from './app.setup';
+
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  // Global validation pipe (whitelists and transforms payloads)
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: false }),
-  );
+  setupApp(app);
 
-  // Swagger setup
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('NestJS API')
-    .setDescription('API documentation')
+    .setTitle('Lumi API')
+    .setDescription('Lumi backend API documentation')
     .setVersion('1.0')
-    .build();
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'access-token',
+    )
+    .build()
+  ;
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
   const port = configService.get<number>('port') ?? 3000;
+
   await app.listen(port);
-  // eslint-disable-next-line no-console
-  console.log(`Server listening on port ${port}`);
+
+  console.log(`Lumi API is running on http://localhost:${port}/api`);
+  console.log(`Swagger is available on http://localhost:${port}/api/docs`);
 }
-bootstrap();
+
+void bootstrap();
