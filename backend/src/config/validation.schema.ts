@@ -16,4 +16,5 @@ export const validationSchema = Joi.object({
 
   JWT_ISSUER: Joi.string().default('lumi-api'),
   JWT_AUDIENCE: Joi.string().default('lumi-android'),
+  DATABASE_URL: Joi.string().required(),
 });

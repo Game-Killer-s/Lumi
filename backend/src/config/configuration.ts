@@ -18,5 +18,7 @@ export default () => ({
 
     issuer: process.env.JWT_ISSUER ?? 'lumi-api',
     audience: process.env.JWT_AUDIENCE ?? 'lumi-android',
+  database: {
+    url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/lumi?schema=public',
   },
 });

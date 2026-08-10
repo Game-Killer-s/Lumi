@@ -4,6 +4,7 @@ import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -13,8 +14,11 @@ import { AuthModule } from './modules/auth/auth.module';
       validationSchema,
       envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`, '.env'],
     }),
+    PrismaModule,
     HealthModule,
     AuthModule,
   ],
 })
 export class AppModule {}
+
+

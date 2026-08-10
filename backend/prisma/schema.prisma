@@ -1,0 +1,230 @@
+// Prisma schema for Lumi music streaming platform
+// This file describes the database structure (tables and relations)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// Користувач (Слухач або Адмін)
+// ============================================================
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  nickname     String
+  role         Role     @default(LISTENER)
+  avatarUrl    String?
+  isPublic     Boolean  @default(true)
+  isBlocked    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  playlists      Playlist[]
+  likes          Like[]
+  history        History[]
+  subscriptions  Subscription[]
+  comments       Comment[]
+  reports        Report[]
+}
+
+// Ролі користувачів
+enum Role {
+  LISTENER
+  ARTIST
+  CONTENT_MANAGER
+  ADMIN
+}
+
+// ============================================================
+// Виконавець
+// ============================================================
+model Artist {
+  id          String   @id @default(uuid())
+  name        String
+  photoUrl    String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  tracks     Track[]
+  albums     Album[]
+  followers  Subscription[]
+}
+
+// ============================================================
+// Жанр музики
+// ============================================================
+model Genre {
+  id    String @id @default(uuid())
+  name  String @unique
+  color String?
+
+  tracks Track[]
+}
+
+// ============================================================
+// Альбом
+// ============================================================
+model Album {
+  id        String   @id @default(uuid())
+  title     String
+  coverUrl  String?
+  releaseYear Int?
+  artistId  String
+  createdAt DateTime @default(now())
+
+  artist Artist  @relation(fields: [artistId], references: [id])
+  tracks Track[]
+}
+
+// ============================================================
+// Трек
+// ============================================================
+model Track {
+  id          String   @id @default(uuid())
+  title       String
+  duration    Int
+  coverUrl    String?
+  audioUrl    String?
+  lyrics      String?
+  playCount   Int      @default(0)
+  likeCount   Int      @default(0)
+  status      TrackStatus @default(PUBLISHED)
+  artistId    String
+  genreId     String?
+  albumId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  artist  Artist  @relation(fields: [artistId], references: [id])
+  genre   Genre?  @relation(fields: [genreId], references: [id])
+  album   Album?  @relation(fields: [albumId], references: [id])
+
+  playlistTracks PlaylistTrack[]
+  likes          Like[]
+  history        History[]
+  comments       Comment[]
+  reports        Report[]
+}
+
+// Статус треку (модерація)
+enum TrackStatus {
+  DRAFT
+  ON_MODERATION
+  PUBLISHED
+  BLOCKED
+}
+
+// ============================================================
+// Плейлист
+// ============================================================
+model Playlist {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  coverUrl    String?
+  isOfficial  Boolean  @default(false)
+  userId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User?  @relation(fields: [userId], references: [id])
+  tracks PlaylistTrack[]
+}
+
+// Зв'язок плейлист <-> трек (багато-до-багатьох)
+model PlaylistTrack {
+  id         String @id @default(uuid())
+  playlistId String
+  trackId    String
+  position   Int    @default(0)
+
+  playlist Playlist @relation(fields: [playlistId], references: [id])
+  track    Track    @relation(fields: [trackId], references: [id])
+
+  @@unique([playlistId, trackId])
+}
+
+// ============================================================
+// Вподобайки (Улюблене)
+// ============================================================
+model Like {
+  id      String @id @default(uuid())
+  userId  String
+  trackId String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  track Track @relation(fields: [trackId], references: [id])
+
+  @@unique([userId, trackId])
+}
+
+// ============================================================
+// Історія прослуховувань
+// ============================================================
+model History {
+  id        String   @id @default(uuid())
+  userId    String
+  trackId   String
+  playedAt  DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  track Track @relation(fields: [trackId], references: [id])
+}
+
+// ============================================================
+// Підписка на виконавця
+// ============================================================
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String
+  artistId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  artist Artist @relation(fields: [artistId], references: [id])
+
+  @@unique([userId, artistId])
+}
+
+// ============================================================
+// Коментар до треку
+// ============================================================
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  userId    String
+  trackId   String
+  isHidden  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  track Track @relation(fields: [trackId], references: [id])
+}
+
+// ============================================================
+// Скарга на трек
+// ============================================================
+model Report {
+  id        String   @id @default(uuid())
+  reason    String
+  userId    String
+  trackId   String
+  status    ReportStatus @default(NEW)
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  track Track @relation(fields: [trackId], references: [id])
+}
+
+enum ReportStatus {
+  NEW
+  REVIEWED
+  RESOLVED
+}
