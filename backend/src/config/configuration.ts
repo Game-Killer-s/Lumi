@@ -15,9 +15,9 @@ export default () => ({
       process.env.JWT_REFRESH_TTL_SECONDS ?? '2592000',
       10,
     ),
-
     issuer: process.env.JWT_ISSUER ?? 'lumi-api',
     audience: process.env.JWT_AUDIENCE ?? 'lumi-android',
+  },
   database: {
     url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/lumi?schema=public',
   },

@@ -25,12 +25,32 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  playlists      Playlist[]
-  likes          Like[]
-  history        History[]
-  subscriptions  Subscription[]
-  comments       Comment[]
-  reports        Report[]
+  playlists     Playlist[]
+  likes         Like[]
+  history       History[]
+  subscriptions Subscription[]
+  comments      Comment[]
+  reports       Report[]
+  authSessions  AuthSession[]
+}
+
+model AuthSession {
+  id               String @id
+  userId           String
+  familyId         String
+  currentJti       String @unique
+  refreshTokenHash String
+
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
 }
 
 // Ролі користувачів
@@ -51,17 +71,17 @@ model Artist {
   description String?
   createdAt   DateTime @default(now())
 
-  tracks     Track[]
-  albums     Album[]
-  followers  Subscription[]
+  tracks    Track[]
+  albums    Album[]
+  followers Subscription[]
 }
 
 // ============================================================
 // Жанр музики
 // ============================================================
 model Genre {
-  id    String @id @default(uuid())
-  name  String @unique
+  id    String  @id @default(uuid())
+  name  String  @unique
   color String?
 
   tracks Track[]
@@ -71,12 +91,12 @@ model Genre {
 // Альбом
 // ============================================================
 model Album {
-  id        String   @id @default(uuid())
-  title     String
-  coverUrl  String?
+  id          String   @id @default(uuid())
+  title       String
+  coverUrl    String?
   releaseYear Int?
-  artistId  String
-  createdAt DateTime @default(now())
+  artistId    String
+  createdAt   DateTime @default(now())
 
   artist Artist  @relation(fields: [artistId], references: [id])
   tracks Track[]
@@ -86,24 +106,24 @@ model Album {
 // Трек
 // ============================================================
 model Track {
-  id          String   @id @default(uuid())
-  title       String
-  duration    Int
-  coverUrl    String?
-  audioUrl    String?
-  lyrics      String?
-  playCount   Int      @default(0)
-  likeCount   Int      @default(0)
-  status      TrackStatus @default(PUBLISHED)
-  artistId    String
-  genreId     String?
-  albumId     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String      @id @default(uuid())
+  title     String
+  duration  Int
+  coverUrl  String?
+  audioUrl  String?
+  lyrics    String?
+  playCount Int         @default(0)
+  likeCount Int         @default(0)
+  status    TrackStatus @default(PUBLISHED)
+  artistId  String
+  genreId   String?
+  albumId   String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
-  artist  Artist  @relation(fields: [artistId], references: [id])
-  genre   Genre?  @relation(fields: [genreId], references: [id])
-  album   Album?  @relation(fields: [albumId], references: [id])
+  artist Artist @relation(fields: [artistId], references: [id])
+  genre  Genre? @relation(fields: [genreId], references: [id])
+  album  Album? @relation(fields: [albumId], references: [id])
 
   playlistTracks PlaylistTrack[]
   likes          Like[]
@@ -133,7 +153,7 @@ model Playlist {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user   User?  @relation(fields: [userId], references: [id])
+  user   User?           @relation(fields: [userId], references: [id])
   tracks PlaylistTrack[]
 }
 
@@ -154,9 +174,9 @@ model PlaylistTrack {
 // Вподобайки (Улюблене)
 // ============================================================
 model Like {
-  id      String @id @default(uuid())
-  userId  String
-  trackId String
+  id        String   @id @default(uuid())
+  userId    String
+  trackId   String
   createdAt DateTime @default(now())
 
   user  User  @relation(fields: [userId], references: [id])
@@ -169,10 +189,10 @@ model Like {
 // Історія прослуховувань
 // ============================================================
 model History {
-  id        String   @id @default(uuid())
-  userId    String
-  trackId   String
-  playedAt  DateTime @default(now())
+  id       String   @id @default(uuid())
+  userId   String
+  trackId  String
+  playedAt DateTime @default(now())
 
   user  User  @relation(fields: [userId], references: [id])
   track Track @relation(fields: [trackId], references: [id])
@@ -212,12 +232,12 @@ model Comment {
 // Скарга на трек
 // ============================================================
 model Report {
-  id        String   @id @default(uuid())
+  id        String       @id @default(uuid())
   reason    String
   userId    String
   trackId   String
   status    ReportStatus @default(NEW)
-  createdAt DateTime @default(now())
+  createdAt DateTime     @default(now())
 
   user  User  @relation(fields: [userId], references: [id])
   track Track @relation(fields: [trackId], references: [id])

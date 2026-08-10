@@ -12,7 +12,17 @@ export class PasswordService {
     });
   }
 
-  verify(passwordHash: string, password: string): Promise<boolean> {
-    return argon2.verify(passwordHash, password);
+  async verify(
+    passwordHash: string,
+    password: string,
+  ): Promise<boolean> {
+    try {
+      return await argon2.verify(
+        passwordHash,
+        password,
+      );
+    } catch {
+      return false;
+    }
   }
 }

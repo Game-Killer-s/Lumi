@@ -1,6 +1,9 @@
+import { Role } from '@prisma/client';
+
 export interface IssueTokenPairInput {
   userId: string;
   sessionId: string;
   familyId: string;
-  role: string;
+  refreshJti: string;
+  role: Role;
 }
