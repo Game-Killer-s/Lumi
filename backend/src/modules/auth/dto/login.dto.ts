@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+
 import {
+  IsEmail,
   IsNotEmpty,
   IsString,
   MaxLength,
@@ -8,10 +10,11 @@ import {
 export class LoginDto {
   @ApiProperty({
     example: 'user@example.com',
-    description: 'User login or email',
+    description: 'User email',
   })
   @IsString()
   @IsNotEmpty()
+  @IsEmail()
   @MaxLength(254)
   login!: string;
 
