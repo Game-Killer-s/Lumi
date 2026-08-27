@@ -4,6 +4,8 @@ import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CatalogModule } from './modules/catalog/catalog.module';
+import { ContentModule } from './modules/content/content.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -17,8 +19,8 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     HealthModule,
     AuthModule,
+    CatalogModule,
+    ContentModule,
   ],
 })
 export class AppModule {}
-
-

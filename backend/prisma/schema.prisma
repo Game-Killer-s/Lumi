@@ -25,13 +25,14 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  playlists     Playlist[]
-  likes         Like[]
-  history       History[]
-  subscriptions Subscription[]
-  comments      Comment[]
-  reports       Report[]
-  authSessions  AuthSession[]
+  playlists      Playlist[]
+  likes          Like[]
+  history        History[]
+  subscriptions  Subscription[]
+  comments       Comment[]
+  reports        Report[]
+  authSessions   AuthSession[]
+  trackAuditLogs TrackAuditLog[]
 }
 
 model AuthSession {
@@ -106,20 +107,21 @@ model Album {
 // Трек
 // ============================================================
 model Track {
-  id        String      @id @default(uuid())
-  title     String
-  duration  Int
-  coverUrl  String?
-  audioUrl  String?
-  lyrics    String?
-  playCount Int         @default(0)
-  likeCount Int         @default(0)
-  status    TrackStatus @default(PUBLISHED)
-  artistId  String
-  genreId   String?
-  albumId   String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id          String      @id @default(uuid())
+  title       String
+  duration    Int
+  coverUrl    String?
+  audioUrl    String?
+  lyrics      String?
+  playCount   Int         @default(0)
+  likeCount   Int         @default(0)
+  status      TrackStatus @default(PUBLISHED)
+  blockReason String?
+  artistId    String
+  genreId     String?
+  albumId     String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   artist Artist @relation(fields: [artistId], references: [id])
   genre  Genre? @relation(fields: [genreId], references: [id])
@@ -130,11 +132,30 @@ model Track {
   history        History[]
   comments       Comment[]
   reports        Report[]
+  auditLogs      TrackAuditLog[]
 }
 
-// Статус треку (модерація)
+// Журнал дій над треком (хто, коли, що і чому змінив)
+model TrackAuditLog {
+  id        String   @id @default(uuid())
+  trackId   String
+  actorId   String
+  action    String
+  reason    String?
+  details   String?
+  createdAt DateTime @default(now())
+
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([trackId])
+}
+
+// Статус треку (життєвий цикл контенту)
 enum TrackStatus {
   DRAFT
+  UPLOADED
+  PROCESSING
   ON_MODERATION
   PUBLISHED
   BLOCKED
