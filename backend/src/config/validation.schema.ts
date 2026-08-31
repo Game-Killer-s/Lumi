@@ -17,4 +17,18 @@ export const validationSchema = Joi.object({
   JWT_ISSUER: Joi.string().default('lumi-api'),
   JWT_AUDIENCE: Joi.string().default('lumi-android'),
   DATABASE_URL: Joi.string().required(),
+
+  TWO_FACTOR_ENCRYPTION_KEY: Joi.string().base64().required(),
+
+  SECURITY_HMAC_KEY: Joi.string().min(32).required(),
+
+  TWO_FACTOR_ISSUER: Joi.string().default('Lumi'),
+
+  GOOGLE_OAUTH_CLIENT_ID: Joi.string().required(),
+
+  GOOGLE_OAUTH_CLIENT_SECRET: Joi.string().required(),
+
+  GOOGLE_OAUTH_CALLBACK_URL: Joi.string().uri().required(),
+
+  OAUTH_ALLOWED_RETURN_URLS: Joi.string().required(),
 });

@@ -23,8 +23,7 @@ async function bootstrap(): Promise<void> {
       },
       'access-token',
     )
-    .build()
-  ;
+    .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);

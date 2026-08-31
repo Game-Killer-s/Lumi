@@ -5,7 +5,10 @@ import { PrismaClient } from '@prisma/client';
 // Вона підключається до бази даних при старті застосунку
 // і закриває з'єднання при зупинці.
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   async onModuleInit() {
     // Підключаємось до PostgreSQL при запуску
     await this.$connect();

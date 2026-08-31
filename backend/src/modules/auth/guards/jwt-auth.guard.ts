@@ -23,59 +23,43 @@ export class JwtAuthGuard implements CanActivate {
     private readonly prisma: PrismaService,
   ) {}
 
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
-    const isPublic =
-      this.reflector.getAllAndOverride<boolean>(
-        IS_PUBLIC_KEY,
-        [
-          context.getHandler(),
-          context.getClass(),
-        ],
-      );
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (isPublic) {
       return true;
     }
 
-    const request =
-      context
-        .switchToHttp()
-        .getRequest<AuthenticatedRequest>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
-    const token =
-      this.extractBearerToken(request);
+    const token = this.extractBearerToken(request);
 
     if (!token) {
-      throw new UnauthorizedException(
-        'Bearer token is required',
-      );
+      throw new UnauthorizedException('Bearer token is required');
     }
 
-    const payload =
-      await this.tokenService.verifyAccessToken(
-        token,
-      );
+    const payload = await this.tokenService.verifyAccessToken(token);
 
-    const session =
-      await this.prisma.authSession.findUnique({
-        where: {
-          id: payload.sessionId,
-        },
-        select: {
-          userId: true,
-          revokedAt: true,
-          expiresAt: true,
+    const session = await this.prisma.authSession.findUnique({
+      where: {
+        id: payload.sessionId,
+      },
+      select: {
+        userId: true,
+        revokedAt: true,
+        expiresAt: true,
 
-          user: {
-            select: {
-              isBlocked: true,
-              role: true,
-            },
+        user: {
+          select: {
+            isBlocked: true,
+            role: true,
           },
         },
-      });
+      },
+    });
 
     if (
       !session ||
@@ -84,9 +68,7 @@ export class JwtAuthGuard implements CanActivate {
       session.expiresAt <= new Date() ||
       session.user.isBlocked
     ) {
-      throw new UnauthorizedException(
-        'Session is invalid or revoked',
-      );
+      throw new UnauthorizedException('Session is invalid or revoked');
     }
 
     /*
@@ -103,20 +85,14 @@ export class JwtAuthGuard implements CanActivate {
     return true;
   }
 
-  private extractBearerToken(
-    request: Request,
-  ): string | undefined {
-    const authorization =
-      request.headers.authorization;
+  private extractBearerToken(request: Request): string | undefined {
+    const authorization = request.headers.authorization;
 
     if (!authorization) {
       return undefined;
     }
 
-    const parts =
-      authorization
-        .trim()
-        .split(/\s+/);
+    const parts = authorization.trim().split(/\s+/);
 
     if (parts.length !== 2) {
       return undefined;
@@ -124,10 +100,7 @@ export class JwtAuthGuard implements CanActivate {
 
     const [scheme, token] = parts;
 
-    if (
-      scheme.toLowerCase() !== 'bearer' ||
-      !token
-    ) {
+    if (scheme.toLowerCase() !== 'bearer' || !token) {
       return undefined;
     }
 

@@ -251,7 +251,7 @@ async function main() {
       },
 
       create: {
-        email: 'admin@lumi.app',
+        email: 'admin@lumi.app0',
         passwordHash: adminPasswordHash,
         nickname: 'Admin',
         role: 'ADMIN',
