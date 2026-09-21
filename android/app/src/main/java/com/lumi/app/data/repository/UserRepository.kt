@@ -29,4 +29,22 @@ class UserRepository {
     suspend fun getGenres(): ApiResult<GenreListResponse> {
         return safeApiCall { api.getGenres() }
     }
+
+    /**
+     * TODO(backend): no follow/unfollow endpoint exists yet
+     * (ApiConstants.ARTISTS_FOLLOW). This is a local-only stub so the UI
+     * (Artist screen, follow button) can be built and tested now.
+     * Replace the body with a real safeApiCall once the endpoint ships;
+     * ArtistViewModel already treats this as a suspend ApiResult call so
+     * no call-site changes will be needed.
+     */
+    suspend fun followArtist(artistId: String): ApiResult<Unit> {
+        android.util.Log.w("UserRepository", "TODO(backend): followArtist($artistId) — no real API call made")
+        return ApiResult.Success(Unit)
+    }
+
+    suspend fun unfollowArtist(artistId: String): ApiResult<Unit> {
+        android.util.Log.w("UserRepository", "TODO(backend): unfollowArtist($artistId) — no real API call made")
+        return ApiResult.Success(Unit)
+    }
 }

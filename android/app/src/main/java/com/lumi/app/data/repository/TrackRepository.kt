@@ -15,6 +15,21 @@ class TrackRepository {
         return safeApiCall { api.getPopularTracks(limit) }
     }
 
+    /**
+     * Personalized recommendations for the home feed.
+     *
+     * TODO(backend): /tracks/recommended does not exist yet. Until it
+     * does, this falls back to popular+new tracks merged as a stand-in
+     * feed. Swap the body for `safeApiCall { api.getRecommendedTracks(limit) }`
+     * once the real endpoint ships — the call site (HomeViewModel) does
+     * not need to change.
+     */
+    suspend fun getRecommendedTracks(limit: Int = 20): ApiResult<TrackListResponse> {
+        val popular = safeApiCall { api.getPopularTracks(limit) }
+        if (popular is ApiResult.Success) return popular
+        return safeApiCall { api.getNewTracks(limit) }
+    }
+
     suspend fun getNewTracks(limit: Int = 10): ApiResult<TrackListResponse> {
         return safeApiCall { api.getNewTracks(limit) }
     }

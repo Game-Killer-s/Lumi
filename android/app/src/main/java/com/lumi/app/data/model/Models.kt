@@ -141,3 +141,47 @@ data class GenreListResponse(
 data class AddHistoryRequest(
     @SerializedName("trackId") val trackId: String
 )
+
+// ==================== ALBUM MODELS ====================
+// NOTE: backend does not expose a dedicated /albums resource yet.
+// This mirrors the Playlist contract 1:1 so the UI can be built now;
+// TODO(backend): replace AlbumRepository's playlist-endpoint fallback
+// once real /albums endpoints exist (see AlbumRepository.kt).
+
+data class Album(
+    @SerializedName("id") val id: String,
+    @SerializedName("title") val title: String,
+    @SerializedName("artist") val artist: Artist?,
+    @SerializedName("artistName") val artistName: String? = null,
+    @SerializedName("coverUrl") val coverUrl: String? = null,
+    @SerializedName("releaseDate") val releaseDate: String? = null,
+    @SerializedName("tracks") val tracks: List<Track>? = null,
+    @SerializedName("tracksCount") val tracksCount: Int = 0,
+    @SerializedName("duration") val duration: Int = 0
+)
+
+data class AlbumListResponse(
+    @SerializedName("albums") val albums: List<Album>,
+    @SerializedName("total") val total: Int = 0,
+    @SerializedName("page") val page: Int = 1,
+    @SerializedName("limit") val limit: Int = 20
+)
+
+// ==================== REPORT MODELS ====================
+// TODO(backend): no /report endpoint exists yet. Kept here so the UI
+// (reason picker in the track context menu) has a stable contract to
+// build against; ReportRepository currently just logs the request.
+
+enum class ReportReason(val label: String) {
+    EXPLICIT_CONTENT("Неприйнятний контент"),
+    COPYRIGHT("Порушення авторських прав"),
+    WRONG_METADATA("Некоректні дані про трек"),
+    SPAM("Спам"),
+    OTHER("Інше")
+}
+
+data class ReportTrackRequest(
+    @SerializedName("trackId") val trackId: String,
+    @SerializedName("reason") val reason: String,
+    @SerializedName("comment") val comment: String? = null
+)

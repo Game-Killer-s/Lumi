@@ -25,6 +25,22 @@ object ApiConstants {
     const val LIKES = "likes"
     const val HISTORY = "history"
 
+    // TODO(backend): /albums does not exist yet — see Models.kt Album section.
+    const val ALBUMS = "albums"
+
+    // TODO(backend): recommendations endpoint does not exist yet.
+    // Once it does, point TrackRepository.getRecommendedTracks() at this
+    // instead of its current getPopularTracks()/getNewTracks() fallback.
+    const val TRACKS_RECOMMENDED = "tracks/recommended"
+
+    // TODO(backend): follow/unfollow endpoints do not exist yet.
+    // UserRepository.followArtist()/unfollowArtist() stub these locally.
+    const val ARTISTS_FOLLOW = "artists/{id}/follow"
+
+    // TODO(backend): report endpoint does not exist yet.
+    // ReportRepository.reportTrack() stubs this locally.
+    const val REPORT = "report/track"
+
     // Timeouts
     const val CONNECT_TIMEOUT = 30L
     const val READ_TIMEOUT = 30L
