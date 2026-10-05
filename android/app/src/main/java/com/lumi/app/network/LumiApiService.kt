@@ -21,6 +21,12 @@ interface LumiApiService {
     @POST(ApiConstants.AUTH_REFRESH)
     suspend fun refreshToken(@Body request: RefreshTokenRequest): Response<AuthResponse>
 
+    @POST(ApiConstants.AUTH_GOOGLE)
+    suspend fun googleLogin(@Body request: GoogleAuthRequest): Response<AuthResponse>
+
+    @POST(ApiConstants.AUTH_FORGOT_PASSWORD)
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): Response<ForgotPasswordResponse>
+
     // ==================== USERS ====================
 
     @GET(ApiConstants.USERS_PROFILE)
@@ -132,4 +138,62 @@ interface LumiApiService {
 
     @POST(ApiConstants.HISTORY)
     suspend fun addToHistory(@Body request: AddHistoryRequest): Response<Unit>
+
+    // ==================== NOTIFICATIONS ====================
+
+    @GET(ApiConstants.NOTIFICATIONS_SETTINGS)
+    suspend fun getNotificationSettings(): Response<NotificationSettings>
+
+    @PUT(ApiConstants.NOTIFICATIONS_SETTINGS)
+    suspend fun updateNotificationSettings(
+        @Body request: UpdateNotificationSettingsRequest
+    ): Response<NotificationSettings>
+
+    @GET(ApiConstants.NOTIFICATIONS)
+    suspend fun getNotifications(): Response<NotificationListResponse>
+
+    @PATCH("${ApiConstants.NOTIFICATIONS}/{id}/read")
+    suspend fun markNotificationRead(@Path("id") notificationId: String): Response<NotificationItem>
+
+    @PATCH(ApiConstants.NOTIFICATIONS_READ_ALL)
+    suspend fun markAllNotificationsRead(): Response<UpdatedCountResponse>
+
+    // ==================== SUBSCRIPTIONS ====================
+
+    @GET(ApiConstants.SUBSCRIPTION_PLANS)
+    suspend fun getSubscriptionPlans(): Response<List<SubscriptionPlan>>
+
+    @GET(ApiConstants.SUBSCRIPTION_STATUS)
+    suspend fun getSubscriptionStatus(): Response<SubscriptionStatusResponse>
+
+    @GET(ApiConstants.SUBSCRIPTION_PLAY_ACCESS)
+    suspend fun checkPlayAccess(): Response<PlayAccessResponse>
+
+    @POST(ApiConstants.SUBSCRIPTION_CHECKOUT)
+    suspend fun checkout(@Body request: CheckoutRequest): Response<CheckoutResponse>
+
+    @POST(ApiConstants.SUBSCRIPTION_CANCEL)
+    suspend fun cancelSubscription(): Response<CancelSubscriptionResponse>
+
+    @GET(ApiConstants.SUBSCRIPTION_PAYMENTS)
+    suspend fun getPaymentHistory(): Response<List<PaymentHistoryItem>>
+
+    @GET(ApiConstants.SUBSCRIPTION_PAYMENT_METHODS)
+    suspend fun getPaymentMethods(): Response<List<PaymentMethod>>
+
+    @POST(ApiConstants.SUBSCRIPTION_PAYMENT_METHODS)
+    suspend fun addPaymentMethod(
+        @Body request: AddPaymentMethodRequest
+    ): Response<PaymentMethod>
+
+    @PUT("${ApiConstants.SUBSCRIPTION_PAYMENT_METHODS}/{id}")
+    suspend fun updatePaymentMethod(
+        @Path("id") paymentMethodId: String,
+        @Body request: UpdatePaymentMethodRequest
+    ): Response<PaymentMethod>
+
+    @DELETE("${ApiConstants.SUBSCRIPTION_PAYMENT_METHODS}/{id}")
+    suspend fun deletePaymentMethod(
+        @Path("id") paymentMethodId: String
+    ): Response<DeletedResponse>
 }

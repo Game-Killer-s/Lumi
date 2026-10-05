@@ -5,19 +5,23 @@ plugins {
 
 android {
     namespace = "com.lumi.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.lumi.app"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Backend base URL - change for production
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/v1/\"")
+        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+
+        // Google OAuth web client ID for Google Sign-In
+        // (leave empty until configured in Google Cloud Console)
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"\"")
     }
 
     buildTypes {
@@ -80,6 +84,9 @@ dependencies {
 
     // DataStore
     implementation(libs.datastore.preferences)
+
+    // Google Sign-In
+    implementation(libs.google.play.services.auth)
 
     // Testing
     testImplementation(libs.junit)

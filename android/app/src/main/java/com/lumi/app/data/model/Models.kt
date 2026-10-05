@@ -10,9 +10,21 @@ data class LoginRequest(
 )
 
 data class RegisterRequest(
-    @SerializedName("username") val username: String,
+    @SerializedName("nickname") val nickname: String,
     @SerializedName("email") val email: String,
     @SerializedName("password") val password: String
+)
+
+data class ForgotPasswordRequest(
+    @SerializedName("email") val email: String
+)
+
+data class ForgotPasswordResponse(
+    @SerializedName("message") val message: String
+)
+
+data class GoogleAuthRequest(
+    @SerializedName("idToken") val idToken: String
 )
 
 data class RefreshTokenRequest(
@@ -22,14 +34,14 @@ data class RefreshTokenRequest(
 data class AuthResponse(
     @SerializedName("accessToken") val accessToken: String,
     @SerializedName("refreshToken") val refreshToken: String,
-    @SerializedName("user") val user: UserProfile
+    @SerializedName("user") val user: UserProfile? = null
 )
 
 // ==================== USER MODELS ====================
 
 data class UserProfile(
     @SerializedName("id") val id: String,
-    @SerializedName("username") val username: String,
+    @SerializedName("nickname") val nickname: String,
     @SerializedName("email") val email: String,
     @SerializedName("avatarUrl") val avatarUrl: String? = null,
     @SerializedName("role") val role: String = "listener",
@@ -140,4 +152,155 @@ data class GenreListResponse(
 
 data class AddHistoryRequest(
     @SerializedName("trackId") val trackId: String
+)
+
+// ==================== NOTIFICATION MODELS ====================
+
+data class NotificationSettings(
+    @SerializedName("newReleases") val newReleases: Boolean = true,
+    @SerializedName("artistUpdates") val artistUpdates: Boolean = true,
+    @SerializedName("platformUpdates") val platformUpdates: Boolean = true,
+    @SerializedName("pushEnabled") val pushEnabled: Boolean = true,
+    @SerializedName("emailEnabled") val emailEnabled: Boolean = false
+)
+
+data class UpdateNotificationSettingsRequest(
+    @SerializedName("newReleases") val newReleases: Boolean? = null,
+    @SerializedName("artistUpdates") val artistUpdates: Boolean? = null,
+    @SerializedName("platformUpdates") val platformUpdates: Boolean? = null,
+    @SerializedName("pushEnabled") val pushEnabled: Boolean? = null,
+    @SerializedName("emailEnabled") val emailEnabled: Boolean? = null
+)
+
+data class NotificationItem(
+    @SerializedName("id") val id: String,
+    @SerializedName("type") val type: String = "new_release",
+    @SerializedName("title") val title: String,
+    @SerializedName("body") val body: String = "",
+    @SerializedName("isRead") val isRead: Boolean = false,
+    @SerializedName("createdAt") val createdAt: String? = null
+)
+
+data class NotificationListResponse(
+    @SerializedName("items") val items: List<NotificationItem> = emptyList(),
+    @SerializedName("unread") val unread: Int = 0
+)
+
+data class UpdatedCountResponse(
+    @SerializedName("updated") val updated: Int = 0
+)
+
+data class DeletedResponse(
+    @SerializedName("deleted") val deleted: Boolean = true
+)
+
+// ==================== SUBSCRIPTION MODELS ====================
+
+data class SubscriptionPlan(
+    @SerializedName("id") val id: String,
+    @SerializedName("code") val code: String = "",
+    @SerializedName("title") val title: String,
+    @SerializedName("description") val description: String? = null,
+    @SerializedName("priceCents") val priceCents: Int = 0,
+    @SerializedName("currency") val currency: String = "UAH",
+    @SerializedName("periodDays") val periodDays: Int = 30
+)
+
+// Можливості тарифу: сервер віддає їх разом зі статусом підписки.
+data class EntitlementResponse(
+    @SerializedName("tier") val tier: String = "FREE",
+    @SerializedName("maxQuality") val maxQuality: String = "STANDARD",
+    @SerializedName("canUseHq") val canUseHq: Boolean = false,
+    @SerializedName("canUseLossless") val canUseLossless: Boolean = false,
+    @SerializedName("canDownload") val canDownload: Boolean = false
+)
+
+data class SubscriptionStatusResponse(
+    @SerializedName("hasSubscription") val hasSubscription: Boolean = false,
+    @SerializedName("status") val status: String = "FREE",
+    @SerializedName("entitlement") val entitlement: EntitlementResponse? = null,
+    @SerializedName("title") val title: String = "",
+    @SerializedName("message") val message: String = "",
+    @SerializedName("plan") val plan: SubscriptionPlan? = null,
+    @SerializedName("currentPeriodEnd") val currentPeriodEnd: String? = null,
+    @SerializedName("gracePeriodEndsAt") val gracePeriodEndsAt: String? = null,
+    @SerializedName("cancelAtPeriodEnd") val cancelAtPeriodEnd: Boolean = false,
+    @SerializedName("nextChargeDate") val nextChargeDate: String? = null,
+    @SerializedName("nextChargeAmountCents") val nextChargeAmountCents: Int? = null,
+    @SerializedName("paymentsCount") val paymentsCount: Int = 0
+)
+
+data class PlayAccessResponse(
+    @SerializedName("allowed") val allowed: Boolean = true,
+    @SerializedName("quality") val quality: String = "STANDARD",
+    @SerializedName("status") val status: String = "FREE",
+    @SerializedName("message") val message: String = ""
+)
+
+data class PaymentHistoryItem(
+    @SerializedName("id") val id: String,
+    @SerializedName("amountCents") val amountCents: Int = 0,
+    @SerializedName("currency") val currency: String = "UAH",
+    @SerializedName("status") val status: String = "PENDING",
+    @SerializedName("failureReason") val failureReason: String? = null,
+    @SerializedName("createdAt") val createdAt: String? = null
+)
+
+data class PaymentMethod(
+    @SerializedName("id") val id: String,
+    @SerializedName("brand") val brand: String = "CARD",
+    @SerializedName("last4") val last4: String = "",
+    @SerializedName("expMonth") val expMonth: Int = 1,
+    @SerializedName("expYear") val expYear: Int = 2026,
+    @SerializedName("holderName") val holderName: String? = null,
+    @SerializedName("isDefault") val isDefault: Boolean = false
+)
+
+data class CheckoutRequest(
+    @SerializedName("planId") val planId: String,
+    @SerializedName("provider") val provider: String = "CARD",
+    @SerializedName("cardNumber") val cardNumber: String? = null,
+    @SerializedName("holderName") val holderName: String? = null,
+    @SerializedName("expMonth") val expMonth: Int? = null,
+    @SerializedName("expYear") val expYear: Int? = null,
+    @SerializedName("cvc") val cvc: String? = null,
+    @SerializedName("paymentToken") val paymentToken: String? = null
+)
+
+data class AddPaymentMethodRequest(
+    @SerializedName("cardNumber") val cardNumber: String,
+    @SerializedName("holderName") val holderName: String? = null,
+    @SerializedName("expMonth") val expMonth: Int,
+    @SerializedName("expYear") val expYear: Int,
+    @SerializedName("cvc") val cvc: String? = null
+)
+
+data class UpdatePaymentMethodRequest(
+    @SerializedName("holderName") val holderName: String? = null,
+    @SerializedName("expMonth") val expMonth: Int? = null,
+    @SerializedName("expYear") val expYear: Int? = null,
+    @SerializedName("isDefault") val isDefault: Boolean? = null
+)
+
+data class SubscriptionRecord(
+    @SerializedName("id") val id: String,
+    @SerializedName("status") val status: String = "PENDING",
+    @SerializedName("currentPeriodEnd") val currentPeriodEnd: String? = null,
+    @SerializedName("cancelAtPeriodEnd") val cancelAtPeriodEnd: Boolean = false
+)
+
+data class PaymentInfo(
+    @SerializedName("id") val id: String,
+    @SerializedName("status") val status: String = "PENDING",
+    @SerializedName("failureReason") val failureReason: String? = null
+)
+
+data class CheckoutResponse(
+    @SerializedName("subscription") val subscription: SubscriptionRecord? = null,
+    @SerializedName("payment") val payment: PaymentInfo? = null
+)
+
+data class CancelSubscriptionResponse(
+    @SerializedName("subscription") val subscription: SubscriptionRecord? = null,
+    @SerializedName("cancelAtPeriodEnd") val cancelAtPeriodEnd: Boolean = true
 )

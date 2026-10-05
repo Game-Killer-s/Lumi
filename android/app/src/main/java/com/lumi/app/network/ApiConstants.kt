@@ -13,6 +13,8 @@ object ApiConstants {
     const val AUTH_LOGIN = "auth/login"
     const val AUTH_REGISTER = "auth/register"
     const val AUTH_REFRESH = "auth/refresh"
+    const val AUTH_GOOGLE = "auth/google"
+    const val AUTH_FORGOT_PASSWORD = "auth/forgot-password"
     const val USERS_PROFILE = "users/profile"
     const val TRACKS = "tracks"
     const val TRACKS_POPULAR = "tracks/popular"
@@ -24,6 +26,20 @@ object ApiConstants {
     const val ARTISTS = "artists"
     const val LIKES = "likes"
     const val HISTORY = "history"
+
+    // Notifications
+    const val NOTIFICATIONS = "notifications"
+    const val NOTIFICATIONS_SETTINGS = "notifications/settings"
+    const val NOTIFICATIONS_READ_ALL = "notifications/read-all"
+
+    // Subscription
+    const val SUBSCRIPTION_PLANS = "subscriptions/plans"
+    const val SUBSCRIPTION_STATUS = "subscriptions/status"
+    const val SUBSCRIPTION_PLAY_ACCESS = "subscriptions/play-access"
+    const val SUBSCRIPTION_CHECKOUT = "subscriptions/checkout"
+    const val SUBSCRIPTION_CANCEL = "subscriptions/cancel"
+    const val SUBSCRIPTION_PAYMENTS = "subscriptions/payments"
+    const val SUBSCRIPTION_PAYMENT_METHODS = "subscriptions/payment-methods"
 
     // Timeouts
     const val CONNECT_TIMEOUT = 30L
