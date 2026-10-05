@@ -10,6 +10,7 @@ import { RolesGuard } from './guards/roles.guard';
 
 import { PasswordService } from './services/password.service';
 import { TokenService } from './services/token.service';
+import { MailService } from './services/mail.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TokenService } from './services/token.service';
     AuthService,
     PasswordService,
     TokenService,
+    MailService,
     JwtAuthGuard,
     RolesGuard,
 

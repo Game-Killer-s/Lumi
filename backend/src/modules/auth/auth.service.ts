@@ -1,12 +1,17 @@
 import {
+  BadRequestException,
+  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
-import { randomUUID } from 'crypto';
+import { ConfigService } from '@nestjs/config';
+import { Role, User } from '@prisma/client';
+import { OAuth2Client } from 'google-auth-library';
+import { randomBytes, randomUUID } from 'crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
 
+import { AuthResponseDto } from './dto/auth-response.dto';
 import { PasswordService } from './services/password.service';
 import {
   TokenPair,
@@ -16,12 +21,19 @@ import {
 import { IssueTokenPairInput } from './types/issue-token-pair.type';
 import { RefreshTokenPayload } from './types/token-payload.type';
 
+import { MailService } from './services/mail.service';
+
+// Термін дії токена відновлення пароля — 1 година.
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
   hashPassword(password: string): Promise<string> {
@@ -83,20 +95,20 @@ export class AuthService {
   }
 
   async login(
-    login: string,
+    email: string,
     password: string,
-  ): Promise<TokenPair> {
-    const email = login.trim().toLowerCase();
+  ): Promise<AuthResponseDto> {
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.client.user.findUnique({
       where: {
-        email,
+        email: normalizedEmail,
       },
     });
 
     if (!user || user.isBlocked) {
       throw new UnauthorizedException(
-        'Invalid credentials',
+        'Користувача з таким email не знайдено',
       );
     }
 
@@ -108,13 +120,184 @@ export class AuthService {
 
     if (!passwordValid) {
       throw new UnauthorizedException(
-        'Invalid credentials',
+        'Неправильний пароль',
       );
     }
 
-    return this.createSession(
+    const tokens = await this.createSession(
       user.id,
       user.role,
+    );
+
+    return this.toAuthResponse(user, tokens);
+  }
+
+  async register(
+    nickname: string,
+    email: string,
+    password: string,
+  ): Promise<AuthResponseDto> {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const existing =
+      await this.prisma.client.user.findUnique({
+        where: {
+          email: normalizedEmail,
+        },
+      });
+
+    if (existing) {
+      throw new ConflictException(
+        'Користувач з таким email вже існує',
+      );
+    }
+
+    const passwordHash =
+      await this.hashPassword(password);
+
+    let user: User;
+
+    try {
+      user = await this.prisma.client.user.create({
+        data: {
+          email: normalizedEmail,
+          passwordHash,
+          nickname: nickname.trim(),
+        },
+      });
+    } catch (error) {
+      // P2002 — unique constraint violation.
+      // Можлива гонка між перевіркою вище і create.
+      if (this.isUniqueViolation(error)) {
+        throw new ConflictException(
+          'Користувач з таким email вже існує',
+        );
+      }
+
+      throw error;
+    }
+
+    const tokens = await this.createSession(
+      user.id,
+      user.role,
+    );
+
+    return this.toAuthResponse(user, tokens);
+  }
+
+  async googleLogin(
+    idToken: string,
+  ): Promise<AuthResponseDto> {
+    const googleClientId =
+      this.configService.get<string>('google.clientId');
+
+    if (!googleClientId) {
+      throw new BadRequestException(
+        'Google Sign-In не налаштовано на сервері (GOOGLE_CLIENT_ID)',
+      );
+    }
+
+    const client = new OAuth2Client(googleClientId);
+
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: googleClientId,
+    });
+
+    const payload = ticket.getPayload();
+
+    const email = payload?.email;
+
+    if (!email) {
+      throw new UnauthorizedException(
+        'Не вдалося отримати email з Google-акаунта',
+      );
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const nickname =
+      payload?.name?.trim() ||
+      normalizedEmail.split('@')[0];
+
+    let user =
+      await this.prisma.client.user.findUnique({
+        where: {
+          email: normalizedEmail,
+        },
+      });
+
+    if (!user) {
+      // Швидка реєстрація в один клік:
+      // акаунт створюється автоматично.
+      const passwordHash =
+        await this.hashPassword(randomUUID());
+
+      user = await this.prisma.client.user.create({
+        data: {
+          email: normalizedEmail,
+          passwordHash,
+          nickname,
+        },
+      });
+    }
+
+    if (user.isBlocked) {
+      throw new UnauthorizedException(
+        'Користувача з таким email не знайдено',
+      );
+    }
+
+    const tokens = await this.createSession(
+      user.id,
+      user.role,
+    );
+
+    return this.toAuthResponse(user, tokens);
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await this.prisma.client.user.findUnique({
+      where: {
+        email: normalizedEmail,
+      },
+    });
+
+    // Відповідь однакова незалежно від того,
+    // чи існує акаунт, щоб не розкривати email'и.
+    if (!user) {
+      return;
+    }
+
+    // Анулюємо всі попередні активні токени користувача.
+    await this.prisma.client.passwordResetToken.updateMany({
+      where: {
+        userId: user.id,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      data: {
+        expiresAt: new Date(0),
+      },
+    });
+
+    const token = randomBytes(32).toString('hex');
+    const tokenHash = await this.hashPassword(token);
+
+    await this.prisma.client.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt: new Date(
+          Date.now() + RESET_TOKEN_TTL_MS,
+        ),
+      },
+    });
+
+    await this.mailService.sendPasswordReset(
+      user.email,
+      token,
     );
   }
 
@@ -127,7 +310,7 @@ export class AuthService {
       );
 
     const session =
-      await this.prisma.authSession.findUnique({
+      await this.prisma.client.authSession.findUnique({
         where: {
           id: payload.sessionId,
         },
@@ -222,7 +405,7 @@ export class AuthService {
      * виконати rotation.
      */
     const updated =
-      await this.prisma.authSession.updateMany({
+      await this.prisma.client.authSession.updateMany({
         where: {
           id: session.id,
           currentJti: payload.jti,
@@ -255,7 +438,7 @@ export class AuthService {
     sessionId: string,
     userId: string,
   ): Promise<void> {
-    await this.prisma.authSession.updateMany({
+    await this.prisma.client.authSession.updateMany({
       where: {
         id: sessionId,
         userId,
@@ -289,7 +472,7 @@ export class AuthService {
         tokens.refreshToken,
       );
 
-    await this.prisma.authSession.create({
+    await this.prisma.client.authSession.create({
       data: {
         id: sessionId,
         userId,
@@ -310,7 +493,7 @@ export class AuthService {
   private async revokeSession(
     sessionId: string,
   ): Promise<void> {
-    await this.prisma.authSession.updateMany({
+    await this.prisma.client.authSession.updateMany({
       where: {
         id: sessionId,
         revokedAt: null,
@@ -319,5 +502,34 @@ export class AuthService {
         revokedAt: new Date(),
       },
     });
+  }
+
+  private toAuthResponse(
+    user: User,
+    tokens: TokenPair,
+  ): AuthResponseDto {
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      tokenType: tokens.tokenType,
+      accessTokenExpiresIn: tokens.accessTokenExpiresIn,
+      refreshTokenExpiresIn: tokens.refreshTokenExpiresIn,
+      user: {
+        id: user.id,
+        nickname: user.nickname,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
+    };
+  }
+
+  private isUniqueViolation(error: unknown): boolean {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      (error as { code?: string }).code === 'P2002'
+    );
   }
 }

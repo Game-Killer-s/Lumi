@@ -33,6 +33,13 @@ model User {
   reports        Report[]
   authSessions   AuthSession[]
   trackAuditLogs TrackAuditLog[]
+
+  passwordResetTokens  PasswordResetToken[]
+  notificationSettings NotificationSettings?
+  notifications        UserNotification[]
+  userSubscriptions    UserSubscription[]
+  paymentMethods       PaymentMethod[]
+  payments             Payment[]
 }
 
 model AuthSession {
@@ -52,6 +59,22 @@ model AuthSession {
 
   @@index([userId])
   @@index([familyId])
+}
+
+// ============================================================
+// Токен скидання пароля (відновлення доступу)
+// ============================================================
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // Ролі користувачів
@@ -268,4 +291,152 @@ enum ReportStatus {
   NEW
   REVIEWED
   RESOLVED
+}
+
+// ============================================================
+// Тарифний план (Free / Premium / Family)
+// ============================================================
+model SubscriptionPlan {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  title       String
+  description String?
+  priceCents  Int
+  currency    String   @default("UAH")
+  periodDays  Int      @default(30)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscriptions UserSubscription[]
+}
+
+// Стан підписки користувача
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  GRACE_PERIOD
+  SUSPENDED
+  CANCELLED
+}
+
+// Спосіб оплати
+enum PaymentProvider {
+  CARD
+  GOOGLE_PAY
+  STRIPE
+  LIQPAY
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+// ============================================================
+// Підписка користувача на тариф
+// ============================================================
+model UserSubscription {
+  id               String             @id @default(uuid())
+  userId           String
+  planId           String
+  status           SubscriptionStatus @default(PENDING)
+  provider         PaymentProvider    @default(CARD)
+  currentPeriodEnd DateTime?
+  gracePeriodEndsAt    DateTime?
+  lastPaymentFailedAt  DateTime?
+  cancelAtPeriodEnd    Boolean        @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     SubscriptionPlan @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@index([userId])
+}
+
+// ============================================================
+// Збережена картка (номер не зберігаємо — лише маску)
+// ============================================================
+model PaymentMethod {
+  id         String   @id @default(uuid())
+  userId     String
+  brand      String
+  last4      String
+  expMonth   Int
+  expYear    Int
+  holderName String?
+  isDefault  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ============================================================
+// Платіж (історія транзакцій платіжного шлюзу)
+// ============================================================
+model Payment {
+  id             String          @id @default(uuid())
+  userId         String
+  subscriptionId String?
+  amountCents    Int
+  currency       String          @default("UAH")
+  status         PaymentStatus   @default(PENDING)
+  provider       PaymentProvider @default(CARD)
+  externalId     String          @unique
+  failureReason  String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription UserSubscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@index([userId])
+}
+
+// ============================================================
+// Налаштування сповіщень користувача
+// ============================================================
+model NotificationSettings {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  newReleases     Boolean  @default(true)
+  artistUpdates   Boolean  @default(true)
+  platformUpdates Boolean  @default(true)
+  systemNotifications Boolean @default(true)
+  pushEnabled     Boolean  @default(true)
+  emailEnabled    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================
+// Сповіщення у шторці застосунку
+// ============================================================
+model UserNotification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  // payload — метадані події (артист, альбом, реліз).
+  payload   Json?
+  // releaseId — щоб одному користувачу прийшло одне сповіщення на реліз.
+  releaseId String?
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, releaseId])
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
 }

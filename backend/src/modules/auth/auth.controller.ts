@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common';
 
 import {
+  ApiConflictResponse,
+  ApiCreatedResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiTags,
@@ -18,8 +20,12 @@ import { Auth } from './decorators/auth.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { RegisterDto } from './dto/register.dto';
 import { TokenPairDto } from './dto/token-pair.dto';
 
 @ApiTags('auth')
@@ -30,18 +36,76 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Post('register')
+  @ApiCreatedResponse({
+    type: AuthResponseDto,
+    description: 'Account created, session issued',
+  })
+  @ApiConflictResponse({
+    description: 'Email already exists',
+  })
+  register(
+    @Body() dto: RegisterDto,
+  ): Promise<AuthResponseDto> {
+    return this.authService.register(
+      dto.nickname,
+      dto.email,
+      dto.password,
+    );
+  }
+
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: TokenPairDto,
+    type: AuthResponseDto,
   })
   login(
     @Body() dto: LoginDto,
-  ): Promise<TokenPairDto> {
+  ): Promise<AuthResponseDto> {
     return this.authService.login(
-      dto.login,
+      dto.email,
       dto.password,
     );
+  }
+
+  @Public()
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: AuthResponseDto,
+    description: 'Google account verified, session issued',
+  })
+  google(
+    @Body() dto: GoogleLoginDto,
+  ): Promise<AuthResponseDto> {
+    return this.authService.googleLogin(
+      dto.idToken,
+    );
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    schema: {
+      example: {
+        message: 'Якщо акаунт існує — токен надіслано на пошту',
+      },
+    },
+    description: 'Password reset token is sent to email (if account exists)',
+  })
+  async forgotPassword(
+    @Body() dto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.forgotPassword(
+      dto.email,
+    );
+
+    return {
+      message:
+        'Якщо акаунт існує — токен надіслано на пошту',
+    };
   }
 
   @Public()

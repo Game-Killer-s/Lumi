@@ -1,18 +1,72 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
-// PrismaService - це обгортка над PrismaClient.
-// Вона підключається до бази даних при старті застосунку
-// і закриває з'єднання при зупинці.
+import { MetricsService } from '../modules/metrics/metrics.service';
+
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
+  readonly client: PrismaClient;
+
+  constructor(private readonly metricsService: MetricsService) {
+    this.client = new PrismaClient().$extends({
+      query: {
+        $allModels: {
+          async $allOperations({ model, operation, args, query }) {
+            const start = Date.now();
+            const result = await query(args);
+            const durationMs = Date.now() - start;
+
+            metricsService.recordPrismaQuery(
+              model,
+              operation,
+              durationMs,
+              args,
+            );
+
+            return result;
+          },
+        },
+      },
+    }) as unknown as PrismaClient;
+  }
+
+  // Прямий доступ до моделей (this.prisma.track, this.prisma.user, ...).
+  // Цей стиль використовує код, що прийшов з гілки main (модуль content та
+  // публічна частина каталогу), тому делегуємо виклики до metrics-обгортки
+  // this.client — щоб метрики Prisma працювали для всіх модулів однаково.
+  get user() {
+    return this.client.user;
+  }
+
+  get artist() {
+    return this.client.artist;
+  }
+
+  get album() {
+    return this.client.album;
+  }
+
+  get genre() {
+    return this.client.genre;
+  }
+
+  get track() {
+    return this.client.track;
+  }
+
+  get trackAuditLog() {
+    return this.client.trackAuditLog;
+  }
+
+  get authSession() {
+    return this.client.authSession;
+  }
+
   async onModuleInit() {
-    // Підключаємось до PostgreSQL при запуску
-    await this.$connect();
+    await this.client.$connect();
   }
 
   async onModuleDestroy() {
-    // Закриваємо з'єднання при зупинці застосунку
-    await this.$disconnect();
+    await this.client.$disconnect();
   }
 }

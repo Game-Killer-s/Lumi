@@ -210,7 +210,56 @@ async function main() {
   );
 
   // ============================================================
-  // 4. Тимчасовий адміністратор для development
+  // 4. Тарифні плани підписки
+  // ============================================================
+
+  const plans = [
+    {
+      code: 'free',
+      title: 'Безкоштовний',
+      description: 'Каталог зі звуком у стандартній якості',
+      priceCents: 0,
+      periodDays: 30,
+    },
+    {
+      code: 'premium',
+      title: 'Premium',
+      description: 'HQ-аудіопотік без реклами та офлайн-режим',
+      priceCents: 14900,
+      periodDays: 30,
+    },
+    {
+      code: 'family',
+      title: 'Сімейний',
+      description: 'Premium для 6 акаунтів',
+      priceCents: 34900,
+      periodDays: 30,
+    },
+  ];
+
+  for (const plan of plans) {
+    await prisma.subscriptionPlan.upsert({
+      where: {
+        code: plan.code,
+      },
+      update: {
+        title: plan.title,
+        description: plan.description,
+        priceCents: plan.priceCents,
+        periodDays: plan.periodDays,
+        isActive: true,
+      },
+      create: {
+        ...plan,
+        currency: 'UAH',
+      },
+    });
+  }
+
+  console.log('Тарифні плани додано/оновлено:', plans.length);
+
+  // ============================================================
+  // 5. Тимчасовий адміністратор для development
   // ============================================================
 
   /*

@@ -1,0 +1,50 @@
+{
+  "createdAt": "2026-08-17T16:53:45.091Z",
+  "entries": [
+    {
+      "endpoint": "health",
+      "method": "GET",
+      "path": "/api/health",
+      "count": 20,
+      "avgMs": 3,
+      "p95Ms": 3,
+      "maxMs": 36
+    },
+    {
+      "endpoint": "metrics",
+      "method": "GET",
+      "path": "/api/metrics",
+      "count": 20,
+      "avgMs": 1,
+      "p95Ms": 2,
+      "maxMs": 2
+    },
+    {
+      "endpoint": "catalog",
+      "method": "GET",
+      "path": "/api/catalog",
+      "count": 20,
+      "avgMs": 1,
+      "p95Ms": 1,
+      "maxMs": 1
+    },
+    {
+      "endpoint": "search",
+      "method": "GET",
+      "path": "/api/search?q=test",
+      "count": 20,
+      "avgMs": 1,
+      "p95Ms": 2,
+      "maxMs": 2
+    },
+    {
+      "endpoint": "stream",
+      "method": "GET",
+      "path": "/api/stream",
+      "count": 20,
+      "avgMs": 1,
+      "p95Ms": 1,
+      "maxMs": 2
+    }
+  ]
+}

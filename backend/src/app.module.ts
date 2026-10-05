@@ -4,8 +4,12 @@ import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CacheModule } from './modules/cache/cache.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { ContentModule } from './modules/content/content.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -17,10 +21,14 @@ import { PrismaModule } from './prisma/prisma.module';
       envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`, '.env'],
     }),
     PrismaModule,
+    CacheModule,
+    MetricsModule,
+    CatalogModule,
     HealthModule,
     AuthModule,
-    CatalogModule,
     ContentModule,
+    NotificationsModule,
+    SubscriptionsModule,
   ],
 })
 export class AppModule {}

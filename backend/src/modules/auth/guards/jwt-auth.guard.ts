@@ -59,7 +59,7 @@ export class JwtAuthGuard implements CanActivate {
       );
 
     const session =
-      await this.prisma.authSession.findUnique({
+      await this.prisma.client.authSession.findUnique({
         where: {
           id: payload.sessionId,
         },
