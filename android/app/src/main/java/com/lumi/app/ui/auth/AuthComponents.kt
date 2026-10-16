@@ -28,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -49,6 +51,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -104,6 +108,12 @@ val MinTouchTarget = 48.dp
  */
 @Composable
 fun AuthBackground(content: @Composable BoxScope.() -> Unit) {
+    // Екрани автори зверстані за макетом Figma у фіксованій сітці 412x917:
+    // геометрія задана в dp, а тексти — у sp. Якщо системний масштаб шрифту
+    // збільшено, тексти перестають вміщатися у поля фіксованої висоти й
+    // елементи наповзають один на одного. Тому в межах екранів автори
+    // масштаб шрифту обмежується одиницею — вигляд лишається як у макеті.
+    val designDensity = LocalDensity.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -128,7 +138,14 @@ fun AuthBackground(content: @Composable BoxScope.() -> Unit) {
                 )
             }
         }
-        content()
+        CompositionLocalProvider(
+            LocalDensity provides Density(
+                density = designDensity.density,
+                fontScale = designDensity.fontScale.coerceAtMost(1f)
+            )
+        ) {
+            content()
+        }
     }
 }
 
@@ -266,7 +283,11 @@ fun LumiTextField(
                                         text = placeholderText,
                                         fontFamily = Montserrat,
                                         color = AuthPlaceholderColor,
-                                        fontSize = 14.sp
+                                        fontSize = 14.sp,
+                                        // Плейсхолдер не переноситься на другий рядок,
+                                        // інакше він вилазить за межі поля висотою 50dp.
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                                 innerTextField()
@@ -563,13 +584,20 @@ private val EqualizerBars = listOf(
 )
 
 /**
+ * Висота смуги еквалайзера внизу екрана (135dp за макетом).
+ * Екрани автори лишають цей простір вільним, щоб бари ніколи
+ * не наповзали на кнопки та поля вводу.
+ */
+val BottomEqualizerHeight = 135.dp
+
+/**
  * Еквалайзер внизу екрана: прямокутники rgba(56,37,112,0.63),
  * blur 2px, radius 13px.
  */
 @Composable
 fun BottomEqualizer(modifier: Modifier = Modifier) {
     val barColor = Color(0xFF382570).copy(alpha = 0.63f)
-    Canvas(modifier = modifier.fillMaxWidth().height(135.dp)) {
+    Canvas(modifier = modifier.fillMaxWidth().height(BottomEqualizerHeight)) {
         val scaleX = size.width / 412.dp.toPx()
         EqualizerBars.forEach { b ->
             drawRoundRect(

@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import {
   ApiConflictResponse,
@@ -31,9 +25,7 @@ import { TokenPairDto } from './dto/token-pair.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('register')
@@ -44,14 +36,8 @@ export class AuthController {
   @ApiConflictResponse({
     description: 'Email already exists',
   })
-  register(
-    @Body() dto: RegisterDto,
-  ): Promise<AuthResponseDto> {
-    return this.authService.register(
-      dto.nickname,
-      dto.email,
-      dto.password,
-    );
+  register(@Body() dto: RegisterDto): Promise<AuthResponseDto> {
+    return this.authService.register(dto.nickname, dto.email, dto.password);
   }
 
   @Public()
@@ -60,13 +46,8 @@ export class AuthController {
   @ApiOkResponse({
     type: AuthResponseDto,
   })
-  login(
-    @Body() dto: LoginDto,
-  ): Promise<AuthResponseDto> {
-    return this.authService.login(
-      dto.email,
-      dto.password,
-    );
+  login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
+    return this.authService.login(dto.email, dto.password);
   }
 
   @Public()
@@ -76,12 +57,8 @@ export class AuthController {
     type: AuthResponseDto,
     description: 'Google account verified, session issued',
   })
-  google(
-    @Body() dto: GoogleLoginDto,
-  ): Promise<AuthResponseDto> {
-    return this.authService.googleLogin(
-      dto.idToken,
-    );
+  google(@Body() dto: GoogleLoginDto): Promise<AuthResponseDto> {
+    return this.authService.googleLogin(dto.idToken);
   }
 
   @Public()
@@ -98,13 +75,10 @@ export class AuthController {
   async forgotPassword(
     @Body() dto: ForgotPasswordDto,
   ): Promise<{ message: string }> {
-    await this.authService.forgotPassword(
-      dto.email,
-    );
+    await this.authService.forgotPassword(dto.email);
 
     return {
-      message:
-        'Якщо акаунт існує — токен надіслано на пошту',
+      message: 'Якщо акаунт існує — токен надіслано на пошту',
     };
   }
 
@@ -114,12 +88,8 @@ export class AuthController {
   @ApiOkResponse({
     type: TokenPairDto,
   })
-  refresh(
-    @Body() dto: RefreshTokenDto,
-  ): Promise<TokenPairDto> {
-    return this.authService.refresh(
-      dto.refreshToken,
-    );
+  refresh(@Body() dto: RefreshTokenDto): Promise<TokenPairDto> {
+    return this.authService.refresh(dto.refreshToken);
   }
 
   @Post('logout')
@@ -135,9 +105,6 @@ export class AuthController {
     @CurrentUser('sessionId')
     sessionId: string,
   ): Promise<void> {
-    await this.authService.logout(
-      sessionId,
-      userId,
-    );
+    await this.authService.logout(sessionId, userId);
   }
 }

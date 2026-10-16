@@ -1,7 +1,22 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+// Backend base URL.
+// Default value (http://10.0.2.2:3000/api/) works only for the Android emulator,
+// where 10.0.2.2 is an alias for the host machine.
+// For a real device put the PC LAN address into android/local.properties, e.g.:
+//   LUMI_BASE_URL=http://192.168.100.2:3000/api/
+val lumiBaseUrl: String = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}.getProperty("LUMI_BASE_URL")
+    ?: "http://10.0.2.2:3000/api/"
 
 android {
     namespace = "com.lumi.app"
@@ -16,8 +31,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Backend base URL - change for production
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/api/\"")
+        // Backend base URL - see lumiBaseUrl above (local.properties: LUMI_BASE_URL)
+        buildConfigField("String", "BASE_URL", "\"$lumiBaseUrl\"")
 
         // Google OAuth web client ID for Google Sign-In
         // (leave empty until configured in Google Cloud Console)

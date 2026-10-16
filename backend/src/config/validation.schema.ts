@@ -31,12 +31,14 @@ export const validationSchema = Joi.object({
   MAIL_PASS: Joi.string().allow('').default(''),
   MAIL_FROM: Joi.string().allow('').default('Lumi <no-reply@lumi.app>'),
 
+  // Медіа: каталог для завантажених файлів і цільова гучність.
+  UPLOAD_DIR: Joi.string().default('storage'),
+  MEDIA_TARGET_LUFS: Joi.number().min(-30).max(-5).default(-14),
+
   // Платежі (Stripe / LiqPay)
   PAYMENT_PROVIDER: Joi.string()
     .valid('card', 'stripe', 'liqpay')
     .default('card'),
 
-  PAYMENT_WEBHOOK_SECRET: Joi.string()
-    .min(8)
-    .default('lumi-webhook-secret'),
+  PAYMENT_WEBHOOK_SECRET: Joi.string().min(8).default('lumi-webhook-secret'),
 });

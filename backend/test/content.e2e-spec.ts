@@ -114,7 +114,7 @@ describe('Content admin (e2e)', () => {
   async function login(email: string, password: string) {
     const response = await request(app.getHttpServer())
       .post('/api/auth/login')
-      .send({ login: email, password })
+      .send({ email, password })
       .expect(200);
 
     return (response.body as { accessToken: string }).accessToken;

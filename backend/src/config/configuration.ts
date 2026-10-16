@@ -55,11 +55,20 @@ export default () => ({
     ),
   },
 
+  // Куди складати завантажені аудіо/обкладинки (поза репозиторієм у проді).
+  storage: {
+    uploadDir: process.env.UPLOAD_DIR || 'storage',
+  },
+
+  // Аудіо-конвеєр: цільова гучність у LUFS для нормалізації.
+  media: {
+    targetLufs: Number.parseFloat(process.env.MEDIA_TARGET_LUFS ?? '-14'),
+  },
+
   payments: {
     provider: process.env.PAYMENT_PROVIDER ?? 'card',
 
     // Ним платіжний шлюз підписує webhook-и.
-    webhookSecret:
-      process.env.PAYMENT_WEBHOOK_SECRET || 'lumi-webhook-secret',
+    webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || 'lumi-webhook-secret',
   },
 });

@@ -301,9 +301,7 @@ describe('Notifications (e2e)', () => {
       .set('Authorization', `Bearer ${ownToken}`)
       .expect(200);
 
-    expect((second.body as NotificationItemBody).readAt).toBe(
-      firstBody.readAt,
-    );
+    expect((second.body as NotificationItemBody).readAt).toBe(firstBody.readAt);
   });
 
   it('marks all my notifications as read and leaves foreign ones unread', async () => {

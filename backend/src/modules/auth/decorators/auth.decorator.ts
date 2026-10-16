@@ -1,7 +1,4 @@
-import {
-  applyDecorators,
-  UseGuards,
-} from '@nestjs/common';
+import { applyDecorators, UseGuards } from '@nestjs/common';
 
 import { Role } from '@prisma/client';
 
@@ -14,9 +11,7 @@ import {
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from './roles.decorator';
 
-export function Auth(
-  ...roles: Role[]
-) {
+export function Auth(...roles: Role[]) {
   return applyDecorators(
     ApiBearerAuth('access-token'),
 
@@ -24,13 +19,11 @@ export function Auth(
     UseGuards(RolesGuard),
 
     ApiUnauthorizedResponse({
-      description:
-        'Access token is missing, invalid or expired',
+      description: 'Access token is missing, invalid or expired',
     }),
 
     ApiForbiddenResponse({
-      description:
-        'The user does not have the required role',
+      description: 'The user does not have the required role',
     }),
   );
 }

@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { ContentModule } from './modules/content/content.module';
+import { MediaModule } from './modules/media/media.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
@@ -27,6 +28,7 @@ import { PrismaModule } from './prisma/prisma.module';
     HealthModule,
     AuthModule,
     ContentModule,
+    MediaModule,
     NotificationsModule,
     SubscriptionsModule,
   ],

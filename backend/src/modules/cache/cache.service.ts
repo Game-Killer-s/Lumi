@@ -2,12 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 export type CacheNamespace =
-  | 'track'
-  | 'artist'
-  | 'album'
-  | 'catalog'
-  | 'discovery'
-  | 'recommendation';
+  'track' | 'artist' | 'album' | 'catalog' | 'discovery' | 'recommendation';
 
 export interface CacheNamespaceStat {
   namespace: CacheNamespace;

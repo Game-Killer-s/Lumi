@@ -13,10 +13,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { PasswordService } from './services/password.service';
-import {
-  TokenPair,
-  TokenService,
-} from './services/token.service';
+import { TokenPair, TokenService } from './services/token.service';
 
 import { IssueTokenPairInput } from './types/issue-token-pair.type';
 import { RefreshTokenPayload } from './types/token-payload.type';
@@ -40,19 +37,11 @@ export class AuthService {
     return this.passwordService.hash(password);
   }
 
-  verifyPassword(
-    passwordHash: string,
-    password: string,
-  ): Promise<boolean> {
-    return this.passwordService.verify(
-      passwordHash,
-      password,
-    );
+  verifyPassword(passwordHash: string, password: string): Promise<boolean> {
+    return this.passwordService.verify(passwordHash, password);
   }
 
-  issueTokenPair(
-    input: IssueTokenPairInput,
-  ): Promise<TokenPair> {
+  issueTokenPair(input: IssueTokenPairInput): Promise<TokenPair> {
     return this.tokenService.signTokenPair(
       {
         sub: input.userId,
@@ -70,17 +59,11 @@ export class AuthService {
     );
   }
 
-  verifyRefreshToken(
-    refreshToken: string,
-  ): Promise<RefreshTokenPayload> {
-    return this.tokenService.verifyRefreshToken(
-      refreshToken,
-    );
+  verifyRefreshToken(refreshToken: string): Promise<RefreshTokenPayload> {
+    return this.tokenService.verifyRefreshToken(refreshToken);
   }
 
-  hashRefreshToken(
-    refreshToken: string,
-  ): Promise<string> {
+  hashRefreshToken(refreshToken: string): Promise<string> {
     return this.passwordService.hash(refreshToken);
   }
 
@@ -88,16 +71,10 @@ export class AuthService {
     refreshTokenHash: string,
     refreshToken: string,
   ): Promise<boolean> {
-    return this.passwordService.verify(
-      refreshTokenHash,
-      refreshToken,
-    );
+    return this.passwordService.verify(refreshTokenHash, refreshToken);
   }
 
-  async login(
-    email: string,
-    password: string,
-  ): Promise<AuthResponseDto> {
+  async login(email: string, password: string): Promise<AuthResponseDto> {
     const normalizedEmail = email.trim().toLowerCase();
 
     const user = await this.prisma.client.user.findUnique({
@@ -107,27 +84,19 @@ export class AuthService {
     });
 
     if (!user || user.isBlocked) {
-      throw new UnauthorizedException(
-        'Користувача з таким email не знайдено',
-      );
+      throw new UnauthorizedException('Користувача з таким email не знайдено');
     }
 
-    const passwordValid =
-      await this.verifyPassword(
-        user.passwordHash,
-        password,
-      );
+    const passwordValid = await this.verifyPassword(
+      user.passwordHash,
+      password,
+    );
 
     if (!passwordValid) {
-      throw new UnauthorizedException(
-        'Неправильний пароль',
-      );
+      throw new UnauthorizedException('Неправильний пароль');
     }
 
-    const tokens = await this.createSession(
-      user.id,
-      user.role,
-    );
+    const tokens = await this.createSession(user.id, user.role);
 
     return this.toAuthResponse(user, tokens);
   }
@@ -139,21 +108,17 @@ export class AuthService {
   ): Promise<AuthResponseDto> {
     const normalizedEmail = email.trim().toLowerCase();
 
-    const existing =
-      await this.prisma.client.user.findUnique({
-        where: {
-          email: normalizedEmail,
-        },
-      });
+    const existing = await this.prisma.client.user.findUnique({
+      where: {
+        email: normalizedEmail,
+      },
+    });
 
     if (existing) {
-      throw new ConflictException(
-        'Користувач з таким email вже існує',
-      );
+      throw new ConflictException('Користувач з таким email вже існує');
     }
 
-    const passwordHash =
-      await this.hashPassword(password);
+    const passwordHash = await this.hashPassword(password);
 
     let user: User;
 
@@ -169,27 +134,19 @@ export class AuthService {
       // P2002 — unique constraint violation.
       // Можлива гонка між перевіркою вище і create.
       if (this.isUniqueViolation(error)) {
-        throw new ConflictException(
-          'Користувач з таким email вже існує',
-        );
+        throw new ConflictException('Користувач з таким email вже існує');
       }
 
       throw error;
     }
 
-    const tokens = await this.createSession(
-      user.id,
-      user.role,
-    );
+    const tokens = await this.createSession(user.id, user.role);
 
     return this.toAuthResponse(user, tokens);
   }
 
-  async googleLogin(
-    idToken: string,
-  ): Promise<AuthResponseDto> {
-    const googleClientId =
-      this.configService.get<string>('google.clientId');
+  async googleLogin(idToken: string): Promise<AuthResponseDto> {
+    const googleClientId = this.configService.get<string>('google.clientId');
 
     if (!googleClientId) {
       throw new BadRequestException(
@@ -215,22 +172,18 @@ export class AuthService {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    const nickname =
-      payload?.name?.trim() ||
-      normalizedEmail.split('@')[0];
+    const nickname = payload?.name?.trim() || normalizedEmail.split('@')[0];
 
-    let user =
-      await this.prisma.client.user.findUnique({
-        where: {
-          email: normalizedEmail,
-        },
-      });
+    let user = await this.prisma.client.user.findUnique({
+      where: {
+        email: normalizedEmail,
+      },
+    });
 
     if (!user) {
       // Швидка реєстрація в один клік:
       // акаунт створюється автоматично.
-      const passwordHash =
-        await this.hashPassword(randomUUID());
+      const passwordHash = await this.hashPassword(randomUUID());
 
       user = await this.prisma.client.user.create({
         data: {
@@ -242,15 +195,10 @@ export class AuthService {
     }
 
     if (user.isBlocked) {
-      throw new UnauthorizedException(
-        'Користувача з таким email не знайдено',
-      );
+      throw new UnauthorizedException('Користувача з таким email не знайдено');
     }
 
-    const tokens = await this.createSession(
-      user.id,
-      user.role,
-    );
+    const tokens = await this.createSession(user.id, user.role);
 
     return this.toAuthResponse(user, tokens);
   }
@@ -289,49 +237,31 @@ export class AuthService {
       data: {
         userId: user.id,
         tokenHash,
-        expiresAt: new Date(
-          Date.now() + RESET_TOKEN_TTL_MS,
-        ),
+        expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
       },
     });
 
-    await this.mailService.sendPasswordReset(
-      user.email,
-      token,
-    );
+    await this.mailService.sendPasswordReset(user.email, token);
   }
 
-  async refresh(
-    refreshToken: string,
-  ): Promise<TokenPair> {
-    const payload =
-      await this.verifyRefreshToken(
-        refreshToken,
-      );
+  async refresh(refreshToken: string): Promise<TokenPair> {
+    const payload = await this.verifyRefreshToken(refreshToken);
 
-    const session =
-      await this.prisma.client.authSession.findUnique({
-        where: {
-          id: payload.sessionId,
-        },
-        include: {
-          user: true,
-        },
-      });
+    const session = await this.prisma.client.authSession.findUnique({
+      where: {
+        id: payload.sessionId,
+      },
+      include: {
+        user: true,
+      },
+    });
 
     if (!session) {
-      throw new UnauthorizedException(
-        'Session not found',
-      );
+      throw new UnauthorizedException('Session not found');
     }
 
-    if (
-      session.revokedAt ||
-      session.expiresAt <= new Date()
-    ) {
-      throw new UnauthorizedException(
-        'Session expired or revoked',
-      );
+    if (session.revokedAt || session.expiresAt <= new Date()) {
+      throw new UnauthorizedException('Session expired or revoked');
     }
 
     if (
@@ -340,17 +270,13 @@ export class AuthService {
     ) {
       await this.revokeSession(session.id);
 
-      throw new UnauthorizedException(
-        'Invalid refresh token',
-      );
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     if (session.user.isBlocked) {
       await this.revokeSession(session.id);
 
-      throw new UnauthorizedException(
-        'User is blocked',
-      );
+      throw new UnauthorizedException('User is blocked');
     }
 
     /*
@@ -362,40 +288,31 @@ export class AuthService {
     if (session.currentJti !== payload.jti) {
       await this.revokeSession(session.id);
 
-      throw new UnauthorizedException(
-        'Refresh token reuse detected',
-      );
+      throw new UnauthorizedException('Refresh token reuse detected');
     }
 
-    const tokenHashValid =
-      await this.verifyRefreshTokenHash(
-        session.refreshTokenHash,
-        refreshToken,
-      );
+    const tokenHashValid = await this.verifyRefreshTokenHash(
+      session.refreshTokenHash,
+      refreshToken,
+    );
 
     if (!tokenHashValid) {
       await this.revokeSession(session.id);
 
-      throw new UnauthorizedException(
-        'Refresh token reuse detected',
-      );
+      throw new UnauthorizedException('Refresh token reuse detected');
     }
 
     const nextJti = randomUUID();
 
-    const tokens =
-      await this.issueTokenPair({
-        userId: session.userId,
-        sessionId: session.id,
-        familyId: session.familyId,
-        refreshJti: nextJti,
-        role: session.user.role,
-      });
+    const tokens = await this.issueTokenPair({
+      userId: session.userId,
+      sessionId: session.id,
+      familyId: session.familyId,
+      refreshJti: nextJti,
+      role: session.user.role,
+    });
 
-    const refreshTokenHash =
-      await this.hashRefreshToken(
-        tokens.refreshToken,
-      );
+    const refreshTokenHash = await this.hashRefreshToken(tokens.refreshToken);
 
     /*
      * updateMany використовується навмисно.
@@ -404,40 +321,31 @@ export class AuthService {
      * з одним refresh token не зможуть обидва успішно
      * виконати rotation.
      */
-    const updated =
-      await this.prisma.client.authSession.updateMany({
-        where: {
-          id: session.id,
-          currentJti: payload.jti,
-          revokedAt: null,
-        },
-        data: {
-          currentJti: nextJti,
-          refreshTokenHash,
+    const updated = await this.prisma.client.authSession.updateMany({
+      where: {
+        id: session.id,
+        currentJti: payload.jti,
+        revokedAt: null,
+      },
+      data: {
+        currentJti: nextJti,
+        refreshTokenHash,
 
-          // Sliding refresh session.
-          expiresAt: new Date(
-            Date.now() +
-              tokens.refreshTokenExpiresIn * 1000,
-          ),
-        },
-      });
+        // Sliding refresh session.
+        expiresAt: new Date(Date.now() + tokens.refreshTokenExpiresIn * 1000),
+      },
+    });
 
     if (updated.count !== 1) {
       await this.revokeSession(session.id);
 
-      throw new UnauthorizedException(
-        'Refresh token reuse detected',
-      );
+      throw new UnauthorizedException('Refresh token reuse detected');
     }
 
     return tokens;
   }
 
-  async logout(
-    sessionId: string,
-    userId: string,
-  ): Promise<void> {
+  async logout(sessionId: string, userId: string): Promise<void> {
     await this.prisma.client.authSession.updateMany({
       where: {
         id: sessionId,
@@ -450,27 +358,20 @@ export class AuthService {
     });
   }
 
-  private async createSession(
-    userId: string,
-    role: Role,
-  ): Promise<TokenPair> {
+  private async createSession(userId: string, role: Role): Promise<TokenPair> {
     const sessionId = randomUUID();
     const familyId = randomUUID();
     const refreshJti = randomUUID();
 
-    const tokens =
-      await this.issueTokenPair({
-        userId,
-        sessionId,
-        familyId,
-        refreshJti,
-        role,
-      });
+    const tokens = await this.issueTokenPair({
+      userId,
+      sessionId,
+      familyId,
+      refreshJti,
+      role,
+    });
 
-    const refreshTokenHash =
-      await this.hashRefreshToken(
-        tokens.refreshToken,
-      );
+    const refreshTokenHash = await this.hashRefreshToken(tokens.refreshToken);
 
     await this.prisma.client.authSession.create({
       data: {
@@ -480,19 +381,14 @@ export class AuthService {
         currentJti: refreshJti,
         refreshTokenHash,
 
-        expiresAt: new Date(
-          Date.now() +
-            tokens.refreshTokenExpiresIn * 1000,
-        ),
+        expiresAt: new Date(Date.now() + tokens.refreshTokenExpiresIn * 1000),
       },
     });
 
     return tokens;
   }
 
-  private async revokeSession(
-    sessionId: string,
-  ): Promise<void> {
+  private async revokeSession(sessionId: string): Promise<void> {
     await this.prisma.client.authSession.updateMany({
       where: {
         id: sessionId,
@@ -504,10 +400,7 @@ export class AuthService {
     });
   }
 
-  private toAuthResponse(
-    user: User,
-    tokens: TokenPair,
-  ): AuthResponseDto {
+  private toAuthResponse(user: User, tokens: TokenPair): AuthResponseDto {
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,

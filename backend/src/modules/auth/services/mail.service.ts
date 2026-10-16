@@ -17,12 +17,9 @@ export class MailService {
   private readonly transporter: Transporter;
   private readonly from: string;
 
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.from =
-      this.configService.get<string>('mail.from') ??
-      'Lumi <no-reply@lumi.app>';
+      this.configService.get<string>('mail.from') ?? 'Lumi <no-reply@lumi.app>';
 
     const host = this.configService.get<string>('mail.host');
     const user = this.configService.get<string>('mail.user');
@@ -49,10 +46,7 @@ export class MailService {
   /**
    * Надсилає лист із токеном для відновлення пароля.
    */
-  async sendPasswordReset(
-    to: string,
-    token: string,
-  ): Promise<void> {
+  async sendPasswordReset(to: string, token: string): Promise<void> {
     const message = {
       from: this.from,
       to,

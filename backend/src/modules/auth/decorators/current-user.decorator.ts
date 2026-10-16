@@ -12,15 +12,12 @@ export const CurrentUser = createParamDecorator(
     property: keyof AccessTokenPayload | undefined,
     context: ExecutionContext,
   ) => {
-    const request =
-      context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     if (!request.user) {
       throw new UnauthorizedException();
     }
 
-    return property
-      ? request.user[property]
-      : request.user;
+    return property ? request.user[property] : request.user;
   },
 );

@@ -1,6 +1,7 @@
 package com.lumi.app.ui.screen
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -52,6 +53,7 @@ import com.lumi.app.ui.auth.AuthRegisterGoogleColor
 import com.lumi.app.ui.auth.AuthTextColor
 import com.lumi.app.ui.auth.AuthViewModel
 import com.lumi.app.ui.auth.BottomEqualizer
+import com.lumi.app.ui.auth.BottomEqualizerHeight
 import com.lumi.app.ui.auth.GoogleAuthButton
 import com.lumi.app.ui.auth.LumiTextField
 import com.lumi.app.ui.auth.MinTouchTarget
@@ -105,6 +107,9 @@ fun RegisterScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    // Лишаємо місце під еквалайзер: бари більше не наповзають
+                    // на кнопки навіть на коротших екранах.
+                    .padding(bottom = BottomEqualizerHeight)
                     .verticalScroll(rememberScrollState())
                     .imePadding()
                     .padding(horizontal = 16.dp),
@@ -271,7 +276,11 @@ fun RegisterScreen(
 
                 // «Уже маєте акаунт? Увійти» (top 718)
                 Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = stringResource(R.string.register_have_account),
                         fontFamily = Montserrat,

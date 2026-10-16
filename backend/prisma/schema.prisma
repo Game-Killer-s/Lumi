@@ -156,6 +156,7 @@ model Track {
   comments       Comment[]
   reports        Report[]
   auditLogs      TrackAuditLog[]
+  mediaAssets    MediaAsset[]
 }
 
 // Журнал дій над треком (хто, коли, що і чому змінив)
@@ -439,4 +440,107 @@ model UserNotification {
   @@unique([userId, releaseId])
   @@index([userId, isRead])
   @@index([userId, createdAt])
+}
+
+// ============================================================
+// Завантажений медіафайл (аудіо або обкладинка)
+// storageKey не містить імені файлу користувача - тільки uuid.
+// ============================================================
+model MediaAsset {
+  id           String          @id @default(uuid())
+  trackId      String?
+  kind         MediaAssetKind
+  title        String?
+  storageKey   String          @unique
+  originalName String?
+  mimeType     String
+  extension    String
+  sizeBytes    Int
+  checksum     String
+  scanStatus   MediaScanStatus @default(PENDING)
+  scanReason   String?
+  // --- Метадані, витягнуті з аудіо через ffprobe (audio probe) ---
+  durationSeconds Float?
+  codec           String?
+  sampleRateHz    Int?
+  channels        Int?
+  bitrateKbps     Int?
+  // embedded tags з файлу (title, artist, album, genre, year, bpm, ...)
+  tags            Json?
+  metadataStatus  MediaMetadataStatus @default(PENDING)
+  // Зрозуміла причина для Content Manager (без шляхів і виводу ffprobe).
+  metadataError   String?
+  createdAt    DateTime        @default(now())
+
+  track         Track?              @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  processingJob MediaProcessingJob?
+
+  @@index([trackId])
+  @@index([kind])
+}
+
+// Що це за файл
+enum MediaAssetKind {
+  AUDIO
+  COVER
+}
+
+// Результат pre-check (антивірус + перевірка справжнього типу)
+enum MediaScanStatus {
+  PENDING
+  CLEAN
+  INFECTED
+}
+
+// Результат витягнення метаданих з аудіофайлу
+enum MediaMetadataStatus {
+  PENDING
+  EXTRACTED
+  FAILED
+}
+
+// ============================================================
+// Job обробки аудіо: нормалізація + генерація Opus варіантів
+// ============================================================
+model MediaProcessingJob {
+  id            String           @id @default(uuid())
+  assetId       String           @unique
+  status        ProcessingStatus @default(QUEUED)
+  targetLufs    Float            @default(-14)
+  measuredLufs  Float?
+  attempts      Int              @default(0)
+  failureReason String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  asset    MediaAsset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  variants MediaVariant[]
+
+  @@index([status])
+}
+
+// Стан обробки
+enum ProcessingStatus {
+  QUEUED
+  PROCESSING
+  READY
+  FAILED
+}
+
+// ============================================================
+// Згенерований варіант аудіо (Opus 96/160/256)
+// ============================================================
+model MediaVariant {
+  id          String   @id @default(uuid())
+  jobId       String
+  codec       String
+  bitrateKbps Int
+  storageKey  String
+  sizeBytes   Int?
+  createdAt   DateTime @default(now())
+
+  job MediaProcessingJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, bitrateKbps])
+  @@index([jobId])
 }

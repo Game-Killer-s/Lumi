@@ -49,6 +49,7 @@ import com.lumi.app.ui.auth.AuthMutedLinkColor
 import com.lumi.app.ui.auth.AuthTextColor
 import com.lumi.app.ui.auth.AuthViewModel
 import com.lumi.app.ui.auth.BottomEqualizer
+import com.lumi.app.ui.auth.BottomEqualizerHeight
 import com.lumi.app.ui.auth.GoogleAuthButton
 import com.lumi.app.ui.auth.LumiTextField
 import com.lumi.app.ui.auth.MinTouchTarget
@@ -105,6 +106,9 @@ fun LoginScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    // Лишаємо місце під еквалайзер: бари більше не наповзають
+                    // на кнопки навіть на коротших екранах.
+                    .padding(bottom = BottomEqualizerHeight)
                     .verticalScroll(rememberScrollState())
                     .imePadding()
                     .padding(horizontal = 16.dp),
@@ -201,7 +205,11 @@ fun LoginScreen(
                 // «Ще немає акаунту? Зареєструватися» (top 568)
                 // 8dp замість 16dp — компенсація збільшеної зони дотику посилання
                 Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = stringResource(R.string.login_no_account),
                         fontFamily = Montserrat,

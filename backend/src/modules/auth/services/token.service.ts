@@ -41,22 +41,22 @@ export class TokenService {
   }
 
   async signTokenPair(
-      accessPayload: AccessTokenPayload,
-      refreshPayload: RefreshTokenPayload,
-    ): Promise<TokenPair> {
-      const [accessToken, refreshToken] = await Promise.all([
-        this.signAccessToken(accessPayload),
-        this.signRefreshToken(refreshPayload),
-      ]);
+    accessPayload: AccessTokenPayload,
+    refreshPayload: RefreshTokenPayload,
+  ): Promise<TokenPair> {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.signAccessToken(accessPayload),
+      this.signRefreshToken(refreshPayload),
+    ]);
 
-      return {
-        accessToken,
-        refreshToken,
-        tokenType: 'Bearer',
-        accessTokenExpiresIn: this.accessTtlSeconds,
-        refreshTokenExpiresIn: this.refreshTtlSeconds,
-      };
-    }
+    return {
+      accessToken,
+      refreshToken,
+      tokenType: 'Bearer',
+      accessTokenExpiresIn: this.accessTtlSeconds,
+      refreshTokenExpiresIn: this.refreshTtlSeconds,
+    };
+  }
 
   async verifyAccessToken(token: string): Promise<AccessTokenPayload> {
     try {

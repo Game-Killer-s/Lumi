@@ -95,10 +95,7 @@ async function main() {
     createdArtists.push(created);
   }
 
-  console.log(
-    'Виконавців додано/оновлено:',
-    createdArtists.length,
-  );
+  console.log('Виконавців додано/оновлено:', createdArtists.length);
 
   // ============================================================
   // 3. Треки
@@ -160,10 +157,7 @@ async function main() {
     });
 
     if (!artist || !genre) {
-      console.log(
-        'Пропускаємо трек (немає виконавця або жанру):',
-        track.title,
-      );
+      console.log('Пропускаємо трек (немає виконавця або жанру):', track.title);
 
       continue;
     }
@@ -205,9 +199,7 @@ async function main() {
     tracksCreated++;
   }
 
-  console.log(
-    `Треки: створено ${tracksCreated}, оновлено ${tracksUpdated}`,
-  );
+  console.log(`Треки: створено ${tracksCreated}, оновлено ${tracksUpdated}`);
 
   // ============================================================
   // 4. Тарифні плани підписки
@@ -273,15 +265,12 @@ async function main() {
    */
 
   if (process.env.NODE_ENV !== 'production') {
-    const adminPasswordHash = await argon2.hash(
-      'admin123',
-      {
-        type: argon2.argon2id,
-        memoryCost: 19_456,
-        timeCost: 2,
-        parallelism: 1,
-      },
-    );
+    const adminPasswordHash = await argon2.hash('admin123', {
+      type: argon2.argon2id,
+      memoryCost: 19_456,
+      timeCost: 2,
+      parallelism: 1,
+    });
 
     await prisma.user.upsert({
       where: {
@@ -308,13 +297,9 @@ async function main() {
       },
     });
 
-    console.log(
-      'Development admin додано/оновлено: admin@lumi.app',
-    );
+    console.log('Development admin додано/оновлено: admin@lumi.app');
   } else {
-    console.log(
-      'Production mode: development admin не створюється.',
-    );
+    console.log('Production mode: development admin не створюється.');
   }
 
   // ============================================================
@@ -326,10 +311,7 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(
-      'Помилка під час наповнення бази:',
-      error,
-    );
+    console.error('Помилка під час наповнення бази:', error);
 
     process.exit(1);
   })

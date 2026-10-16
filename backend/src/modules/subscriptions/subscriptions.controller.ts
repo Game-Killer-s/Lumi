@@ -27,9 +27,7 @@ import { SubscriptionsService } from './subscriptions.service';
 @ApiTags('subscriptions')
 @Controller('subscriptions')
 export class SubscriptionsController {
-  constructor(
-    private readonly subscriptionsService: SubscriptionsService,
-  ) {}
+  constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   // GET /api/subscriptions/plans — тарифи для екрана вибору
   @Public()
@@ -63,10 +61,7 @@ export class SubscriptionsController {
   @Auth()
   @Post('checkout')
   @HttpCode(HttpStatus.OK)
-  checkout(
-    @CurrentUser('sub') userId: string,
-    @Body() dto: CheckoutDto,
-  ) {
+  checkout(@CurrentUser('sub') userId: string, @Body() dto: CheckoutDto) {
     return this.subscriptionsService.checkout(userId, dto);
   }
 

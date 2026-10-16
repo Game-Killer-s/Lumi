@@ -1,5 +1,5 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 import { MetricsService } from '../modules/metrics/metrics.service';
 
@@ -60,6 +60,25 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   get authSession() {
     return this.client.authSession;
+  }
+
+  get mediaAsset() {
+    return this.client.mediaAsset;
+  }
+
+  get mediaProcessingJob() {
+    return this.client.mediaProcessingJob;
+  }
+
+  get mediaVariant() {
+    return this.client.mediaVariant;
+  }
+
+  // Атомарне завантаження: asset + job + оновлення треку в одній транзакції.
+  transaction<T>(
+    callback: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.client.$transaction(callback);
   }
 
   async onModuleInit() {
