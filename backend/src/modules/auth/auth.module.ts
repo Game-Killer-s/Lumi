@@ -10,20 +10,18 @@ import { RolesGuard } from './guards/roles.guard';
 
 import { PasswordService } from './services/password.service';
 import { TokenService } from './services/token.service';
+import { MailService } from './services/mail.service';
 
 @Module({
-  imports: [
-    JwtModule.register({}),
-  ],
+  imports: [JwtModule.register({})],
 
-  controllers: [
-    AuthController,
-  ],
+  controllers: [AuthController],
 
   providers: [
     AuthService,
     PasswordService,
     TokenService,
+    MailService,
     JwtAuthGuard,
     RolesGuard,
 
@@ -33,11 +31,6 @@ import { TokenService } from './services/token.service';
     },
   ],
 
-  exports: [
-    AuthService,
-    PasswordService,
-    TokenService,
-    RolesGuard,
-  ],
+  exports: [AuthService, PasswordService, TokenService, RolesGuard],
 })
 export class AuthModule {}

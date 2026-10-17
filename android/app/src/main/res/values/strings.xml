@@ -1,3 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Базова (default) локалізація застосунку Lumi — українська.
+    Англійська версія лежить у res/values-en/strings.xml.
+    Перемикання мови під час роботи застосунку: ui/i18n/LumiLocalization.kt
+-->
 <resources>
     <string name="app_name">Lumi</string>
+    <!-- Слоган бренду: однаковий для всіх мов, не перекладається -->
+    <string name="brand_tagline" translatable="false">Steam Your Sound</string>
+
+    <!-- ===== Загальні ===== -->
+    <string name="common_back">Назад</string>
+    <string name="common_back_arrow">← Назад</string>
+    <string name="common_or">або</string>
+    <string name="common_ok">Зрозуміло</string>
+    <string name="common_close">Закрити</string>
+    <string name="common_loading">Завантаження…</string>
+
+    <!-- ===== Поля вводу ===== -->
+    <string name="field_email">Email</string>
+    <string name="field_password">Пароль</string>
+    <string name="field_email_placeholder">Введіть ваш email</string>
+    <string name="field_password_placeholder">Введіть пароль</string>
+    <string name="field_show_password">Показати пароль</string>
+    <string name="field_hide_password">Сховати пароль</string>
+
+    <!-- ===== Вхід ===== -->
+    <string name="login_submit">Увійти</string>
+    <string name="login_forgot_password">Забули пароль?</string>
+    <string name="login_no_account">Ще немає акаунту?</string>
+    <string name="login_register_link">Зареєструватися</string>
+    <string name="login_google">Вхід через Google</string>
+
+    <!-- ===== Реєстрація ===== -->
+    <string name="register_name_label">Ім’я</string>
+    <string name="register_name_placeholder">Введіть своє ім’я</string>
+    <string name="register_confirm_password_label">Підтвердити пароль</string>
+    <string name="register_confirm_password_placeholder">Введіть пароль повторно</string>
+    <string name="register_terms">Я погоджуюся з Умовами використання та Політикою конфіденційності й даю згоду на обробку персональних даних</string>
+    <string name="register_submit">Зареєструватися</string>
+    <string name="register_have_account">Уже маєте акаунт?</string>
+    <string name="register_login_link">Увійти</string>
+    <string name="register_google">Зареєструватися через Google</string>
+
+    <!-- ===== Відновлення пароля ===== -->
+    <string name="forgot_title">Забули пароль?</string>
+    <string name="forgot_heading">Відновлення паролю</string>
+    <string name="forgot_description">Вкажіть email, який ви використовуєте для входу. Ми надішлемо код для відновлення доступу.</string>
+    <string name="forgot_submit">Надіслати код доступу</string>
+    <string name="forgot_back_to_login">Повернутися до входу</string>
+
+    <!-- ===== Повідомлення та помилки авторизації ===== -->
+    <string name="error_required_field">Будь ласка, заповніть це поле</string>
+    <string name="error_invalid_email">Введіть коректний email</string>
+    <string name="error_wrong_password">Неправильний пароль, спробуйте ще раз</string>
+    <string name="error_email_not_found">Неправильний email, спробуйте ще раз</string>
+    <string name="error_password_too_short">Пароль закороткий — мінімум 8 символів</string>
+    <string name="error_password_too_weak">Пароль занадто простий</string>
+    <string name="error_passwords_mismatch">Паролі не збігаються</string>
+    <string name="error_terms_not_accepted">Будь ласка, погодьтесь з умовами використання</string>
+    <string name="error_choose_plan">Оберіть тариф</string>
+    <string name="forgot_password_sent">Якщо акаунт з таким email існує — токен для відновлення відправлено на вашу пошту</string>
+
+    <!-- ===== Google Sign-In ===== -->
+    <string name="google_error_no_token">Google Sign-In не повернув токен</string>
+    <string name="google_error_failed">Google Sign-In не вдався (код %1$d)</string>
+    <string name="google_error_cancelled">Google Sign-In скасовано</string>
+    <string name="google_error_not_configured">Google Sign-In не налаштовано: вкажіть GOOGLE_WEB_CLIENT_ID у build.gradle</string>
+    <!-- ===== Головний екран ===== -->
+    <string name="home_greeting">Привіт, %1$s!</string>
+    <string name="home_default_user">друже</string>
+    <string name="home_play_track">Увімкнути трек</string>
+    <string name="home_notifications">Сповіщення</string>
+    <string name="home_notification_settings">Налаштування сповіщень</string>
+    <string name="home_subscription">Підписка та оплата</string>
+    <string name="home_app_settings">Налаштування застосунку</string>
+    <string name="home_logout">Вийти</string>
+    <string name="home_play_access_allowed">Відтворення дозволено</string>
+    <string name="home_play_access_denied">Доступ обмежено</string>
+    <string name="home_play_access_quality">Якість: %1$s. %2$s</string>
+    <string name="home_play_access_quality_hq">HQ</string>
+    <string name="home_play_access_quality_standard">стандартна</string>
+    <string name="home_play_access_payment_hint">%1$s. Перевірте оплату в розділі «Підписка та оплата»</string>
+    <!-- Точки входу преміум-функцій (Story 2) -->
+    <string name="home_quality_section">Якість відтворення</string>
+    <string name="home_play_hq">Увімкнути в HQ</string>
+    <string name="home_play_lossless">Увімкнути в Lossless</string>
+    <string name="home_download_track">Завантажити трек</string>
+    <string name="home_download_started">Трек завантажується на пристрій</string>
+
+    <!-- ===== Шторка сповіщень ===== -->
+    <string name="notifications_topbar">Сповіщення</string>
+    <string name="notifications_title">Сповіщення</string>
+    <string name="notifications_subtitle">Шторка сповіщень</string>
+    <string name="notifications_unread_count">Непрочитаних: %1$d</string>
+    <string name="notifications_mark_all_read">Позначити всі як прочитані</string>
+    <string name="notifications_empty">Поки що немає сповіщень.\nМи напишемо, коли вийде щось нове.</string>
+    <string name="notifications_row_unread_state">Непрочитане</string>
+    <string name="notifications_unread_dot">Є непрочитані сповіщення</string>
+    <plurals name="notifications_unread_state">
+        <item quantity="one">%1$d непрочитане сповіщення</item>
+        <item quantity="few">%1$d непрочитані сповіщення</item>
+        <item quantity="many">%1$d непрочитаних сповіщень</item>
+        <item quantity="other">%1$d непрочитаного сповіщення</item>
+    </plurals>
+
+    <!-- ===== Налаштування сповіщень ===== -->
+    <string name="notif_settings_topbar">Налаштування</string>
+    <string name="notif_settings_title">Сповіщення</string>
+    <string name="notif_settings_subtitle">Оберіть, про що ви хочете дізнаватися першими.</string>
+    <string name="notif_section_releases">Нові релізи та оновлення</string>
+    <string name="notif_new_releases">Нові релізи від моїх артистів</string>
+    <string name="notif_new_releases_sub">Нові треки та альбоми улюблених виконавців</string>
+    <string name="notif_artist_updates">Оновлення виконавців</string>
+    <string name="notif_artist_updates_sub">Анонси та зміни в профілях артистів</string>
+    <string name="notif_platform_updates">Акції та оновлення платформи</string>
+    <string name="notif_platform_updates_sub">Новини Lumi та спеціальні пропозиції</string>
+    <string name="notif_section_channels">Канали доставки</string>
+    <string name="notif_push">Push-сповіщення</string>
+    <string name="notif_push_sub">Показувати у шторці застосунку</string>
+    <string name="notif_email">Дублювати на email</string>
+    <string name="notif_email_sub">Лист на вашу пошту</string>
+    <!-- ===== Підписка та оплата ===== -->
+    <string name="subscription_topbar">Підписка</string>
+    <string name="subscription_title">Ваш тариф</string>
+    <string name="subscription_no_plan">Тариф ще не обрано</string>
+    <string name="subscription_choose_plan">Оберіть тариф</string>
+    <string name="subscription_plan_label">Тариф: %1$s</string>
+    <string name="subscription_price">%1$s / %2$s</string>
+    <plurals name="subscription_period_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дні</item>
+        <item quantity="many">%1$d днів</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
+    <string name="subscription_free">Безкоштовно</string>
+    <string name="subscription_amount">Сума платежу</string>
+    <string name="subscription_next_charge">Наступне списання</string>
+    <string name="subscription_payments_count">Проведено платежів</string>
+    <string name="subscription_grace_until">Grace Period діє до %1$s</string>
+    <string name="subscription_payment_section">Оплата</string>
+    <string name="subscription_google_pay">Оплатити через Google Pay</string>
+    <string name="subscription_google_pay_sub">Картку вводити не потрібно</string>
+    <string name="subscription_google_pay_hint">Натисніть «Оплатити» — платіж підтвердиться у Google Pay.</string>
+    <string name="subscription_pay">Оплатити</string>
+    <string name="subscription_save_card">Зберегти картку без оплати</string>
+    <string name="subscription_saved_cards">Збережені картки</string>
+    <string name="subscription_update_card">Оновити або змінити платіжну карту</string>
+    <string name="subscription_no_saved_cards">Ще немає збережених карток</string>
+    <string name="subscription_payments_history">Історія оплат</string>
+    <string name="subscription_no_payments">Платежів ще не було</string>
+    <string name="subscription_manage">Керування підпискою</string>
+    <string name="subscription_cancel">Скасувати підписку</string>
+    <string name="subscription_cancelled_note">Підписку скасовано. Доступ працюватиме до кінця оплаченого періоду.</string>
+    <string name="subscription_paid">Оплату прийнято — підписка активна</string>
+    <string name="subscription_cancelled">Підписку скасовано</string>
+    <string name="subscription_card_saved">Картку збережено</string>
+
+    <!-- Story 3: Grace Period і призупинення доступу -->
+    <string name="subscription_suspended_title">Доступ призупинено</string>
+    <string name="subscription_suspended_reason">Причина: %1$s</string>
+    <string name="subscription_cta_update_payment">Оновити спосіб оплати</string>
+    <string name="subscription_cta_open">Перейти до підписки</string>
+    <string name="subscription_cta_refresh">Оновити стан оплати</string>
+    <string name="subscription_recovered">Оплату прийнято — преміум-доступ відновлено</string>
+
+    <!-- ===== Paywall (Story 2) ===== -->
+    <string name="paywall_feature_hq">HQ-якість</string>
+    <string name="paywall_feature_lossless">Lossless-якість</string>
+    <string name="paywall_feature_download">Завантаження треків</string>
+    <string name="paywall_locked_hq">HQ-якість входить до Premium. Оформіть підписку, щоб слухати музику детальніше.</string>
+    <string name="paywall_locked_lossless">Lossless входить до Premium. Оформіть підписку, щоб отримати звук без стиснення.</string>
+    <string name="paywall_locked_download">Завантаження входить до Premium. Оформіть підписку, щоб слухати музику офлайн.</string>
+    <string name="paywall_benefits_title">Що дає Premium</string>
+    <string name="paywall_benefit_hq">HQ-звук</string>
+    <string name="paywall_benefit_hq_sub">Детальніший звук для навушників</string>
+    <string name="paywall_benefit_lossless">Lossless-звук</string>
+    <string name="paywall_benefit_lossless_sub">Звук без стиснення — як у студії</string>
+    <string name="paywall_benefit_download">Офлайн-завантаження</string>
+    <string name="paywall_benefit_download_sub">Треки доступні без інтернету</string>
+    <string name="paywall_cta">Перейти до тарифів</string>
+    <string name="paywall_not_now">Не зараз</string>
+    <string name="paywall_navigation_error">Не вдалося відкрити тарифи. Перевірте з’єднання та спробуйте ще раз.</string>
+
+    <!-- ===== Картка та статуси платежів ===== -->
+    <string name="card_number">Номер картки</string>
+    <string name="card_holder">Власник картки</string>
+    <string name="card_month">Місяць</string>
+    <string name="card_year">Рік</string>
+    <string name="card_month_short">ММ</string>
+    <string name="card_year_short">РР</string>
+    <string name="card_cvc">CVC</string>
+    <string name="card_number_placeholder">0000 0000 0000 0000</string>
+    <string name="card_holder_placeholder">ТАРАС ШЕВЧЕНКО</string>
+    <string name="card_month_placeholder">12</string>
+    <string name="card_year_placeholder">2030</string>
+    <string name="card_cvc_placeholder">123</string>
+    <string name="card_default">Основна</string>
+    <string name="card_make_default">Основною</string>
+    <string name="card_remove">Видалити</string>
+    <string name="payment_status_paid">Оплачено</string>
+    <string name="payment_status_failed">Не пройшов</string>
+    <string name="payment_status_refunded">Повернено</string>
+    <string name="payment_status_pending">В обробці</string>
+    <string name="error_card_number">Введіть номер картки</string>
+    <string name="error_card_holder">Введіть ім’я власника картки</string>
+    <string name="error_card_month">Місяць має бути від 01 до 12</string>
+    <string name="error_card_year">Введіть рік, напр. %1$d</string>
+    <string name="error_card_cvc">Введіть CVC зі звороту картки</string>
+
+    <!-- ===== Налаштування застосунку ===== -->
+    <string name="settings_topbar">Налаштування</string>
+    <string name="settings_title">Налаштування застосунку</string>
+    <string name="settings_subtitle">Мова, тема та акаунт</string>
+    <string name="settings_section_language">Мова інтерфейсу</string>
+    <string name="settings_section_theme">Тема інтерфейсу</string>
+    <string name="settings_section_account">Акаунт</string>
+    <string name="settings_clear_cache">Очистити локальний кеш</string>
+    <string name="settings_clear_cache_sub">Видалити тимчасові файли застосунку</string>
+    <string name="settings_cache_cleared">Локальний кеш очищено</string>
+    <string name="settings_cache_failed">Не вдалося очистити локальний кеш</string>
+    <string name="settings_logout">Вийти з акаунта</string>
+    <string name="settings_selected_state">Обрано</string>
+    <string name="language_uk">Українська</string>
+    <string name="language_en">English</string>
+    <string name="theme_system">Системна</string>
+    <string name="theme_light">Світла</string>
+    <string name="theme_dark">Темна</string>
+
+    <!-- ===== Доступність: плеєр, навігація, трек ===== -->
+    <string name="player_now_playing">Зараз грає</string>
+    <string name="player_play">Відтворити</string>
+    <string name="player_pause">Пауза</string>
+    <string name="player_previous">Попередній трек</string>
+    <string name="player_next">Наступний трек</string>
+    <string name="player_playing_state">Відтворюється</string>
+    <string name="player_paused_state">На паузі</string>
+    <string name="player_progress_state">%1$s з %2$s</string>
+    <string name="nav_home">Головна</string>
+    <string name="nav_search">Пошук</string>
+    <string name="nav_library">Медіатека</string>
+    <string name="nav_profile">Профіль</string>
+    <string name="track_row_description">Трек: %1$s, виконавець: %2$s, тривалість: %3$s</string>
+    <string name="track_play">Відтворити %1$s</string>
+    <string name="track_like">Вподобати</string>
+    <string name="track_unlike">Прибрати з вподобаних</string>
+    <string name="track_liked_state">Вподобано</string>
+    <string name="track_not_liked_state">Не вподобано</string>
+    <string name="track_follow">Стежити за виконавцем</string>
+    <string name="track_unfollow">Не стежити за виконавцем</string>
+    <string name="track_following_state">Ви стежите</string>
+    <string name="track_not_following_state">Ви не стежите</string>
 </resources>

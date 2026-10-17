@@ -95,10 +95,7 @@ async function main() {
     createdArtists.push(created);
   }
 
-  console.log(
-    'Виконавців додано/оновлено:',
-    createdArtists.length,
-  );
+  console.log('Виконавців додано/оновлено:', createdArtists.length);
 
   // ============================================================
   // 3. Треки
@@ -160,10 +157,7 @@ async function main() {
     });
 
     if (!artist || !genre) {
-      console.log(
-        'Пропускаємо трек (немає виконавця або жанру):',
-        track.title,
-      );
+      console.log('Пропускаємо трек (немає виконавця або жанру):', track.title);
 
       continue;
     }
@@ -205,12 +199,59 @@ async function main() {
     tracksCreated++;
   }
 
-  console.log(
-    `Треки: створено ${tracksCreated}, оновлено ${tracksUpdated}`,
-  );
+  console.log(`Треки: створено ${tracksCreated}, оновлено ${tracksUpdated}`);
 
   // ============================================================
-  // 4. Тимчасовий адміністратор для development
+  // 4. Тарифні плани підписки
+  // ============================================================
+
+  const plans = [
+    {
+      code: 'free',
+      title: 'Безкоштовний',
+      description: 'Каталог зі звуком у стандартній якості',
+      priceCents: 0,
+      periodDays: 30,
+    },
+    {
+      code: 'premium',
+      title: 'Premium',
+      description: 'HQ-аудіопотік без реклами та офлайн-режим',
+      priceCents: 14900,
+      periodDays: 30,
+    },
+    {
+      code: 'family',
+      title: 'Сімейний',
+      description: 'Premium для 6 акаунтів',
+      priceCents: 34900,
+      periodDays: 30,
+    },
+  ];
+
+  for (const plan of plans) {
+    await prisma.subscriptionPlan.upsert({
+      where: {
+        code: plan.code,
+      },
+      update: {
+        title: plan.title,
+        description: plan.description,
+        priceCents: plan.priceCents,
+        periodDays: plan.periodDays,
+        isActive: true,
+      },
+      create: {
+        ...plan,
+        currency: 'UAH',
+      },
+    });
+  }
+
+  console.log('Тарифні плани додано/оновлено:', plans.length);
+
+  // ============================================================
+  // 5. Тимчасовий адміністратор для development
   // ============================================================
 
   /*
@@ -224,15 +265,12 @@ async function main() {
    */
 
   if (process.env.NODE_ENV !== 'production') {
-    const adminPasswordHash = await argon2.hash(
-      'admin123',
-      {
-        type: argon2.argon2id,
-        memoryCost: 19_456,
-        timeCost: 2,
-        parallelism: 1,
-      },
-    );
+    const adminPasswordHash = await argon2.hash('admin123', {
+      type: argon2.argon2id,
+      memoryCost: 19_456,
+      timeCost: 2,
+      parallelism: 1,
+    });
 
     await prisma.user.upsert({
       where: {
@@ -259,13 +297,9 @@ async function main() {
       },
     });
 
-    console.log(
-      'Development admin додано/оновлено: admin@lumi.app',
-    );
+    console.log('Development admin додано/оновлено: admin@lumi.app');
   } else {
-    console.log(
-      'Production mode: development admin не створюється.',
-    );
+    console.log('Production mode: development admin не створюється.');
   }
 
   // ============================================================
@@ -277,10 +311,7 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(
-      'Помилка під час наповнення бази:',
-      error,
-    );
+    console.error('Помилка під час наповнення бази:', error);
 
     process.exit(1);
   })

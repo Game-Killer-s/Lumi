@@ -1,6 +1,7 @@
 package com.lumi.app
 
 import android.app.Application
+import com.lumi.app.ui.i18n.AppSettingsStore
 import com.lumi.app.network.TokenManager
 import com.lumi.app.player.DownloadManagerHolder
 import com.lumi.app.player.PlayerController
@@ -14,6 +15,8 @@ class LumiApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        // Мова й тема читаються з диска до створення першого Activity (ТЗ 6.3.7).
+        AppSettingsStore.init(this)
 
         DownloadManagerHolder.init(this)
         PlayerController.init(this)

@@ -50,5 +50,8 @@ pids
 *.seed
 *.pid.lock
 
+# Uploaded media (лишається на диску сервера, не в git)
+/storage
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
