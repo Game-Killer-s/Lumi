@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
@@ -12,6 +13,7 @@ import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
 import com.lumi.app.data.model.Track
+import com.lumi.app.network.ApiConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -21,7 +23,7 @@ import java.util.concurrent.Executors
 /**
  * Real offline-download support for tracks, backed by Media3's
  * DownloadManager + SimpleCache. Downloaded tracks are also transparently
- * served to the player from cache via [cacheDataSourceFactory], so
+ * served to the player from cache via [dataSourceFactory], so
  * playback works offline once a track has finished downloading.
  *
  * This is process-wide (like TokenManager/NetworkModule) — call [init]
@@ -48,8 +50,17 @@ object DownloadManagerHolder {
 
         val databaseProvider = StandaloneDatabaseProvider(context)
         val cacheDir = File(context.filesDir, "media_cache")
-        val simpleCache = SimpleCache(cacheDir, LeastRecentlyUsedCacheEvictor(CACHE_MAX_BYTES), databaseProvider)
-        cache = simpleCache
+        val simpleCache = try {
+            SimpleCache(cacheDir, LeastRecentlyUsedCacheEvictor(CACHE_MAX_BYTES), databaseProvider).also {
+                cache = it
+                Log.i(TAG, "Media cache ready at ${cacheDir.absolutePath}")
+            }
+        } catch (e: Exception) {
+            // Без кешу плеєр усе одно має грати (стрімінгом), тому не валимо застосунок.
+            Log.e(TAG, "Media cache init failed, downloads disabled", e)
+            null
+        }
+        if (simpleCache == null) return
 
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
         val downloadExecutor = Executors.newFixedThreadPool(2)
@@ -117,7 +128,7 @@ object DownloadManagerHolder {
     fun isDownloaded(trackId: String): Boolean = trackId in _downloadedTrackIds.value
 
     fun downloadTrack(track: Track) {
-        val url = track.audioUrl ?: return
+        val url = ApiConstants.mediaUrl(track.audioUrl) ?: return
         if (!initialized) return
         val request = DownloadRequest.Builder(track.id, android.net.Uri.parse(url)).build()
         downloadManager?.addDownload(request)
@@ -128,11 +139,21 @@ object DownloadManagerHolder {
         downloadManager?.removeDownload(trackId)
     }
 
-    /** DataSource factory the player should use so cached/downloaded audio is served locally. */
-    fun cacheDataSourceFactory(): CacheDataSource.Factory {
+    /**
+     * DataSource factory the player should use so cached/downloaded audio is served locally.
+     *
+     * Якщо кеш із якоїсь причини не піднявся, повертаємо звичайний HTTP-стрім:
+     * `CacheDataSource.Factory` без `setCache()` падає з NPE під час prepare.
+     */
+    fun dataSourceFactory(): DataSource.Factory {
         val upstream = DefaultHttpDataSource.Factory()
+        val activeCache = cache
+        if (activeCache == null) {
+            Log.w(TAG, "Cache is not initialized — streaming without local cache")
+            return upstream
+        }
         return CacheDataSource.Factory().apply {
-            cache?.let { setCache(it) }
+            setCache(activeCache)
             setUpstreamDataSourceFactory(upstream)
             setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
         }
@@ -141,6 +162,6 @@ object DownloadManagerHolder {
     fun mediaItemFor(track: Track): MediaItem =
         MediaItem.Builder()
             .setMediaId(track.id)
-            .setUri(track.audioUrl)
+            .setUri(ApiConstants.mediaUrl(track.audioUrl))
             .build()
 }

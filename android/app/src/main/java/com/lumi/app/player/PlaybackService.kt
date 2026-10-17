@@ -22,8 +22,11 @@ class PlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
+        // Init ідемпотентний: Application зазвичай уже все підняв, але сервіс
+        // може бути створений системою й без Activity — тоді кеш ще порожній.
+        DownloadManagerHolder.init(this)
         val player = ExoPlayer.Builder(this)
-            .setMediaSourceFactory(DefaultMediaSourceFactory(this).setDataSourceFactory(DownloadManagerHolder.cacheDataSourceFactory()))
+            .setMediaSourceFactory(DefaultMediaSourceFactory(this).setDataSourceFactory(DownloadManagerHolder.dataSourceFactory()))
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(C.USAGE_MEDIA)
