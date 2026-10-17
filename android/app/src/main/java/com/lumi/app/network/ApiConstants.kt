@@ -40,6 +40,24 @@ object ApiConstants {
     const val SUBSCRIPTION_CANCEL = "subscriptions/cancel"
     const val SUBSCRIPTION_PAYMENTS = "subscriptions/payments"
     const val SUBSCRIPTION_PAYMENT_METHODS = "subscriptions/payment-methods"
+    // TODO(backend): /statistics/summary does not exist yet — contract in docs/statistics-api-contract.md.
+    const val STATISTICS_SUMMARY = "statistics/summary"
+
+    // TODO(backend): /albums does not exist yet — see Models.kt Album section.
+    const val ALBUMS = "albums"
+
+    // TODO(backend): recommendations endpoint does not exist yet.
+    // Once it does, point TrackRepository.getRecommendedTracks() at this
+    // instead of its current getPopularTracks()/getNewTracks() fallback.
+    const val TRACKS_RECOMMENDED = "tracks/recommended"
+
+    // TODO(backend): follow/unfollow endpoints do not exist yet.
+    // UserRepository.followArtist()/unfollowArtist() stub these locally.
+    const val ARTISTS_FOLLOW = "artists/{id}/follow"
+
+    // TODO(backend): report endpoint does not exist yet.
+    // ReportRepository.reportTrack() stubs this locally.
+    const val REPORT = "report/track"
 
     // Timeouts
     const val CONNECT_TIMEOUT = 30L

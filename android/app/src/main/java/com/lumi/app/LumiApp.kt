@@ -13,10 +13,12 @@ import com.lumi.app.ui.screen.RegisterScreen
 import com.lumi.app.ui.screen.SettingsScreen
 import com.lumi.app.ui.screen.SplashScreen
 import com.lumi.app.ui.screen.SubscriptionScreen
+import com.lumi.app.ui.screen.MainScaffold
 
 /**
  * Root composable for the Lumi application.
- * Sets up navigation graph and screen routing.
+ * Bottom-nav shell + navigation graph now live in MainScaffold (which
+ * also hosts the persistent mini player above the nav bar).
  */
 @Composable
 fun LumiApp() {
@@ -108,6 +110,7 @@ fun LumiApp() {
             )
         }
     }
+    MainScaffold()
 }
 
 /**
@@ -132,7 +135,19 @@ sealed class Screen(val route: String) {
     data object Playlist : Screen("playlist/{playlistId}") {
         fun createRoute(playlistId: String) = "playlist/$playlistId"
     }
+    data object Album : Screen("album/{albumId}") {
+        fun createRoute(albumId: String) = "album/$albumId"
+    }
     data object Artist : Screen("artist/{artistId}") {
         fun createRoute(artistId: String) = "artist/$artistId"
     }
+    data object Statistics : Screen("statistics")
+    data object Genre : Screen("genre/{genreName}") {
+        /** Назву жанру кодуємо, бо вона може містити "/" або "&" (наприклад "R&B/Soul"). */
+        fun createRoute(genreName: String) = "genre/${android.net.Uri.encode(genreName)}"
+    }
+    data object Settings : Screen("settings")
+    data object Subscription : Screen("subscription")
+    data object SubscriptionSuccess : Screen("subscription_success")
+    data object SupportChat : Screen("support_chat")
 }
