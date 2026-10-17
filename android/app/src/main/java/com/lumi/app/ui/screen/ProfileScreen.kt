@@ -93,7 +93,7 @@ fun ProfileScreen(
                     Text("Онлайн-чат підтримки")
                 }
                 TextButton(onClick = onBack) { Text("Назад") }
-                TextButton(onClick = { authRepository.logout(); onLoggedOut() }) { Text("Вийти") }
+                TextButton(onClick = { scope.launch { authRepository.logout(); onLoggedOut() } }) { Text("Вийти") }
                 message?.let { Text(it) }
             }
         } ?: CircularProgressIndicator(Modifier.align(Alignment.Center))

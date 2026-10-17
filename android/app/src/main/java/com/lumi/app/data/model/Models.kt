@@ -46,7 +46,9 @@ data class UserProfile(
     @SerializedName("avatarUrl") val avatarUrl: String? = null,
     @SerializedName("role") val role: String = "listener",
     @SerializedName("createdAt") val createdAt: String? = null
-)
+) {
+    val username: String get() = nickname
+}
 
 data class UpdateProfileRequest(
     @SerializedName("username") val username: String? = null,
@@ -303,6 +305,7 @@ data class CheckoutResponse(
 data class CancelSubscriptionResponse(
     @SerializedName("subscription") val subscription: SubscriptionRecord? = null,
     @SerializedName("cancelAtPeriodEnd") val cancelAtPeriodEnd: Boolean = true
+)
 // ==================== ALBUM MODELS ====================
 // NOTE: backend does not expose a dedicated /albums resource yet.
 // This mirrors the Playlist contract 1:1 so the UI can be built now;

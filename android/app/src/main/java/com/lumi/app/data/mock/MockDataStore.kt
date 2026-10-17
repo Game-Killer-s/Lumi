@@ -208,13 +208,13 @@ object MockDataStore {
 
     fun profile(): UserProfile = currentUser
     fun registerUser(username: String, email: String): UserProfile {
-        currentUser = currentUser.copy(username = username.trim(), email = email.trim())
+        currentUser = currentUser.copy(nickname = username.trim(), email = email.trim())
         playlists.replaceAll { it.copy(owner = currentUser, ownerName = currentUser.username) }
         return currentUser
     }
 
     fun updateProfile(username: String?, avatarUrl: String?): UserProfile {
-        currentUser = currentUser.copy(username = username?.trim().takeUnless { it.isNullOrEmpty() } ?: currentUser.username, avatarUrl = avatarUrl ?: currentUser.avatarUrl)
+        currentUser = currentUser.copy(nickname = username?.trim().takeUnless { it.isNullOrEmpty() } ?: currentUser.nickname, avatarUrl = avatarUrl ?: currentUser.avatarUrl)
         playlists.replaceAll { it.copy(owner = currentUser, ownerName = currentUser.username) }
         return currentUser
     }

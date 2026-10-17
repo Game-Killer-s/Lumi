@@ -112,6 +112,17 @@ object TokenManager {
         }
     }
 
+    fun saveTokens(access: String, refresh: String) {
+        accessToken = access
+        refreshToken = refresh
+        kotlinx.coroutines.runBlocking {
+            appContext.sessionDataStore.edit { prefs ->
+                prefs[KEY_ACCESS] = access
+                prefs[KEY_REFRESH] = refresh
+            }
+        }
+    }
+
     suspend fun clearSession() {
         accessToken = null
         refreshToken = null
