@@ -8,10 +8,13 @@ import com.lumi.app.util.filterByGenre
 /**
  * Repository for track-related operations.
  * Handles fetching tracks, searching, and managing likes.
+ *
+ * [api] приходить із [NetworkModule], а в юніт-тестах підставляється
+ * маленький фейк [TracksApi] — тоді плеєр перевіряється без мережі.
  */
-class TrackRepository {
-
-    private val api = NetworkModule.apiService
+class TrackRepository(
+    private val api: TracksApi = NetworkModule.apiService
+) {
 
     suspend fun getPopularTracks(limit: Int = 10): ApiResult<TrackListResponse> {
         if (MockDataStore.ENABLED) return ApiResult.Success(MockDataStore.popular(limit))

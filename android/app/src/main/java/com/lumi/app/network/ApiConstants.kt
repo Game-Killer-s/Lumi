@@ -59,6 +59,11 @@ object ApiConstants {
     // ReportRepository.reportTrack() stubs this locally.
     const val REPORT = "report/track"
 
+    // Текст пісні, коментарі та скарги (екран плеєра)
+    const val COMMENTS = "comments"
+    const val REPORTS = "reports"
+
+
     // Timeouts
     const val CONNECT_TIMEOUT = 30L
     const val READ_TIMEOUT = 30L

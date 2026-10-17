@@ -15,6 +15,8 @@
     <string name="common_or">або</string>
     <string name="common_ok">Зрозуміло</string>
     <string name="common_close">Закрити</string>
+    <string name="common_cancel">Скасувати</string>
+    <string name="common_retry">Спробувати ще раз</string>
     <string name="common_loading">Завантаження…</string>
 
     <!-- ===== Поля вводу ===== -->
@@ -251,4 +253,67 @@
     <string name="track_unfollow">Не стежити за виконавцем</string>
     <string name="track_following_state">Ви стежите</string>
     <string name="track_not_following_state">Ви не стежите</string>
+    <!-- ===== Плеєр: текст пісні, коментарі, скарги (ТЗ 6.3.11, 6.7.2) ===== -->
+    <string name="player_section">Відтворення</string>
+    <string name="player_open">Відкрити плеєр</string>
+    <string name="player_topbar">Плеєр</string>
+    <string name="player_loading">Завантажуємо трек…</string>
+    <string name="player_error_no_tracks">Немає доступних треків</string>
+    <string name="player_error_track">Не вдалося завантажити трек</string>
+    <string name="player_lyrics">Текст пісні</string>
+    <string name="player_menu">Інші дії з треком</string>
+    <string name="player_report_track">Поскаржитися на трек</string>
+    <string name="player_comments">Коментарі</string>
+    <string name="player_no_audio">Аудіо цього треку недоступне</string>
+
+    <!-- Текст пісні -->
+    <string name="lyrics_loading">Завантажуємо текст пісні…</string>
+    <string name="lyrics_error">Не вдалося завантажити текст пісні</string>
+    <string name="lyrics_empty">Текст цієї пісні ще не додали</string>
+    <string name="lyrics_hint">Рядок підсвічується в такт музиці</string>
+
+    <!-- Коментарі -->
+    <plurals name="comments_count">
+        <item quantity="one">%1$d коментар</item>
+        <item quantity="few">%1$d коментарі</item>
+        <item quantity="many">%1$d коментарів</item>
+        <item quantity="other">%1$d коментаря</item>
+    </plurals>
+    <string name="comments_loading">Завантажуємо коментарі…</string>
+    <string name="comments_error">Не вдалося завантажити коментарі</string>
+    <string name="comments_empty">Коментарів ще немає — напишіть перший</string>
+    <string name="comments_load_more">Показати ще</string>
+    <string name="comments_input_label">Новий коментар</string>
+    <string name="comments_input_hint">Що ви думаєте про цей трек?</string>
+    <string name="comments_send">Надіслати</string>
+    <string name="comments_added">Коментар додано</string>
+    <string name="comments_deleted">Коментар видалено</string>
+    <string name="comments_error_send">Не вдалося надіслати коментар</string>
+    <string name="comments_error_delete">Не вдалося видалити коментар</string>
+    <string name="comments_error_too_long">Максимум %1$d символів</string>
+    <string name="comments_delete">Видалити</string>
+    <string name="comments_delete_confirm_title">Видалити коментар?</string>
+    <string name="comments_delete_confirm_text">Коментар зникне з треку для всіх. Скасувати цю дію не можна.</string>
+    <string name="comments_delete_confirm_action">Видалити</string>
+    <string name="comments_report">Поскаржитися</string>
+    <string name="comments_own_label">Ваш коментар</string>
+    <string name="comments_hidden_label">Приховано модератором</string>
+    <string name="comments_author_unknown">Слухач Lumi</string>
+
+    <!-- Скарги -->
+    <string name="report_title_track">Скарга на трек</string>
+    <string name="report_title_comment">Скарга на коментар</string>
+    <string name="report_reason_label">Причина скарги</string>
+    <string name="report_details_label">Деталі (необов’язково)</string>
+    <string name="report_details_hint">Опишіть проблему — так модератор швидше розбереться</string>
+    <string name="report_details_too_long">Максимум %1$d символів</string>
+    <string name="report_submit">Надіслати скаргу</string>
+    <string name="report_sent">Дякуємо! Скаргу надіслано модератору</string>
+    <string name="report_error_send">Не вдалося надіслати скаргу</string>
+    <string name="report_error_reason_required">Оберіть причину скарги</string>
+    <string name="report_reason_copyright">Порушення авторських прав</string>
+    <string name="report_reason_quality">Погана якість звуку</string>
+    <string name="report_reason_spam">Спам або реклама</string>
+    <string name="report_reason_offensive">Образа чи мова ворожнечі</string>
+    <string name="report_reason_other">Інше</string>
 </resources>

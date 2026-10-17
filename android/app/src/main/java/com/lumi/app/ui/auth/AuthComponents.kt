@@ -218,7 +218,13 @@ fun LumiTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     leadingIcon: (@Composable () -> Unit)? = null,
-    trailingIcon: (@Composable () -> Unit)? = null
+    trailingIcon: (@Composable () -> Unit)? = null,
+    /**
+     * Скільки рядків вміщає поле: 1 — звичайне однорядкове (форми входу),
+     * більше — багаторядкове (коментар, деталі скарги). Поле малюється
+     * рівно на [maxLines] рядків, тому висота не «стрибає» під час вводу.
+     */
+    maxLines: Int = 1
 ) {
     val labelText = label.localized()
     val placeholderText = placeholder?.localized().orEmpty()
@@ -230,7 +236,9 @@ fun LumiTextField(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                // Однорядкове поле тримає 50dp за макетом, багаторядкове
+                // виростає під текст — тому обмеження саме знизу.
+                .heightIn(min = 50.dp)
                 .background(AuthGradient, RoundedCornerShape(10.dp))
                 .then(
                     if (isError) {
@@ -242,8 +250,15 @@ fun LumiTextField(
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .fillMaxWidth()
+                    .heightIn(min = 50.dp)
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        // Текст у кілька рядків не має впиратись у краї поля.
+                        top = if (maxLines > 1) 10.dp else 0.dp,
+                        bottom = if (maxLines > 1) 10.dp else 0.dp
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (leadingIcon != null) {
@@ -269,7 +284,11 @@ fun LumiTextField(
                             color = AuthTextColor,
                             fontSize = 14.sp
                         ),
-                        singleLine = true,
+                        singleLine = maxLines == 1,
+                        // minLines == maxLines: багаторядкове поле не «стрибає»
+                        // у висоті, поки користувач набирає текст.
+                        minLines = maxLines,
+                        maxLines = maxLines,
                         cursorBrush = SolidColor(AuthTextColor),
                         visualTransformation = visualTransformation,
                         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),

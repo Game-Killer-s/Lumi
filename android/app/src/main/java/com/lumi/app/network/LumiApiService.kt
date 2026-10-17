@@ -8,7 +8,7 @@ import retrofit2.http.*
  * Retrofit API service interface for Lumi backend.
  * Defines all API endpoints used by the application.
  */
-interface LumiApiService {
+interface LumiApiService : LyricsApi, CommentsApi, ReportApi, TracksApi {
 
     // ==================== AUTH ====================
 
@@ -36,35 +36,8 @@ interface LumiApiService {
     suspend fun updateProfile(@Body request: UpdateProfileRequest): Response<UserProfile>
 
     // ==================== TRACKS ====================
-
-    @GET(ApiConstants.TRACKS)
-    suspend fun getTracks(
-        @Query("page") page: Int = 1,
-        @Query("limit") limit: Int = 20,
-        // TODO(backend): genre filter is not implemented server-side yet;
-        // TrackRepository.getTracksByGenre() additionally filters client-side.
-        @Query("genre") genre: String? = null
-    ): Response<TrackListResponse>
-
-    @GET("${ApiConstants.TRACKS}/{id}")
-    suspend fun getTrack(@Path("id") trackId: String): Response<Track>
-
-    @GET(ApiConstants.TRACKS_POPULAR)
-    suspend fun getPopularTracks(
-        @Query("limit") limit: Int = 10
-    ): Response<TrackListResponse>
-
-    @GET(ApiConstants.TRACKS_NEW)
-    suspend fun getNewTracks(
-        @Query("limit") limit: Int = 10
-    ): Response<TrackListResponse>
-
-    @GET(ApiConstants.TRACKS_SEARCH)
-    suspend fun searchTracks(
-        @Query("q") query: String,
-        @Query("page") page: Int = 1,
-        @Query("limit") limit: Int = 20
-    ): Response<TrackListResponse>
+    // Самі ендпоінти треків, лайків та історії живуть у [TracksApi]:
+    // вузький інтерфейс лишає плеєр і його тести без усієї мережі застосунку.
 
     // ==================== PLAYLISTS ====================
 
@@ -139,29 +112,7 @@ interface LumiApiService {
     suspend fun getArtist(@Path("id") artistId: String): Response<Artist>
 
     // ==================== LIKES ====================
-
-    @GET(ApiConstants.LIKES)
-    suspend fun getLikedTracks(
-        @Query("page") page: Int = 1,
-        @Query("limit") limit: Int = 20
-    ): Response<TrackListResponse>
-
-    @POST("${ApiConstants.LIKES}/{trackId}")
-    suspend fun likeTrack(@Path("trackId") trackId: String): Response<Unit>
-
-    @DELETE("${ApiConstants.LIKES}/{trackId}")
-    suspend fun unlikeTrack(@Path("trackId") trackId: String): Response<Unit>
-
-    // ==================== HISTORY ====================
-
-    @GET(ApiConstants.HISTORY)
-    suspend fun getHistory(
-        @Query("page") page: Int = 1,
-        @Query("limit") limit: Int = 20
-    ): Response<TrackListResponse>
-
-    @POST(ApiConstants.HISTORY)
-    suspend fun addToHistory(@Body request: AddHistoryRequest): Response<Unit>
+    // Лайки — у [TracksApi] разом з іншими ендпоінтами треків.
 
     // ==================== NOTIFICATIONS ====================
 

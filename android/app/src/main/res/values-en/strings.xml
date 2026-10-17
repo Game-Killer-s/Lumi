@@ -12,6 +12,8 @@
     <string name="common_or">or</string>
     <string name="common_ok">OK</string>
     <string name="common_close">Close</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_retry">Try again</string>
     <string name="common_loading">Loading…</string>
 
     <!-- ===== Text fields ===== -->
@@ -244,4 +246,65 @@
     <string name="track_unfollow">Unfollow artist</string>
     <string name="track_following_state">Following</string>
     <string name="track_not_following_state">Not following</string>
+    <!-- ===== Player: lyrics, comments, reports ===== -->
+    <string name="player_section">Playback</string>
+    <string name="player_open">Open player</string>
+    <string name="player_topbar">Player</string>
+    <string name="player_loading">Loading the track…</string>
+    <string name="player_error_no_tracks">No tracks available</string>
+    <string name="player_error_track">Could not load the track</string>
+    <string name="player_lyrics">Lyrics</string>
+    <string name="player_menu">More track actions</string>
+    <string name="player_report_track">Report the track</string>
+    <string name="player_comments">Comments</string>
+    <string name="player_no_audio">Audio for this track is unavailable</string>
+
+    <!-- Lyrics -->
+    <string name="lyrics_loading">Loading the lyrics…</string>
+    <string name="lyrics_error">Could not load the lyrics</string>
+    <string name="lyrics_empty">The lyrics for this song are not added yet</string>
+    <string name="lyrics_hint">The current line is highlighted along with the music</string>
+
+    <!-- Comments -->
+    <plurals name="comments_count">
+        <item quantity="one">%1$d comment</item>
+        <item quantity="other">%1$d comments</item>
+    </plurals>
+    <string name="comments_loading">Loading comments…</string>
+    <string name="comments_error">Could not load the comments</string>
+    <string name="comments_empty">No comments yet — write the first one</string>
+    <string name="comments_load_more">Show more</string>
+    <string name="comments_input_label">New comment</string>
+    <string name="comments_input_hint">What do you think about this track?</string>
+    <string name="comments_send">Send</string>
+    <string name="comments_added">Comment added</string>
+    <string name="comments_deleted">Comment deleted</string>
+    <string name="comments_error_send">Could not send the comment</string>
+    <string name="comments_error_delete">Could not delete the comment</string>
+    <string name="comments_error_too_long">%1$d characters maximum</string>
+    <string name="comments_delete">Delete</string>
+    <string name="comments_delete_confirm_title">Delete the comment?</string>
+    <string name="comments_delete_confirm_text">The comment will disappear from the track for everyone. This cannot be undone.</string>
+    <string name="comments_delete_confirm_action">Delete</string>
+    <string name="comments_report">Report</string>
+    <string name="comments_own_label">Your comment</string>
+    <string name="comments_hidden_label">Hidden by a moderator</string>
+    <string name="comments_author_unknown">Lumi listener</string>
+
+    <!-- Reports -->
+    <string name="report_title_track">Report a track</string>
+    <string name="report_title_comment">Report a comment</string>
+    <string name="report_reason_label">Reason</string>
+    <string name="report_details_label">Details (optional)</string>
+    <string name="report_details_hint">Describe the problem — it helps moderation</string>
+    <string name="report_details_too_long">%1$d characters maximum</string>
+    <string name="report_submit">Send the report</string>
+    <string name="report_sent">Thanks! The report has been sent to moderation</string>
+    <string name="report_error_send">Could not send the report</string>
+    <string name="report_error_reason_required">Choose a reason for the report</string>
+    <string name="report_reason_copyright">Copyright infringement</string>
+    <string name="report_reason_quality">Poor sound quality</string>
+    <string name="report_reason_spam">Spam or advertising</string>
+    <string name="report_reason_offensive">Abuse or hate speech</string>
+    <string name="report_reason_other">Other</string>
 </resources>

@@ -331,6 +331,45 @@ data class AlbumListResponse(
     @SerializedName("limit") val limit: Int = 20
 )
 
+// ==================== LYRICS MODELS ====================
+
+/**
+ * Текст пісні активного треку (колонка Track.lyrics на бекенді).
+ * Текст приходить звичайним рядком, рядки пісні розділені "\n".
+ */
+data class LyricsResponse(
+    @SerializedName("trackId") val trackId: String = "",
+    @SerializedName("lyrics") val lyrics: String? = null
+)
+
+// ==================== COMMENT MODELS ====================
+
+/** Автор коментаря: бекенд віддає вкладений об'єкт user. */
+data class CommentAuthor(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("nickname") val nickname: String = "",
+    @SerializedName("avatarUrl") val avatarUrl: String? = null
+)
+
+/** Коментар слухача до треку (таблиця Comment). */
+data class Comment(
+    @SerializedName("id") val id: String,
+    @SerializedName("text") val text: String,
+    @SerializedName("userId") val userId: String = "",
+    @SerializedName("trackId") val trackId: String = "",
+    @SerializedName("isHidden") val isHidden: Boolean = false,
+    @SerializedName("createdAt") val createdAt: String? = null,
+    @SerializedName("user") val user: CommentAuthor? = null
+)
+
+/** Сторінка коментарів: список + скільки їх усього (для лічильника). */
+data class CommentListResponse(
+    @SerializedName("comments") val comments: List<Comment> = emptyList(),
+    @SerializedName("total") val total: Int = 0,
+    @SerializedName("page") val page: Int = 1,
+    @SerializedName("limit") val limit: Int = 20
+)
+
 // ==================== REPORT MODELS ====================
 // TODO(backend): no /report endpoint exists yet. Kept here so the UI
 // (reason picker in the track context menu) has a stable contract to
@@ -348,4 +387,26 @@ data class ReportTrackRequest(
     @SerializedName("trackId") val trackId: String,
     @SerializedName("reason") val reason: String,
     @SerializedName("comment") val comment: String? = null
+)
+
+data class CreateCommentRequest(
+    @SerializedName("text") val text: String
+)
+
+/**
+ * Скарга на трек або коментар (таблиця Report: reason, trackId, status).
+ * Поля target/targetId кажуть, на що саме скарга: трек чи коментар під ним.
+ */
+data class CreateReportRequest(
+    @SerializedName("target") val target: String,
+    @SerializedName("targetId") val targetId: String,
+    @SerializedName("trackId") val trackId: String,
+    @SerializedName("reason") val reason: String,
+    @SerializedName("comment") val comment: String? = null
+)
+
+/** Відповідь на скаргу: ідентифікатор і статус модерації (NEW за замовчуванням). */
+data class ReportResponse(
+    @SerializedName("id") val id: String = "",
+    @SerializedName("status") val status: String = "NEW"
 )
