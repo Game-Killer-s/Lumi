@@ -34,7 +34,10 @@ interface LumiApiService {
     @GET(ApiConstants.TRACKS)
     suspend fun getTracks(
         @Query("page") page: Int = 1,
-        @Query("limit") limit: Int = 20
+        @Query("limit") limit: Int = 20,
+        // TODO(backend): genre filter is not implemented server-side yet;
+        // TrackRepository.getTracksByGenre() additionally filters client-side.
+        @Query("genre") genre: String? = null
     ): Response<TrackListResponse>
 
     @GET("${ApiConstants.TRACKS}/{id}")
@@ -92,6 +95,27 @@ interface LumiApiService {
         @Path("trackId") trackId: String
     ): Response<Playlist>
 
+    // ==================== ALBUMS ====================
+    // TODO(backend): endpoints below assume the same contract as
+    // /playlists. Confirm/replace once real /albums API ships.
+
+    @GET(ApiConstants.ALBUMS)
+    suspend fun getAlbums(
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 20
+    ): Response<AlbumListResponse>
+
+    @GET("${ApiConstants.ALBUMS}/{id}")
+    suspend fun getAlbum(@Path("id") albumId: String): Response<Album>
+
+    // ==================== RECOMMENDATIONS ====================
+    // TODO(backend): wire this up once /tracks/recommended exists.
+
+    @GET(ApiConstants.TRACKS_RECOMMENDED)
+    suspend fun getRecommendedTracks(
+        @Query("limit") limit: Int = 20
+    ): Response<TrackListResponse>
+
     // ==================== GENRES ====================
 
     @GET(ApiConstants.GENRES)
@@ -132,4 +156,11 @@ interface LumiApiService {
 
     @POST(ApiConstants.HISTORY)
     suspend fun addToHistory(@Body request: AddHistoryRequest): Response<Unit>
+
+    // ==================== STATISTICS ====================
+
+    @GET(ApiConstants.STATISTICS_SUMMARY)
+    suspend fun getStatisticsSummary(
+        @Query("period") period: String
+    ): Response<StatsSummaryDto>
 }

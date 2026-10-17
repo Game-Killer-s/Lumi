@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.lumi.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.lumi.app"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -71,6 +71,8 @@ dependencies {
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.session)
     implementation(libs.media3.ui)
+    implementation(libs.media3.datasource)
+    implementation(libs.media3.database)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
