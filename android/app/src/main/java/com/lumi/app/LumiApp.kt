@@ -35,4 +35,13 @@ sealed class Screen(val route: String) {
     data object Artist : Screen("artist/{artistId}") {
         fun createRoute(artistId: String) = "artist/$artistId"
     }
+    data object Statistics : Screen("statistics")
+    data object Genre : Screen("genre/{genreName}") {
+        /** Назву жанру кодуємо, бо вона може містити "/" або "&" (наприклад "R&B/Soul"). */
+        fun createRoute(genreName: String) = "genre/${android.net.Uri.encode(genreName)}"
+    }
+    data object Settings : Screen("settings")
+    data object Subscription : Screen("subscription")
+    data object SubscriptionSuccess : Screen("subscription_success")
+    data object SupportChat : Screen("support_chat")
 }

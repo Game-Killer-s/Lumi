@@ -25,6 +25,9 @@ object ApiConstants {
     const val LIKES = "likes"
     const val HISTORY = "history"
 
+    // TODO(backend): /statistics/summary does not exist yet — contract in docs/statistics-api-contract.md.
+    const val STATISTICS_SUMMARY = "statistics/summary"
+
     // TODO(backend): /albums does not exist yet — see Models.kt Album section.
     const val ALBUMS = "albums"
 

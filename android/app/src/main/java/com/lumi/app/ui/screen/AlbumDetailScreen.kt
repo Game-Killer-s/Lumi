@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -45,6 +46,7 @@ import com.lumi.app.ui.component.TrackRow
 import com.lumi.app.ui.viewmodel.AlbumDetailUiState
 import com.lumi.app.ui.viewmodel.AlbumDetailViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumDetailScreen(albumId: String, onOpenArtist: (String) -> Unit) {
     val viewModel: AlbumDetailViewModel = viewModel(

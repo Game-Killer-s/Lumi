@@ -1,6 +1,7 @@
 package com.lumi.app.ui.component
 
 import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.PlaylistAdd
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +57,7 @@ import kotlinx.coroutines.launch
  * only thing that can indirectly change screens; it does not touch the
  * player either.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackContextMenu(
     track: Track,
@@ -164,12 +167,9 @@ private fun ContextMenuAction(icon: androidx.compose.ui.graphics.vector.ImageVec
         leadingContent = { Icon(icon, contentDescription = null) },
         modifier = Modifier
             .fillMaxWidth()
-            .clickableListItem(onClick)
+            .clickable(onClick = onClick)
     )
 }
-
-private fun Modifier.clickableListItem(onClick: () -> Unit): Modifier =
-    this.then(androidx.compose.foundation.clickable(onClick = onClick))
 
 @Composable
 private fun AddToPlaylistDialog(
@@ -201,7 +201,7 @@ private fun AddToPlaylistDialog(
                     items(playlists) { playlist ->
                         ListItem(
                             headlineContent = { Text(playlist.title) },
-                            modifier = Modifier.clickableListItem {
+                            modifier = Modifier.clickable {
                                 scope.launch { repository.addTrackToPlaylist(playlist.id, trackId) }
                                 onDismiss()
                             }

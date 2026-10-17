@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +15,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PullToRefreshBox
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,14 +42,7 @@ import com.lumi.app.player.PlayerController
 import com.lumi.app.ui.component.SkeletonCarouselRow
 import com.lumi.app.ui.viewmodel.HomeViewModel
 
-/**
- * Home feed. Sections map to the design reference: personalized
- * recommendations ("Популярно зараз" — TODO(backend): backed by
- * popular/new tracks until /tracks/recommended exists, see
- * TrackRepository.getRecommendedTracks) and "Свіжі релізи" (new
- * releases). Bottom nav + persistent mini player are provided by
- * MainScaffold, which hosts this screen.
- */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onOpenArtist: (String) -> Unit,
@@ -62,15 +63,43 @@ fun HomeScreen(
                 }
             }
             else -> {
-                LazyColumn(contentPadding = PaddingValues(vertical = 12.dp)) {
+                LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
                     item {
-                        Text(
-                            text = "Lumi",
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Lumi",
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = {}) {
+                                Icon(Icons.Filled.Notifications, contentDescription = "Сповіщення")
+                            }
+                            IconButton(onClick = {}) {
+                                Icon(Icons.Filled.Person, contentDescription = "Профіль")
+                            }
+                        }
                     }
+
+                    // Genre filter pills matching Figma top bar
+                    item {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        ) {
+                            items(listOf("Поп", "Рок", "Електронна", "Реп", "Джаз", "Інді", "Ambient")) { genre ->
+                                AssistChip(
+                                    onClick = {},
+                                    label = { Text(genre) },
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                            }
+                        }
+                    }
+
                     if (uiState.recommended.isNotEmpty()) {
                         item {
                             SectionTitle("Популярно зараз")
@@ -79,6 +108,7 @@ fun HomeScreen(
                             }
                         }
                     }
+
                     if (uiState.newReleases.isNotEmpty()) {
                         item {
                             SectionTitle("Свіжі релізи")
@@ -87,18 +117,18 @@ fun HomeScreen(
                             }
                         }
                     }
-                    if (uiState.genres.isNotEmpty()) {
-                        item {
-                            SectionTitle("Категорії музики")
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(horizontal = 16.dp)
-                            ) {
-                                items(uiState.genres) { genre ->
-                                    AssistChip(onClick = {}, label = { Text(genre.name) })
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(80.dp))
+
+                    item {
+                        SectionTitle("Твої найкращі мікси")
+                        TrackCarousel(tracks = uiState.recommended.shuffled()) { index ->
+                            PlayerController.playQueue(uiState.recommended, index)
+                        }
+                    }
+
+                    item {
+                        SectionTitle("Нещодавно відтворене")
+                        TrackCarousel(tracks = uiState.newReleases.shuffled()) { index ->
+                            PlayerController.playQueue(uiState.newReleases, index)
                         }
                     }
                 }
@@ -130,7 +160,7 @@ private fun TrackCarousel(
             Column(
                 modifier = Modifier
                     .size(width = 130.dp, height = 170.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(12.dp))
                     .clickable { onPlay(index) }
             ) {
                 AsyncImage(
@@ -138,7 +168,7 @@ private fun TrackCarousel(
                     contentDescription = track.title,
                     modifier = Modifier
                         .size(130.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(12.dp))
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -150,6 +180,7 @@ private fun TrackCarousel(
                 Text(
                     text = track.artist?.name ?: track.artistName ?: "",
                     style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

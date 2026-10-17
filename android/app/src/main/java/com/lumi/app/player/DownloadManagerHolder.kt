@@ -7,7 +7,6 @@ import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
-import androidx.media3.datasource.cache.NoOpCache
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
@@ -33,8 +32,8 @@ object DownloadManagerHolder {
     private const val CACHE_MAX_BYTES = 1024L * 1024L * 1024L // 1 GB
     private const val TAG = "DownloadManagerHolder"
 
-    private lateinit var cache: SimpleCache
-    private lateinit var downloadManager: DownloadManager
+    private var cache: SimpleCache? = null
+    private var downloadManager: DownloadManager? = null
     private var initialized = false
 
     private val _downloadedTrackIds = MutableStateFlow<Set<String>>(emptySet())
@@ -49,15 +48,16 @@ object DownloadManagerHolder {
 
         val databaseProvider = StandaloneDatabaseProvider(context)
         val cacheDir = File(context.filesDir, "media_cache")
-        cache = SimpleCache(cacheDir, LeastRecentlyUsedCacheEvictor(CACHE_MAX_BYTES), databaseProvider)
+        val simpleCache = SimpleCache(cacheDir, LeastRecentlyUsedCacheEvictor(CACHE_MAX_BYTES), databaseProvider)
+        cache = simpleCache
 
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
         val downloadExecutor = Executors.newFixedThreadPool(2)
 
-        downloadManager = DownloadManager(
+        val manager = DownloadManager(
             context,
             databaseProvider,
-            cache,
+            simpleCache,
             httpDataSourceFactory,
             downloadExecutor
         ).apply {
@@ -96,10 +96,11 @@ object DownloadManagerHolder {
                 }
             })
         }
+        downloadManager = manager
 
         // Seed current state from persisted download index (survives process death).
         try {
-            val cursor = downloadManager.downloadIndex.getDownloads()
+            val cursor = manager.downloadIndex.getDownloads()
             val completed = mutableSetOf<String>()
             while (cursor.moveToNext()) {
                 if (cursor.download.state == Download.STATE_COMPLETED) {
@@ -119,21 +120,22 @@ object DownloadManagerHolder {
         val url = track.audioUrl ?: return
         if (!initialized) return
         val request = DownloadRequest.Builder(track.id, android.net.Uri.parse(url)).build()
-        downloadManager.addDownload(request)
+        downloadManager?.addDownload(request)
     }
 
     fun removeDownload(trackId: String) {
         if (!initialized) return
-        downloadManager.removeDownload(trackId)
+        downloadManager?.removeDownload(trackId)
     }
 
     /** DataSource factory the player should use so cached/downloaded audio is served locally. */
     fun cacheDataSourceFactory(): CacheDataSource.Factory {
         val upstream = DefaultHttpDataSource.Factory()
-        return CacheDataSource.Factory()
-            .setCache(if (initialized) cache else NoOpCache())
-            .setUpstreamDataSourceFactory(upstream)
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+        return CacheDataSource.Factory().apply {
+            cache?.let { setCache(it) }
+            setUpstreamDataSourceFactory(upstream)
+            setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+        }
     }
 
     fun mediaItemFor(track: Track): MediaItem =

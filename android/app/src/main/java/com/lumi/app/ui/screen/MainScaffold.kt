@@ -1,12 +1,13 @@
 package com.lumi.app.ui.screen
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -25,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.lumi.app.Screen
+import com.lumi.app.player.PlayerController
 import com.lumi.app.ui.component.MiniPlayerBar
 
 private data class BottomTab(val screen: Screen, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
@@ -32,18 +34,25 @@ private data class BottomTab(val screen: Screen, val label: String, val icon: an
 private val bottomTabs = listOf(
     BottomTab(Screen.Home, "Головна", Icons.Filled.Home),
     BottomTab(Screen.Search, "Пошук", Icons.Filled.Search),
-    BottomTab(Screen.Library, "Бібліотека", Icons.Filled.LibraryMusic)
+    BottomTab(Screen.Library, "Бібліотека", Icons.Filled.LibraryMusic),
+    BottomTab(Screen.Profile, "Профіль", Icons.Filled.Person)
 )
 
 @Composable
 fun MainScaffold(navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination
+    // Повноекранний плеєр займає весь екран: мініплеєр і нижня навігація там зайві.
+    val isPlayerScreen = currentRoute?.route == Screen.Player.route
 
     Scaffold(
         bottomBar = {
-            Column {
-                MiniPlayerBar(onOpenPlayer = { /* TODO: full-screen player, out of this backlog's scope */ })
+            if (!isPlayerScreen) Column {
+                MiniPlayerBar(onOpenPlayer = {
+                    PlayerController.state.value.currentTrack?.let { track ->
+                        navController.navigate(Screen.Player.createRoute(track.id)) { launchSingleTop = true }
+                    }
+                })
                 NavigationBar {
                     bottomTabs.forEach { tab ->
                         val selected = currentRoute?.hierarchy?.any { it.route == tab.screen.route } == true
@@ -67,13 +76,75 @@ fun MainScaffold(navController: NavHostController = rememberNavController()) {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            modifier = Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding())
+            modifier = Modifier.fillMaxSize().padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(onOpenArtist = { artistId -> navController.navigate(Screen.Artist.createRoute(artistId)) })
             }
-            composable(Screen.Search.route) { SearchPlaceholderScreen() }
-            composable(Screen.Library.route) { LibraryPlaceholderScreen() }
+            composable(Screen.Search.route) {
+                SearchScreen(
+                    onOpenArtist = { artistId -> navController.navigate(Screen.Artist.createRoute(artistId)) },
+                    onOpenAlbum = { albumId -> navController.navigate(Screen.Album.createRoute(albumId)) },
+                    onOpenProfile = {}
+                )
+            }
+            composable(Screen.Library.route) {
+                LibraryScreen(
+                    onOpenPlaylist = { playlistId -> navController.navigate(Screen.Playlist.createRoute(playlistId)) },
+                    onOpenAlbum = { albumId -> navController.navigate(Screen.Album.createRoute(albumId)) },
+                    onOpenArtist = { artistId -> navController.navigate(Screen.Artist.createRoute(artistId)) },
+                    onOpenProfile = {}
+                )
+            }
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    onBack = { navController.popBackStack() },
+                    onLoggedOut = { navController.navigate(Screen.Login.route) { popUpTo(0) } },
+                    onOpenStatistics = { navController.navigate(Screen.Statistics.route) },
+                    onOpenSettings = { navController.navigate(Screen.Settings.route) },
+                    onOpenSubscription = { navController.navigate(Screen.Subscription.route) },
+                    onOpenSupportChat = { navController.navigate(Screen.SupportChat.route) }
+                )
+            }
+            composable(Screen.Settings.route) {
+                SettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Subscription.route) {
+                SubscriptionScreen(
+                    onBack = { navController.popBackStack() },
+                    onSubscribe = { navController.navigate(Screen.SubscriptionSuccess.route) }
+                )
+            }
+            composable(Screen.SubscriptionSuccess.route) {
+                SubscriptionSuccessScreen(onDone = { navController.popBackStack() })
+            }
+            composable(Screen.SupportChat.route) {
+                SupportChatScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Statistics.route) {
+                StatisticsScreen(
+                    onOpenTrack = { tracks, index ->
+                        // Топ-трек: запускаємо його (черга = весь список топу) і відкриваємо плеєр.
+                        PlayerController.playQueue(tracks, index)
+                        tracks.getOrNull(index)?.let { track ->
+                            navController.navigate(Screen.Player.createRoute(track.id)) { launchSingleTop = true }
+                        }
+                    },
+                    onOpenArtist = { artistId -> navController.navigate(Screen.Artist.createRoute(artistId)) },
+                    onOpenGenre = { genre -> navController.navigate(Screen.Genre.createRoute(genre)) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.Player.route) {
+                PlayerScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Genre.route) { backStackEntry ->
+                val genre = backStackEntry.arguments?.getString("genreName").orEmpty()
+                GenreResultsScreen(
+                    genre = genre,
+                    onOpenArtist = { artistId -> navController.navigate(Screen.Artist.createRoute(artistId)) }
+                )
+            }
             composable(Screen.Playlist.route) { backStackEntry ->
                 val id = backStackEntry.arguments?.getString("playlistId").orEmpty()
                 PlaylistDetailScreen(
@@ -97,18 +168,4 @@ fun MainScaffold(navController: NavHostController = rememberNavController()) {
             }
         }
     }
-}
-
-// TODO: full Search screen (categories, tabbed results — see design refs) is out of
-// this backlog's explicit scope (only the bottom-nav tab was required for Epic 1).
-@Composable
-private fun SearchPlaceholderScreen() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Пошук — TODO") }
-}
-
-// TODO: Library (playlists/liked/albums tabs, "create playlist" — see design refs)
-// is out of this backlog's explicit scope.
-@Composable
-private fun LibraryPlaceholderScreen() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Бібліотека — TODO") }
 }

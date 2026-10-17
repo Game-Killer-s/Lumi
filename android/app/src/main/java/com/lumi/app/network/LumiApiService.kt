@@ -34,7 +34,10 @@ interface LumiApiService {
     @GET(ApiConstants.TRACKS)
     suspend fun getTracks(
         @Query("page") page: Int = 1,
-        @Query("limit") limit: Int = 20
+        @Query("limit") limit: Int = 20,
+        // TODO(backend): genre filter is not implemented server-side yet;
+        // TrackRepository.getTracksByGenre() additionally filters client-side.
+        @Query("genre") genre: String? = null
     ): Response<TrackListResponse>
 
     @GET("${ApiConstants.TRACKS}/{id}")
@@ -153,4 +156,11 @@ interface LumiApiService {
 
     @POST(ApiConstants.HISTORY)
     suspend fun addToHistory(@Body request: AddHistoryRequest): Response<Unit>
+
+    // ==================== STATISTICS ====================
+
+    @GET(ApiConstants.STATISTICS_SUMMARY)
+    suspend fun getStatisticsSummary(
+        @Query("period") period: String
+    ): Response<StatsSummaryDto>
 }
