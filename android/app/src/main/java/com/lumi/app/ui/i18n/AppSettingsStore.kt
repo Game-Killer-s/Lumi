@@ -20,6 +20,9 @@ object AppSettingsStore {
     const val PREFS_NAME = "lumi_app_settings"
     const val KEY_LANGUAGE = "app_language"
     const val KEY_THEME_MODE = "app_theme_mode"
+    const val KEY_DATA_SAVER = "app_data_saver"
+    const val KEY_NOTIFICATIONS = "app_notifications"
+    const val KEY_AUDIO_QUALITY = "app_audio_quality"
 
     private var preferences: SharedPreferences? = null
 
@@ -39,6 +42,21 @@ object AppSettingsStore {
     /** Обрана тема інтерфейсу (для LumiTheme). */
     val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
 
+    private val _dataSaver = MutableStateFlow(false)
+
+    /** «Заощадження трафіку» з екрана налаштувань. */
+    val dataSaver: StateFlow<Boolean> = _dataSaver.asStateFlow()
+
+    private val _notifications = MutableStateFlow(true)
+
+    /** Локальні сповіщення про новинки та підписку. */
+    val notifications: StateFlow<Boolean> = _notifications.asStateFlow()
+
+    private val _audioQuality = MutableStateFlow("STANDARD")
+
+    /** Якість звуку: STANDARD / HQ / LOSSLESS. */
+    val audioQuality: StateFlow<String> = _audioQuality.asStateFlow()
+
     /**
      * Читає збережені налаштування в пам'ять.
      * Викликається з LumiApplication.onCreate().
@@ -54,6 +72,9 @@ object AppSettingsStore {
 
         _language.value = storedLanguage
         _themeMode.value = storedTheme
+        _dataSaver.value = prefs.getBoolean(KEY_DATA_SAVER, false)
+        _notifications.value = prefs.getBoolean(KEY_NOTIFICATIONS, true)
+        _audioQuality.value = prefs.getString(KEY_AUDIO_QUALITY, "STANDARD") ?: "STANDARD"
         LumiLocalization.rememberLocale(storedLanguage)
     }
 
@@ -101,6 +122,24 @@ object AppSettingsStore {
     fun setThemeMode(mode: ThemeMode) {
         _themeMode.value = mode
         preferences?.edit()?.putString(KEY_THEME_MODE, mode.storageValue)?.apply()
+    }
+
+    /** Перемикає режим заощадження трафіку. */
+    fun setDataSaver(enabled: Boolean) {
+        _dataSaver.value = enabled
+        preferences?.edit()?.putBoolean(KEY_DATA_SAVER, enabled)?.apply()
+    }
+
+    /** Перемикає локальні сповіщення. */
+    fun setNotifications(enabled: Boolean) {
+        _notifications.value = enabled
+        preferences?.edit()?.putBoolean(KEY_NOTIFICATIONS, enabled)?.apply()
+    }
+
+    /** Зберігає обрану якість звуку. */
+    fun setAudioQuality(quality: String) {
+        _audioQuality.value = quality
+        preferences?.edit()?.putString(KEY_AUDIO_QUALITY, quality)?.apply()
     }
 
     private fun preferencesOf(context: Context): SharedPreferences =

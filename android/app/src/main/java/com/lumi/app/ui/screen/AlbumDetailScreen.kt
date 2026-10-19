@@ -28,16 +28,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
+import com.lumi.app.R
 import com.lumi.app.data.model.Album
 import com.lumi.app.data.model.Track
 import com.lumi.app.state.TrackLikeController
@@ -56,7 +58,6 @@ fun AlbumDetailScreen(albumId: String, onOpenArtist: (String) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     var menuTrack by remember { mutableStateOf<Track?>(null) }
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
     val likeController = remember { TrackLikeController() }
 
     when (val state = uiState) {
@@ -64,7 +65,7 @@ fun AlbumDetailScreen(albumId: String, onOpenArtist: (String) -> Unit) {
         is AlbumDetailUiState.Error -> Box(Modifier.fillMaxSize(), Alignment.Center) { Text(state.message) }
         is AlbumDetailUiState.Empty -> Column {
             AlbumHeader(state.album, canPlay = false, onPlayAll = {}, onShuffle = {})
-            Box(Modifier.fillMaxSize(), Alignment.Center) { Text("У цьому альбомі ще немає треків") }
+            Box(Modifier.fillMaxSize(), Alignment.Center) { Text(stringResource(R.string.album_empty_tracks)) }
         }
         is AlbumDetailUiState.Loaded -> {
             val tracks = state.album.tracks.orEmpty()
@@ -83,7 +84,7 @@ fun AlbumDetailScreen(albumId: String, onOpenArtist: (String) -> Unit) {
                         track = track,
                         index = index,
                         onClick = { viewModel.playFrom(index) },
-                        onToggleLike = { likeController.toggle(track, scope) },
+                        onToggleLike = { likeController.toggle(track) },
                         onOpenMenu = { menuTrack = track }
                     )
                 }
@@ -125,7 +126,11 @@ private fun AlbumHeader(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
         Text(
-            text = "${album.tracksCount} треків" + (album.releaseDate?.let { " · $it" } ?: ""),
+            text = pluralStringResource(
+                R.plurals.tracks_count,
+                album.tracksCount,
+                album.tracksCount
+            ) + (album.releaseDate?.let { " · $it" } ?: ""),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
         )
@@ -134,13 +139,13 @@ private fun AlbumHeader(
             Button(onClick = onPlayAll, enabled = canPlay) {
                 Icon(Icons.Filled.PlayArrow, contentDescription = null)
                 Spacer(modifier = Modifier.size(4.dp))
-                Text("Відтворити все")
+                Text(stringResource(R.string.play_all))
             }
             Spacer(modifier = Modifier.size(8.dp))
             OutlinedButton(onClick = onShuffle, enabled = canPlay) {
                 Icon(Icons.Filled.Shuffle, contentDescription = null)
                 Spacer(modifier = Modifier.size(4.dp))
-                Text("Перемішати")
+                Text(stringResource(R.string.player_shuffle))
             }
         }
     }

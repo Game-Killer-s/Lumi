@@ -160,6 +160,26 @@
     <string name="subscription_cta_refresh">Refresh payment status</string>
     <string name="subscription_recovered">Payment received — premium access restored</string>
 
+    <!-- ===== Subscription management screen (Figma) ===== -->
+    <string name="subscription_manage_title">Manage subscription</string>
+    <string name="subscription_active_badge">Active</string>
+    <string name="subscription_inactive_badge">Inactive</string>
+    <string name="subscription_inactive_hint">Subscription is inactive</string>
+    <string name="subscription_buy">Buy Premium</string>
+    <string name="subscription_buy_hint">Enter card details to pay</string>
+    <string name="subscription_active_until">Your subscription is active until %1$s</string>
+    <string name="subscription_info_section">Subscription details</string>
+    <string name="subscription_plan_row">Plan</string>
+    <string name="subscription_plan_premium_individual">Premium Individual</string>
+    <string name="subscription_price_row">Price</string>
+    <string name="subscription_next_charge_row">Next charge date</string>
+    <string name="subscription_payment_row">Payment method</string>
+    <string name="subscription_manage_row">Manage subscription</string>
+    <string name="subscription_manage_row_hint">Change plan or cancel subscription</string>
+    <string name="subscription_history_section">Transaction history</string>
+    <string name="subscription_history_item">Premium subscription</string>
+    <string name="subscription_cancel_note_date">After cancellation you can keep using Premium until %1$s</string>
+
     <!-- ===== Paywall (Story 2) ===== -->
     <string name="paywall_feature_hq">HQ quality</string>
     <string name="paywall_feature_lossless">Lossless quality</string>
@@ -211,6 +231,8 @@
     <string name="settings_section_language">Interface language</string>
     <string name="settings_section_theme">Interface theme</string>
     <string name="settings_section_account">Account</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_section_playback">Playback &amp; data</string>
     <string name="settings_clear_cache">Clear local cache</string>
     <string name="settings_clear_cache_sub">Delete temporary app files</string>
     <string name="settings_cache_cleared">Local cache cleared</string>
@@ -258,6 +280,17 @@
     <string name="player_report_track">Report the track</string>
     <string name="player_comments">Comments</string>
     <string name="player_no_audio">Audio for this track is unavailable</string>
+    <string name="player_collapse">Collapse the player</string>
+    <string name="player_like_add">Add to favourites</string>
+    <string name="player_like_remove">Remove from favourites</string>
+    <string name="player_comment_hint">Write a comment…</string>
+    <string name="player_lyrics_collapse">Collapse the lyrics</string>
+    <string name="player_lyrics_expand">Expand the lyrics</string>
+    <string name="player_shuffle">Shuffle</string>
+    <string name="player_repeat_off">Repeat off</string>
+    <string name="player_repeat_all">Repeat the queue</string>
+    <string name="player_repeat_one">Repeat the track</string>
+    <string name="player_empty_state">Nothing is playing</string>
 
     <!-- Lyrics -->
     <string name="lyrics_loading">Loading the lyrics…</string>
@@ -307,4 +340,238 @@
     <string name="report_reason_spam">Spam or advertising</string>
     <string name="report_reason_offensive">Abuse or hate speech</string>
     <string name="report_reason_other">Other</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_edit_action">Edit profile</string>
+    <string name="profile_menu_statistics">Listening stats</string>
+    <string name="profile_menu_subscription">Manage subscription</string>
+    <string name="profile_menu_support">Online support chat</string>
+    <string name="profile_menu_settings">Settings</string>
+    <string name="profile_premium_title">Premium</string>
+    <string name="profile_premium_active">Active</string>
+    <string name="profile_premium_inactive">Inactive</string>
+    <string name="profile_premium_caption">Manage your subscription in one tap</string>
+    <string name="profile_premium_next_charge">Next charge: %1$s</string>
+    <string name="profile_premium_free">No subscription • basic features</string>
+    <string name="profile_premium_subscribe">Get Premium</string>
+    <string name="profile_role_listener">Listener</string>
+    <string name="profile_role_artist">Artist</string>
+    <string name="profile_role_admin">Administrator</string>
+    <string name="profile_loading">Loading profile…</string>
+    <string name="profile_error_title">Could not load the profile</string>
+    <string name="profile_error_message">Check your connection and try again.</string>
+    <string name="profile_error_session_title">Sign-in required</string>
+    <string name="profile_error_session_message">Your session has expired. Sign in to see your profile.</string>
+    <string name="profile_retry">Retry</string>
+    <string name="profile_login">Sign in</string>
+    <string name="profile_cached_notice">Showing saved profile data</string>
+    <string name="profile_update_success">Profile updated</string>
+    <string name="profile_update_error">Could not save the changes</string>
+    <string name="profile_avatar_updated">Avatar updated</string>
+    <string name="profile_avatar_error">Could not upload the avatar</string>
+    <string name="profile_avatar_invalid">Choose an image up to 5 MB</string>
+    <string name="profile_avatar_change">Change photo</string>
+    <string name="profile_edit_title">Edit profile</string>
+    <string name="profile_edit_section">Personal information</string>
+    <string name="profile_edit_name">Name</string>
+    <string name="profile_edit_email">Email</string>
+    <string name="profile_edit_phone">Phone</string>
+    <string name="profile_edit_phone_hint">+380 XX XXX XX XX</string>
+    <string name="profile_edit_phone_note">The number is stored on this device only.</string>
+    <string name="profile_edit_save">Save</string>
+    <string name="profile_edit_name_required">Enter your name</string>
+    <string name="profile_edit_name_too_long">50 characters maximum</string>
+    <string name="profile_edit_email_required">Enter your email</string>
+    <string name="profile_edit_email_invalid">Invalid email</string>
+    <string name="profile_edit_phone_invalid">Enter a valid phone number</string>
+    <string name="profile_edit_name_taken">This name is already taken</string>
+    <string name="profile_edit_email_taken">This email is already in use</string>
+    <string name="profile_edit_conflict">Check your name and email</string>
+    <string name="profile_edit_unchanged">There are no changes to save</string>
+
+    <!-- Settings (Figma) -->
+    <string name="settings_row_language">Language</string>
+    <string name="settings_row_theme">Theme</string>
+    <string name="settings_row_notifications">Notifications</string>
+    <string name="settings_row_privacy">Data &amp; privacy</string>
+    <string name="settings_row_sound">Sound preferences</string>
+    <string name="settings_row_data_saver">Data saver</string>
+    <string name="settings_row_cache">Clear cache</string>
+    <string name="settings_row_account">Account</string>
+    <string name="settings_value_public">Public</string>
+    <string name="settings_value_private">Private</string>
+    <string name="settings_value_on">On</string>
+    <string name="settings_value_off">Off</string>
+    <string name="settings_value_manage">Manage</string>
+    <string name="settings_value_standard">Standard</string>
+    <string name="settings_dialog_language_title">Interface language</string>
+    <string name="settings_dialog_theme_title">Interface theme</string>
+    <string name="settings_dialog_privacy_title">Data &amp; privacy</string>
+    <string name="settings_privacy_public">Public profile</string>
+    <string name="settings_privacy_public_desc">Other listeners can find your profile</string>
+    <string name="settings_privacy_listening">Show what I am listening to</string>
+    <string name="settings_privacy_listening_desc">Friends can see your current track</string>
+    <string name="settings_privacy_guest">Sign in to manage profile privacy.</string>
+    <string name="settings_privacy_error">Could not update the settings</string>
+    <string name="settings_dialog_notifications_title">Notifications</string>
+    <string name="settings_notifications_label">Push notifications</string>
+    <string name="settings_notifications_desc">New releases from your favourite artists and subscription updates.</string>
+    <string name="settings_dialog_done">Done</string>
+    <string name="settings_dialog_sound_title">Sound preferences</string>
+    <string name="settings_sound_quality">Audio quality</string>
+    <string name="settings_sound_quality_desc">Available quality depends on your plan.</string>
+    <string name="settings_sound_hq">HQ</string>
+    <string name="settings_sound_lossless">Lossless</string>
+    <string name="settings_sound_plan_note">HQ and Lossless are unlocked with Premium.</string>
+    <string name="settings_dialog_data_saver_title">Data saver</string>
+    <string name="settings_data_saver_label">Download over Wi-Fi only</string>
+    <string name="settings_data_saver_desc">Covers and audio will not load on mobile data.</string>
+    <string name="settings_dialog_cache_title">Clear cache?</string>
+    <string name="settings_cache_dialog_text">Temporary app files will be deleted. Downloaded tracks and settings stay.</string>
+    <string name="settings_dialog_account_title">Account</string>
+    <string name="settings_account_signed_in">Signed in as %1$s</string>
+    <string name="settings_account_guest">Lumi guest</string>
+    <string name="settings_account_edit">Edit profile</string>
+    <string name="settings_dialog_logout_title">Log out?</string>
+    <string name="settings_logout_dialog_text">You will need to sign in again to listen.</string>
+    <string name="settings_dialog_close">Close</string>
+    <string name="settings_dialog_cancel">Cancel</string>
+    <string name="settings_dialog_clear">Clear</string>
+
+    <!-- Player: playback state and modes -->
+    <string name="player_status_idle">Stopped</string>
+    <string name="player_status_buffering">Buffering…</string>
+    <string name="player_status_playing">Playing</string>
+    <string name="player_status_paused">Paused</string>
+    <string name="player_status_ended">Finished</string>
+    <string name="player_repeat_state_off">Repeat: off</string>
+    <string name="player_repeat_state_all">Repeat: all tracks</string>
+    <string name="player_repeat_state_one">Repeat: one track</string>
+    <string name="player_shuffle_state_on">Shuffle: on</string>
+    <string name="player_shuffle_state_off">Shuffle: off</string>
+    <string name="player_mode_summary">%1$s · %2$s</string>
+    <string name="player_progress_description">Playback progress</string>
+
+    <!-- Home -->
+    <string name="home_load_error">Could not load</string>
+    <string name="home_section_popular">Popular now</string>
+    <string name="home_section_new_releases">New releases</string>
+    <string name="home_section_mixes">Your top mixes</string>
+    <string name="home_section_recent">Recently played</string>
+    <string-array name="home_genres">
+        <item>Pop</item>
+        <item>Rock</item>
+        <item>Electronic</item>
+        <item>Rap</item>
+        <item>Jazz</item>
+        <item>Indie</item>
+        <item>Ambient</item>
+    </string-array>
+
+    <!-- Search -->
+    <string name="search_placeholder">Track, artist or album</string>
+    <string name="search_title">Let’s find some music</string>
+    <string name="search_hint">Enter a track, artist or album name</string>
+    <string name="search_empty">Nothing found</string>
+    <string name="search_section_artists">Artists</string>
+    <string name="search_section_albums">Albums</string>
+    <string name="search_section_tracks">Tracks</string>
+    <plurals name="listeners_per_month">
+        <item quantity="one">%1$d monthly listener</item>
+        <item quantity="other">%1$d monthly listeners</item>
+    </plurals>
+
+    <!-- Library -->
+    <string name="library_title">Library</string>
+    <string name="library_playlists_title">Your playlists</string>
+    <string name="library_create">Create</string>
+    <string name="library_empty_playlists">Create your first playlist</string>
+    <string name="library_liked_empty">No liked tracks yet</string>
+    <string name="library_history_empty">Your listening history is empty</string>
+    <string name="library_albums_empty">No albums yet</string>
+    <string name="library_tab_playlists">Playlists</string>
+    <string name="library_tab_liked">Liked</string>
+    <string name="library_tab_albums">Albums</string>
+    <string name="library_tab_history">History</string>
+    <string name="library_album_subtitle">%1$s · %2$s</string>
+    <string name="library_playlist_subtitle">%1$s · %2$s</string>
+    <string name="library_new_playlist">New playlist</string>
+    <string name="library_name">Name</string>
+    <string name="library_description">Description</string>
+    <plurals name="tracks_count">
+        <item quantity="one">%1$d track</item>
+        <item quantity="other">%1$d tracks</item>
+    </plurals>
+
+    <!-- Albums, playlists, artists, genres -->
+    <string name="play_all">Play all</string>
+    <string name="album_empty_tracks">No tracks in this album yet</string>
+    <string name="playlist_empty_tracks">No tracks in this playlist yet</string>
+    <string name="artist_following">Following</string>
+    <string name="artist_follow">Follow</string>
+    <string name="artist_top_tracks">Top tracks</string>
+    <string name="artist_releases">Releases</string>
+    <string name="genre_empty">No tracks in this genre yet</string>
+
+    <!-- Track menu -->
+    <string name="common_done">Done</string>
+    <string name="track_more_actions">More</string>
+    <string name="track_menu_add_to_playlist">Add to playlist</string>
+    <string name="track_menu_share">Share</string>
+    <string name="track_menu_go_artist">Go to artist</string>
+    <string name="track_menu_report">Report</string>
+    <string name="track_download">Download</string>
+    <string name="track_download_remove">Remove download</string>
+    <string name="track_downloading">Downloading…</string>
+    <string name="playlist_picker_empty">You have no playlists yet</string>
+    <string name="report_reason_explicit">Inappropriate content</string>
+    <string name="report_reason_metadata">Incorrect track metadata</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_period_week">Week</string>
+    <string name="stats_period_month">Month</string>
+    <string name="stats_period_all">All time</string>
+    <string name="stats_tracks_played">Tracks played</string>
+    <string name="stats_listening_time">Listening time</string>
+    <string name="stats_playlists">Playlists</string>
+    <string name="stats_top_genre">Top genre</string>
+    <string name="stats_top_artist">Top artist</string>
+    <string name="stats_activity">Activity</string>
+    <string name="stats_top_tracks">Top tracks</string>
+    <string name="stats_top_artists">Top artists</string>
+    <string name="stats_top_genres">Top genres</string>
+    <string name="stats_top_tracks_empty">No top tracks for this period yet</string>
+    <string name="stats_top_artists_empty">No top artists for this period yet</string>
+    <string name="stats_top_genres_empty">No top genres for this period yet</string>
+    <string name="stats_error">Could not load statistics</string>
+    <string name="stats_retry">Try again</string>
+    <string name="stats_refresh">Refresh</string>
+    <string name="stats_refresh_failed">Could not refresh: %1$s</string>
+    <string name="stats_empty">You have not listened to anything in this period yet. Play a track and your stats will appear here.</string>
+    <string name="stats_chart_description">Activity chart: %1$d points, maximum %2$s</string>
+    <string name="stats_less_than_minute">less than 1 min</string>
+    <string name="stats_time_minutes">%1$s min</string>
+    <string name="stats_time_hours">%1$s hr</string>
+    <string name="stats_time_hours_minutes">%1$s %2$s</string>
+    <string name="stats_count_millions">%1$sM</string>
+    <plurals name="stats_plays">
+        <item quantity="one">%1$s play</item>
+        <item quantity="other">%1$s plays</item>
+    </plurals>
+
+    <!-- Online support chat -->
+    <string name="support_chat_title">Online support chat</string>
+    <string name="support_chat_greeting">Hi! How can we help?</string>
+    <string name="support_chat_ack">Thank you! Your question has been passed to a specialist.</string>
+    <string name="support_chat_input_hint">Write a message…</string>
+    <string name="common_send">Send</string>
+
+    <!-- Subscription success -->
+    <string name="subscription_success_title">Subscription complete!</string>
+    <string name="subscription_success_body">You now have access to all premium features.</string>
+    <string name="subscription_success_done">Go to the app</string>
+    <string name="subscription_mock_amount">₴250</string>
+    <string name="subscription_active_until_value">August 3, 2026</string>
 </resources>

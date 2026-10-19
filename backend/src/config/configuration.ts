@@ -71,4 +71,20 @@ export default () => ({
     // Ним платіжний шлюз підписує webhook-и.
     webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || 'lumi-webhook-secret',
   },
+
+  // Presence "слухає зараз": TTL і захист від частих оновлень.
+  presence: {
+    ttlSeconds: Number.parseInt(
+      process.env.CURRENT_LISTENING_TTL_SECONDS ?? '1800',
+      10,
+    ),
+    rateLimitMax: Number.parseInt(
+      process.env.PRESENCE_RATE_LIMIT_MAX ?? '30',
+      10,
+    ),
+    rateLimitWindowMs: Number.parseInt(
+      process.env.PRESENCE_RATE_LIMIT_WINDOW_MS ?? '60000',
+      10,
+    ),
+  },
 });

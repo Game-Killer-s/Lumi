@@ -32,11 +32,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
+import com.lumi.app.R
 import com.lumi.app.data.model.Playlist
 import com.lumi.app.data.model.Track
 import com.lumi.app.ui.component.TrackContextMenu
@@ -44,7 +47,6 @@ import com.lumi.app.ui.component.TrackRow
 import com.lumi.app.ui.viewmodel.PlaylistDetailUiState
 import com.lumi.app.ui.viewmodel.PlaylistDetailViewModel
 import com.lumi.app.state.TrackLikeController
-import androidx.compose.runtime.rememberCoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +58,6 @@ fun PlaylistDetailScreen(playlistId: String, onOpenArtist: (String) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     var menuTrack by remember { mutableStateOf<Track?>(null) }
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
     val likeController = remember { TrackLikeController() }
 
     when (val state = uiState) {
@@ -64,7 +65,7 @@ fun PlaylistDetailScreen(playlistId: String, onOpenArtist: (String) -> Unit) {
         is PlaylistDetailUiState.Error -> Box(Modifier.fillMaxSize(), Alignment.Center) { Text(state.message) }
         is PlaylistDetailUiState.Empty -> Column {
             PlaylistHeader(state.playlist, canPlay = false, onPlayAll = {}, onShuffle = {})
-            Box(Modifier.fillMaxSize(), Alignment.Center) { Text("У цьому плейлисті ще немає треків") }
+            Box(Modifier.fillMaxSize(), Alignment.Center) { Text(stringResource(R.string.playlist_empty_tracks)) }
         }
         is PlaylistDetailUiState.Loaded -> {
             val tracks = state.playlist.tracks.orEmpty()
@@ -83,7 +84,7 @@ fun PlaylistDetailScreen(playlistId: String, onOpenArtist: (String) -> Unit) {
                         track = track,
                         index = index,
                         onClick = { viewModel.playFrom(index) },
-                        onToggleLike = { likeController.toggle(track, scope) },
+                        onToggleLike = { likeController.toggle(track) },
                         onOpenMenu = { menuTrack = track }
                     )
                 }
@@ -125,7 +126,11 @@ private fun PlaylistHeader(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
         Text(
-            text = "${playlist.tracksCount} треків",
+            text = pluralStringResource(
+                R.plurals.tracks_count,
+                playlist.tracksCount,
+                playlist.tracksCount
+            ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
         )
@@ -134,13 +139,13 @@ private fun PlaylistHeader(
             Button(onClick = onPlayAll, enabled = canPlay) {
                 Icon(Icons.Filled.PlayArrow, contentDescription = null)
                 Spacer(modifier = Modifier.size(4.dp))
-                Text("Відтворити все")
+                Text(stringResource(R.string.play_all))
             }
             Spacer(modifier = Modifier.size(8.dp))
             OutlinedButton(onClick = onShuffle, enabled = canPlay) {
                 Icon(Icons.Filled.Shuffle, contentDescription = null)
                 Spacer(modifier = Modifier.size(4.dp))
-                Text("Перемішати")
+                Text(stringResource(R.string.player_shuffle))
             }
         }
     }

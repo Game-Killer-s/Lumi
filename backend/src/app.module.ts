@@ -6,10 +6,13 @@ import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
+import { CommentsModule } from './modules/comments/comments.module';
 import { ContentModule } from './modules/content/content.module';
+import { LikesModule } from './modules/likes/likes.module';
 import { MediaModule } from './modules/media/media.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -30,7 +33,10 @@ import { PrismaModule } from './prisma/prisma.module';
     ContentModule,
     MediaModule,
     NotificationsModule,
+    ProfileModule,
     SubscriptionsModule,
+    LikesModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}

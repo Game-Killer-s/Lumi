@@ -28,9 +28,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.lumi.app.R
 import com.lumi.app.player.PlayerController
 
 /**
@@ -77,7 +79,7 @@ fun MiniPlayerBar(onOpenPlayer: () -> Unit, modifier: Modifier = Modifier) {
                 )
             }
             IconButton(onClick = { PlayerController.skipToPrevious() }) {
-                Icon(Icons.Filled.SkipPrevious, contentDescription = "Попередній трек")
+                Icon(Icons.Filled.SkipPrevious, contentDescription = stringResource(R.string.player_previous))
             }
             if (state.isBuffering) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
@@ -85,12 +87,14 @@ fun MiniPlayerBar(onOpenPlayer: () -> Unit, modifier: Modifier = Modifier) {
                 IconButton(onClick = { PlayerController.togglePlayPause() }) {
                     Icon(
                         imageVector = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = if (state.isPlaying) "Пауза" else "Відтворити"
+                        contentDescription = stringResource(
+                            if (state.isPlaying) R.string.player_pause else R.string.player_play
+                        )
                     )
                 }
             }
             IconButton(onClick = { PlayerController.skipToNext() }) {
-                Icon(Icons.Filled.SkipNext, contentDescription = "Наступний трек")
+                Icon(Icons.Filled.SkipNext, contentDescription = stringResource(R.string.player_next))
             }
         }
     }

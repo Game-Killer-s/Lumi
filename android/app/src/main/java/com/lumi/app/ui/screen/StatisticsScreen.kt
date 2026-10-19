@@ -41,6 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.lumi.app.R
 import com.lumi.app.data.model.ActivityPoint
 import com.lumi.app.data.model.StatsPeriod
 import com.lumi.app.data.model.StatsSummary
@@ -55,10 +58,17 @@ import com.lumi.app.data.model.TopArtist
 import com.lumi.app.data.model.TopGenre
 import com.lumi.app.data.model.TopTrack
 import com.lumi.app.data.model.Track
+import com.lumi.app.ui.i18n.LumiFormatters
+import com.lumi.app.ui.i18n.currentAppLocale
 import com.lumi.app.ui.viewmodel.StatisticsStatus
 import com.lumi.app.ui.viewmodel.StatisticsUiState
 import com.lumi.app.ui.viewmodel.StatisticsViewModel
 import com.lumi.app.util.StatsFormatter
+import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 /**
  * Екран персональної статистики.
@@ -116,11 +126,11 @@ fun StatisticsContent(
                     androidx.compose.material3.IconButton(onClick = onBack) {
                         androidx.compose.material3.Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад"
+                            contentDescription = stringResource(R.string.common_back)
                         )
                     }
                     Text(
-                        text = "Статистика",
+                        text = stringResource(R.string.stats_title),
                         style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier.padding(start = 4.dp)
                     )
@@ -129,7 +139,7 @@ fun StatisticsContent(
         } else {
             item {
                 Text(
-                    text = "Статистика",
+                    text = stringResource(R.string.stats_title),
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)
                 )
@@ -167,12 +177,21 @@ private fun PeriodTabs(selected: StatsPeriod, onSelect: (StatsPeriod) -> Unit) {
             Tab(
                 selected = period == selected,
                 onClick = { onSelect(period) },
-                text = { Text(period.label) },
+                text = { Text(statsPeriodLabel(period)) },
                 modifier = Modifier.testTag("stats_period_tab_${period.apiValue}")
             )
         }
     }
 }
+
+@Composable
+private fun statsPeriodLabel(period: StatsPeriod): String = stringResource(
+    when (period) {
+        StatsPeriod.WEEK -> R.string.stats_period_week
+        StatsPeriod.MONTH -> R.string.stats_period_month
+        StatsPeriod.ALL_TIME -> R.string.stats_period_all
+    }
+)
 
 // ---------------------------------------------------------------------
 // Стани
@@ -194,11 +213,11 @@ private fun StatsError(message: String?, onRetry: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = message ?: "Не вдалося завантажити статистику",
+            text = message ?: stringResource(R.string.stats_error),
             textAlign = TextAlign.Center
         )
         Button(onClick = onRetry, modifier = Modifier.testTag("stats_retry")) {
-            Text("Спробувати знову")
+            Text(stringResource(R.string.stats_retry))
         }
     }
 }
@@ -210,7 +229,7 @@ private fun StatsEmpty() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "За цей період ви ще нічого не слухали. Увімкніть трек — і тут з'явиться ваша статистика.",
+            text = stringResource(R.string.stats_empty),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
@@ -228,12 +247,12 @@ private fun StatsRefreshFailedBanner(message: String, onRetry: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Не вдалося оновити: $message",
+            text = stringResource(R.string.stats_refresh_failed, message),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
             modifier = Modifier.weight(1f)
         )
-        Button(onClick = onRetry) { Text("Оновити") }
+        Button(onClick = onRetry) { Text(stringResource(R.string.stats_refresh)) }
     }
 }
 
@@ -254,36 +273,36 @@ private fun LazyListScope.summaryItems(
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatCard(
-                    title = "Прослухано треків",
-                    value = StatsFormatter.formatCount(summary.tracksPlayed),
+                    title = stringResource(R.string.stats_tracks_played),
+                    value = statsCount(summary.tracksPlayed.toLong()),
                     tag = "stat_tracks",
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
-                    title = "Час прослуховування",
-                    value = StatsFormatter.formatListeningTime(summary.listeningSeconds),
+                    title = stringResource(R.string.stats_listening_time),
+                    value = statsListeningTime(summary.listeningSeconds),
                     tag = "stat_time",
                     modifier = Modifier.weight(1f)
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatCard(
-                    title = "Плейлистів",
-                    value = StatsFormatter.formatCount(summary.playlistsCount),
+                    title = stringResource(R.string.stats_playlists),
+                    value = statsCount(summary.playlistsCount.toLong()),
                     tag = "stat_playlists",
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
-                    title = "Топ жанр",
-                    value = summary.topGenre?.name ?: "—",
+                    title = stringResource(R.string.stats_top_genre),
+                    value = summary.topGenre?.name ?: LumiFormatters.EMPTY_VALUE,
                     tag = "stat_top_genre",
                     onClick = summary.topGenre?.let { genre -> { onOpenGenre(genre.name) } },
                     modifier = Modifier.weight(1f)
                 )
             }
             StatCard(
-                title = "Топ виконавець",
-                value = summary.topArtist?.artist?.name ?: "—",
+                title = stringResource(R.string.stats_top_artist),
+                value = summary.topArtist?.artist?.name ?: LumiFormatters.EMPTY_VALUE,
                 tag = "stat_top_artist",
                 onClick = summary.topArtist?.let { top -> { onOpenArtist(top.artist.id) } },
                 modifier = Modifier.fillMaxWidth()
@@ -293,7 +312,7 @@ private fun LazyListScope.summaryItems(
 
     if (summary.activity.isNotEmpty()) {
         item {
-            SectionTitle("Активність")
+            SectionTitle(stringResource(R.string.stats_activity))
             ActivityChart(
                 points = summary.activity,
                 period = summary.period,
@@ -303,9 +322,14 @@ private fun LazyListScope.summaryItems(
     }
 
     // ---- Топ треки ----
-    item { SectionTitle("Топ треки") }
+    item { SectionTitle(stringResource(R.string.stats_top_tracks)) }
     if (summary.topTracks.isEmpty()) {
-        item { SectionEmpty("Поки немає топ-треків за цей період", "stats_top_tracks_empty") }
+        item {
+            SectionEmpty(
+                stringResource(R.string.stats_top_tracks_empty),
+                "stats_top_tracks_empty"
+            )
+        }
     } else {
         val tracks = summary.topTracks.map { it.track }
         items(summary.topTracks.size) { index ->
@@ -318,9 +342,14 @@ private fun LazyListScope.summaryItems(
     }
 
     // ---- Топ виконавці ----
-    item { SectionTitle("Топ виконавці") }
+    item { SectionTitle(stringResource(R.string.stats_top_artists)) }
     if (summary.topArtists.isEmpty()) {
-        item { SectionEmpty("Поки немає топ-виконавців за цей період", "stats_top_artists_empty") }
+        item {
+            SectionEmpty(
+                stringResource(R.string.stats_top_artists_empty),
+                "stats_top_artists_empty"
+            )
+        }
     } else {
         item {
             LazyRow(
@@ -335,9 +364,14 @@ private fun LazyListScope.summaryItems(
     }
 
     // ---- Топ жанри ----
-    item { SectionTitle("Топ жанри") }
+    item { SectionTitle(stringResource(R.string.stats_top_genres)) }
     if (summary.topGenres.isEmpty()) {
-        item { SectionEmpty("Поки немає топ-жанрів за цей період", "stats_top_genres_empty") }
+        item {
+            SectionEmpty(
+                stringResource(R.string.stats_top_genres_empty),
+                "stats_top_genres_empty"
+            )
+        }
     } else {
         item {
             LazyRow(
@@ -424,13 +458,18 @@ fun ActivityChart(
         .chartLabelIndices(points.size, if (period == StatsPeriod.WEEK) 7 else 5)
         .toSet()
     val barColor = MaterialTheme.colorScheme.primary
+    val chartDescription = stringResource(
+        R.string.stats_chart_description,
+        points.size,
+        statsPlays(maxPlays)
+    )
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .testTag("stats_chart")
             .semantics {
-                contentDescription = "Графік активності: ${points.size} точок, максимум $maxPlays прослуховувань"
+                contentDescription = chartDescription
             }
     ) {
         Row(
@@ -455,7 +494,7 @@ fun ActivityChart(
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     if (index in labelIndices) {
                         Text(
-                            text = StatsFormatter.formatDateLabel(point.date, period),
+                            text = statsDateLabel(point.date, period),
                             style = MaterialTheme.typography.labelSmall,
                             maxLines = 1,
                             softWrap = false,
@@ -508,7 +547,7 @@ private fun TopTrackRow(rank: Int, item: TopTrack, onClick: () -> Unit) {
             )
         }
         Text(
-            text = StatsFormatter.formatPlays(item.plays),
+            text = statsPlays(item.plays),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
@@ -540,7 +579,7 @@ private fun TopArtistItem(item: TopArtist, onClick: () -> Unit) {
             overflow = TextOverflow.Ellipsis
         )
         Text(
-            text = StatsFormatter.formatPlays(item.plays),
+            text = statsPlays(item.plays),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             maxLines = 1,
@@ -553,7 +592,67 @@ private fun TopArtistItem(item: TopArtist, onClick: () -> Unit) {
 private fun TopGenreChip(item: TopGenre, onClick: () -> Unit) {
     AssistChip(
         onClick = onClick,
-        label = { Text("${item.name} · ${StatsFormatter.formatCount(item.plays)}") },
+        label = { Text("${item.name} · ${statsCount(item.plays.toLong())}") },
         modifier = Modifier.testTag("stats_top_genre_${item.name}")
     )
+}
+
+// ---------------------------------------------------------------------
+// Локалізовані форматтери
+// ---------------------------------------------------------------------
+
+@Composable
+private fun statsCount(value: Long): String {
+    val locale = currentAppLocale()
+    val v = value.coerceAtLeast(0L)
+    if (v >= 1_000_000L) {
+        val compact = NumberFormat.getNumberInstance(locale).apply {
+            minimumFractionDigits = 0
+            maximumFractionDigits = 1
+        }.format(v / 1_000_000.0)
+        return stringResource(R.string.stats_count_millions, compact)
+    }
+    return LumiFormatters.formatNumber(v.toInt(), locale)
+}
+
+@Composable
+private fun statsNumber(value: Long): String =
+    LumiFormatters.formatNumber(value.coerceAtLeast(0L).toInt(), currentAppLocale())
+
+@Composable
+private fun statsListeningTime(totalSeconds: Long): String {
+    val seconds = totalSeconds.coerceAtLeast(0L)
+    if (seconds == 0L) return stringResource(R.string.stats_time_minutes, statsNumber(0))
+    if (seconds < 60L) return stringResource(R.string.stats_less_than_minute)
+
+    val totalMinutes = seconds / 60L
+    val hours = totalMinutes / 60L
+    val minutes = totalMinutes % 60L
+    val minutesText = stringResource(R.string.stats_time_minutes, statsNumber(minutes))
+    val hoursText = stringResource(R.string.stats_time_hours, statsNumber(hours))
+
+    return when {
+        hours == 0L -> minutesText
+        minutes == 0L -> hoursText
+        else -> stringResource(R.string.stats_time_hours_minutes, hoursText, minutesText)
+    }
+}
+
+@Composable
+private fun statsPlays(plays: Int): String {
+    val n = plays.coerceAtLeast(0)
+    return pluralStringResource(R.plurals.stats_plays, n, statsCount(n.toLong()))
+}
+
+@Composable
+private fun statsDateLabel(date: LocalDate, period: StatsPeriod): String {
+    val locale = currentAppLocale()
+    val label = when (period) {
+        StatsPeriod.WEEK -> date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
+        StatsPeriod.MONTH -> date.format(DateTimeFormatter.ofPattern("dd.MM", locale))
+        StatsPeriod.ALL_TIME -> date.format(DateTimeFormatter.ofPattern("LLL yyyy", locale))
+    }
+    return label.replaceFirstChar { char ->
+        if (char.isLowerCase()) char.titlecase(locale) else char.toString()
+    }
 }

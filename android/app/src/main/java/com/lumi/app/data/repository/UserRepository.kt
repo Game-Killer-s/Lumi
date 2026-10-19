@@ -3,6 +3,10 @@ package com.lumi.app.data.repository
 import com.lumi.app.data.mock.MockDataStore
 import com.lumi.app.data.model.*
 import com.lumi.app.network.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 
 /**
  * Repository for user profile operations.
@@ -16,9 +20,72 @@ class UserRepository {
         return safeApiCall { api.getProfile() }
     }
 
-    suspend fun updateProfile(username: String? = null, avatarUrl: String? = null): ApiResult<UserProfile> {
-        if (MockDataStore.ENABLED) return ApiResult.Success(MockDataStore.updateProfile(username, avatarUrl))
-        return safeApiCall { api.updateProfile(UpdateProfileRequest(username, avatarUrl)) }
+    /**
+     * PATCH /profile приймає лише nickname та email (див. UpdateProfileDto).
+     * Аватар змінюється окремим multipart-запитом [uploadAvatar].
+     */
+    suspend fun updateProfile(
+        username: String? = null,
+        email: String? = null,
+        avatarUrl: String? = null
+    ): ApiResult<UserProfile> {
+        if (MockDataStore.ENABLED) {
+            return persistProfile(
+                ApiResult.Success(MockDataStore.updateProfile(username, email, avatarUrl))
+            )
+        }
+        return persistProfile(
+            safeApiCall {
+                api.updateProfile(UpdateProfileRequest(nickname = username, email = email))
+            }
+        )
+    }
+
+    suspend fun uploadAvatar(file: File, mimeType: String = "image/jpeg"): ApiResult<UserProfile> {
+        if (MockDataStore.ENABLED) {
+            return persistProfile(
+                ApiResult.Success(
+                    MockDataStore.updateProfile(
+                        username = null,
+                        avatarUrl = file.toURI().toString()
+                    )
+                )
+            )
+        }
+
+        val requestBody = file.asRequestBody(mimeType.toMediaTypeOrNull())
+        val part = MultipartBody.Part.createFormData("avatar", file.name, requestBody)
+        return persistProfile(safeApiCall { api.uploadAvatar(part) })
+    }
+
+    suspend fun updatePrivacy(
+        isPublic: Boolean? = null,
+        showCurrentListening: Boolean? = null
+    ): ApiResult<UserProfile> {
+        if (MockDataStore.ENABLED) {
+            return persistProfile(
+                ApiResult.Success(
+                    MockDataStore.updatePrivacy(isPublic, showCurrentListening)
+                )
+            )
+        }
+        return persistProfile(
+            safeApiCall {
+                api.updatePrivacy(
+                    UpdatePrivacyRequest(
+                        isPublic = isPublic,
+                        showCurrentListening = showCurrentListening
+                    )
+                )
+            }
+        )
+    }
+
+    private suspend fun persistProfile(result: ApiResult<UserProfile>): ApiResult<UserProfile> {
+        if (result is ApiResult.Success) {
+            TokenManager.updateCurrentUser(result.data)
+        }
+        return result
     }
 
     suspend fun getArtists(page: Int = 1, limit: Int = 20): ApiResult<ArtistListResponse> {

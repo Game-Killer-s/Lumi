@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +42,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.lumi.app.R
 import com.lumi.app.data.model.Album
 import com.lumi.app.data.model.Playlist
 import com.lumi.app.data.model.Track
@@ -78,18 +82,34 @@ fun LibraryScreen(
     var reloadKey by remember { mutableIntStateOf(0) }
     val likeController = remember { TrackLikeController() }
 
-    LaunchedEffect(reloadKey, tab) {
+    // Улюблені — спільний стан: коли серце перемикають на плеєрі чи в іншій
+    // вкладці, список має одразу перезавантажитися, а не чекати на повторний
+    // вхід у вкладку.
+    val likedIds by LibraryStateHolder.likedTrackIds.collectAsState()
+    val pendingLikeIds by LibraryStateHolder.pendingLikeIds.collectAsState()
+    val likedKey = if (tab == 1) likedIds else emptySet<String>()
+    val pendingLikedKey = if (tab == 1) pendingLikeIds else emptySet<String>()
+
+    LaunchedEffect(reloadKey, tab, likedKey, pendingLikedKey) {
         when (tab) {
             0 -> when (val result = playlistRepository.getPlaylists()) {
                 is ApiResult.Success -> playlists = result.data.playlists
                 is ApiResult.Error -> playlists = emptyList()
             }
-            1 -> when (val result = trackRepository.getLikedTracks()) {
-                is ApiResult.Success -> {
-                    liked = result.data.tracks
-                    LibraryStateHolder.seedLiked(liked.map { it.id })
+            1 -> {
+                val revision = LibraryStateHolder.likedRevision()
+                when (val result = trackRepository.getLikedTracks(limit = 100)) {
+                    is ApiResult.Success -> {
+                        liked = result.data.tracks
+                        val ids = result.data.tracks.map { it.id }
+                        if (result.data.total <= ids.size) {
+                            LibraryStateHolder.applyLikedSnapshot(ids, revision)
+                        } else {
+                            LibraryStateHolder.seedLiked(ids)
+                        }
+                    }
+                    is ApiResult.Error -> liked = emptyList()
                 }
-                is ApiResult.Error -> liked = emptyList()
             }
             2 -> when (val result = albumRepository.getAlbums()) {
                 is ApiResult.Success -> albums = result.data.albums
@@ -107,15 +127,20 @@ fun LibraryScreen(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Бібліотека", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
-            IconButton(onClick = onOpenProfile) { Icon(Icons.Filled.Person, contentDescription = "Профіль") }
+            Text(stringResource(R.string.library_title), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+            IconButton(onClick = onOpenProfile) { Icon(Icons.Filled.Person, contentDescription = stringResource(R.string.nav_profile)) }
         }
         Row(
             modifier = Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()).padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            listOf("Плейлисти", "Улюблені", "Альбоми", "Історія").forEachIndexed { index, label ->
-                FilterChip(selected = tab == index, onClick = { tab = index }, label = { Text(label) })
+            listOf(
+                R.string.library_tab_playlists,
+                R.string.library_tab_liked,
+                R.string.library_tab_albums,
+                R.string.library_tab_history
+            ).forEachIndexed { index, labelRes ->
+                FilterChip(selected = tab == index, onClick = { tab = index }, label = { Text(stringResource(labelRes)) })
             }
         }
         Spacer(Modifier.size(6.dp))
@@ -124,16 +149,16 @@ fun LibraryScreen(
             0 -> PlaylistLibrary(playlists, onOpenPlaylist, onCreate = { showCreate = true })
             1 -> TrackLibrary(
                 liked,
-                emptyMessage = "Улюблених треків поки немає",
+                emptyMessage = stringResource(R.string.library_liked_empty),
                 onPlay = { PlayerController.playQueue(liked, it) },
                 onLike = { track ->
                     liked = liked.filterNot { it.id == track.id }
-                    likeController.toggle(track, scope)
+                    likeController.toggle(track)
                 },
                 onOpenArtist = onOpenArtist
             )
             2 -> AlbumLibrary(albums, onOpenAlbum)
-            3 -> TrackLibrary(history, emptyMessage = "Історія прослуховування порожня", onPlay = { PlayerController.playQueue(history, it) }, onLike = { track -> likeController.toggle(track, scope) }, onOpenArtist = onOpenArtist)
+            3 -> TrackLibrary(history, emptyMessage = stringResource(R.string.library_history_empty), onPlay = { PlayerController.playQueue(history, it) }, onLike = { track -> likeController.toggle(track) }, onOpenArtist = onOpenArtist)
         }
     }
 
@@ -153,11 +178,11 @@ fun LibraryScreen(
 private fun PlaylistLibrary(playlists: List<Playlist>, onOpen: (String) -> Unit, onCreate: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("Ваші плейлисти", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-            Button(onClick = onCreate) { Icon(Icons.Filled.Add, contentDescription = null); Spacer(Modifier.size(6.dp)); Text("Створити") }
+            Text(stringResource(R.string.library_playlists_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+            Button(onClick = onCreate) { Icon(Icons.Filled.Add, contentDescription = null); Spacer(Modifier.size(6.dp)); Text(stringResource(R.string.library_create)) }
         }
         if (playlists.isEmpty()) {
-            EmptyState("Створіть перший плейлист")
+            EmptyState(stringResource(R.string.library_empty_playlists))
         } else {
             LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
                 items(playlists, key = { it.id }) { playlist ->
@@ -166,7 +191,21 @@ private fun PlaylistLibrary(playlists: List<Playlist>, onOpen: (String) -> Unit,
                         Spacer(Modifier.size(12.dp))
                         Column(Modifier.weight(1f)) {
                             Text(playlist.title, style = MaterialTheme.typography.titleMedium)
-                            Text("${playlist.tracksCount} треків · ${if (playlist.isPublic) "Публічний" else "Приватний"}", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                stringResource(
+                                    R.string.library_playlist_subtitle,
+                                    pluralStringResource(
+                                        R.plurals.tracks_count,
+                                        playlist.tracksCount,
+                                        playlist.tracksCount
+                                    ),
+                                    stringResource(
+                                        if (playlist.isPublic) R.string.settings_value_public
+                                        else R.string.settings_value_private
+                                    )
+                                ),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
@@ -213,7 +252,7 @@ private fun TrackLibrary(
 @Composable
 private fun AlbumLibrary(albums: List<Album>, onOpen: (String) -> Unit) {
     if (albums.isEmpty()) {
-        EmptyState("Альбомів поки немає", Icons.Filled.Album)
+        EmptyState(stringResource(R.string.library_albums_empty), Icons.Filled.Album)
     } else {
         LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
             items(albums, key = { it.id }) { album ->
@@ -222,7 +261,18 @@ private fun AlbumLibrary(albums: List<Album>, onOpen: (String) -> Unit) {
                     Spacer(Modifier.size(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(album.title, style = MaterialTheme.typography.titleMedium)
-                        Text("${album.artist?.name ?: album.artistName.orEmpty()} · ${album.tracksCount} треків", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            stringResource(
+                                R.string.library_album_subtitle,
+                                album.artist?.name ?: album.artistName.orEmpty(),
+                                pluralStringResource(
+                                    R.plurals.tracks_count,
+                                    album.tracksCount,
+                                    album.tracksCount
+                                )
+                            ),
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
@@ -248,19 +298,19 @@ private fun CreatePlaylistDialog(onDismiss: () -> Unit, onCreate: (String, Strin
     var isPublic by remember { mutableStateOf(true) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Новий плейлист") },
+        title = { Text(stringResource(R.string.library_new_playlist)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(title, { title = it }, label = { Text("Назва") }, singleLine = true)
-                OutlinedTextField(description, { description = it }, label = { Text("Опис") }, minLines = 2)
+                OutlinedTextField(title, { title = it }, label = { Text(stringResource(R.string.library_name)) }, singleLine = true)
+                OutlinedTextField(description, { description = it }, label = { Text(stringResource(R.string.library_description)) }, minLines = 2)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     androidx.compose.material3.Switch(checked = isPublic, onCheckedChange = { isPublic = it })
                     Spacer(Modifier.size(8.dp))
-                    Text(if (isPublic) "Публічний" else "Приватний")
+                    Text(stringResource(if (isPublic) R.string.settings_value_public else R.string.settings_value_private))
                 }
             }
         },
-        confirmButton = { TextButton(enabled = title.isNotBlank(), onClick = { onCreate(title, description.ifBlank { null }, isPublic) }) { Text("Створити") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Скасувати") } }
+        confirmButton = { TextButton(enabled = title.isNotBlank(), onClick = { onCreate(title, description.ifBlank { null }, isPublic) }) { Text(stringResource(R.string.library_create)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } }
     )
 }

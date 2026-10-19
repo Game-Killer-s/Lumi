@@ -65,11 +65,36 @@ export class CatalogController {
     return this.catalogService.getStream(id);
   }
 
+  // GET /api/tracks/popular — стрічка «Популярно зараз» для мобільного
+  // клієнта (Android: ApiConstants.TRACKS_POPULAR). Віддає
+  // TrackListResponse { tracks, total, page, limit }.
+  @Public()
+  @Get('tracks/popular')
+  getPopularTracks(@Query() query: FeedQueryDto) {
+    return this.catalogService.getPopularFeed(query.limit);
+  }
+
+  // GET /api/tracks/new — стрічка «Свіжі релізи» (Android: TRACKS_NEW).
+  @Public()
+  @Get('tracks/new')
+  getNewTracks(@Query() query: FeedQueryDto) {
+    return this.catalogService.getNewFeed(query.limit);
+  }
+
   // GET /api/tracks — усі опубліковані треки
   @Public()
   @Get('tracks')
   findAll() {
     return this.catalogService.findAll();
+  }
+
+  // GET /api/tracks/:id/lyrics — текст пісні (Android: LyricsApi).
+  // Оголошуємо до 'tracks/:id'. Відсутній текст — це lyrics: null,
+  // а не помилка: клієнт показує заглушку «текст ще не додали».
+  @Public()
+  @Get('tracks/:id/lyrics')
+  getLyrics(@Param('id') id: string) {
+    return this.catalogService.getLyrics(id);
   }
 
   // GET /api/tracks/:id — один опублікований трек

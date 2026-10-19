@@ -1,6 +1,7 @@
 package com.lumi.app.network
 
 import com.lumi.app.data.model.*
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -32,8 +33,15 @@ interface LumiApiService : LyricsApi, CommentsApi, ReportApi, TracksApi {
     @GET(ApiConstants.USERS_PROFILE)
     suspend fun getProfile(): Response<UserProfile>
 
-    @PUT(ApiConstants.USERS_PROFILE)
+    @PATCH(ApiConstants.USERS_PROFILE)
     suspend fun updateProfile(@Body request: UpdateProfileRequest): Response<UserProfile>
+
+    @PATCH(ApiConstants.USERS_PROFILE_PRIVACY)
+    suspend fun updatePrivacy(@Body request: UpdatePrivacyRequest): Response<UserProfile>
+
+    @Multipart
+    @POST(ApiConstants.USERS_PROFILE_AVATAR)
+    suspend fun uploadAvatar(@Part avatar: MultipartBody.Part): Response<UserProfile>
 
     // ==================== TRACKS ====================
     // Самі ендпоінти треків, лайків та історії живуть у [TracksApi]:

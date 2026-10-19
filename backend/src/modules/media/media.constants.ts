@@ -3,8 +3,8 @@ import type { MulterOptions } from '@nestjs/platform-express/multer/interfaces/m
 import { extname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-// Вид медіафайлу (збігається з enum MediaAssetKind у Prisma).
-export type MediaKind = 'AUDIO' | 'COVER';
+// Вид медіафайлу. AVATAR не є MediaAssetKind, але використовує ту саму теку.
+export type MediaKind = 'AUDIO' | 'COVER' | 'AVATAR';
 
 // Файл, який multer поклав на диск (потрібне нам підмножина полів).
 export interface UploadedMediaFile {

@@ -22,14 +22,19 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): ApiResult<T> {
             }
         } else {
             val errorBody = response.errorBody()?.string()
-            val apiError = try {
+            // Тіло помилки може бути порожнім або не JSON: тоді Gson верне
+            // null/об’єкт без statusCode. У такому разі беремо HTTP-код —
+            // інакше 404 від бекенду ставав би «невідомою помилкою».
+            val parsed = try {
                 Gson().fromJson(errorBody, ApiError::class.java)
             } catch (e: Exception) {
-                ApiError(
+                null
+            }
+            val apiError = parsed?.takeIf { it.statusCode != 0 }
+                ?: ApiError(
                     statusCode = response.code(),
                     message = getErrorMessage(response.code())
                 )
-            }
             ApiResult.Error(apiError)
         }
     } catch (e: UnknownHostException) {

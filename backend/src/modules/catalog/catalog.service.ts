@@ -231,6 +231,28 @@ export class CatalogService {
     });
   }
 
+  // Текст пісні для Android-клієнта (LyricsApi: GET /tracks/:id/lyrics).
+  // Якщо тексту ще не додали, повертаємо lyrics: null — клієнт покаже
+  // дружню заглушку «текст ще не додали», а не помилку.
+  async getLyrics(id: string) {
+    const track = await this.prisma.track.findFirst({
+      where: {
+        id,
+        status: TrackStatus.PUBLISHED,
+      },
+      select: {
+        id: true,
+        lyrics: true,
+      },
+    });
+
+    if (!track) {
+      throw new NotFoundException('Track not found or not published');
+    }
+
+    return { trackId: track.id, lyrics: track.lyrics };
+  }
+
   async findOne(id: string) {
     const cached = this.catalogCache.get<unknown>(`catalog:track:${id}`);
     if (cached) {
@@ -255,6 +277,72 @@ export class CatalogService {
 
     this.catalogCache.set(`catalog:track:${id}`, track);
     return track;
+  }
+
+  // ============================================================
+  // Стрічки для мобільного клієнта: /tracks/popular та /tracks/new.
+  //
+  // Android-модель Track (android/.../data/model/Models.kt) очікує
+  // пласку форму: genre і album — рядки, плюс artistName/albumCoverUrl/
+  // likesCount. Тому віддаємо не сирі Prisma-рядки, а DTO, загорнутий
+  // у TrackListResponse { tracks, total, page, limit }.
+  // ============================================================
+
+  async getPopularFeed(limit: number) {
+    return this.loadClientFeed(limit, { playCount: 'desc' });
+  }
+
+  async getNewFeed(limit: number) {
+    return this.loadClientFeed(limit, { createdAt: 'desc' });
+  }
+
+  private async loadClientFeed(
+    limit: number,
+    orderBy: Prisma.TrackOrderByWithRelationInput,
+  ) {
+    const tracks = await this.prisma.track.findMany({
+      where: this.wherePublished(),
+      orderBy,
+      take: limit,
+      include: { artist: true, genre: true, album: true },
+    });
+
+    return {
+      tracks: tracks.map((track) => this.toClientTrack(track)),
+      total: tracks.length,
+      page: 1,
+      limit,
+    };
+  }
+
+  /** Перетворює Prisma-трек у форму, яку читає Android-клієнт. */
+  private toClientTrack(
+    track: Prisma.TrackGetPayload<{
+      include: { artist: true; genre: true; album: true };
+    }>,
+  ) {
+    return {
+      id: track.id,
+      title: track.title,
+      artist: track.artist
+        ? {
+            id: track.artist.id,
+            name: track.artist.name,
+            imageUrl: track.artist.photoUrl,
+            bio: track.artist.description,
+          }
+        : null,
+      artistName: track.artist?.name ?? null,
+      album: track.album?.title ?? null,
+      albumCoverUrl: track.album?.coverUrl ?? null,
+      coverUrl: track.coverUrl,
+      duration: track.duration,
+      genre: track.genre?.name ?? null,
+      audioUrl: track.audioUrl,
+      playCount: track.playCount,
+      likesCount: track.likeCount,
+      isLiked: false,
+    };
   }
 
   async getStream(id: string) {

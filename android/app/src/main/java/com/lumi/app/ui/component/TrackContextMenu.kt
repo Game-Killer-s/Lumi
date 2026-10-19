@@ -37,16 +37,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.lumi.app.R
 import com.lumi.app.data.model.Playlist
 import com.lumi.app.data.model.ReportReason
 import com.lumi.app.data.model.Track
 import com.lumi.app.data.repository.PlaylistRepository
 import com.lumi.app.data.repository.ReportRepository
-import com.lumi.app.data.repository.TrackRepository
 import com.lumi.app.network.ApiResult
 import com.lumi.app.player.DownloadManagerHolder
 import com.lumi.app.state.LibraryStateHolder
+import com.lumi.app.state.TrackLikeController
 import kotlinx.coroutines.launch
 
 /**
@@ -64,11 +66,11 @@ fun TrackContextMenu(
     sheetState: SheetState,
     onDismiss: () -> Unit,
     onGoToArtist: (String) -> Unit,
-    trackRepository: TrackRepository = remember { TrackRepository() },
     playlistRepository: PlaylistRepository = remember { PlaylistRepository() },
     reportRepository: ReportRepository = remember { ReportRepository() }
 ) {
     val scope = rememberCoroutineScope()
+    val likeController = remember { TrackLikeController() }
     val context = LocalContext.current
     val likedIds by LibraryStateHolder.likedTrackIds.collectAsState()
     val downloadedIds by DownloadManagerHolder.downloadedTrackIds.collectAsState()
@@ -90,21 +92,21 @@ fun TrackContextMenu(
 
             ContextMenuAction(
                 icon = if (isLiked) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
-                label = if (isLiked) "Прибрати з улюблених" else "Додати в улюблені"
+                label = stringResource(
+                    if (isLiked) R.string.player_like_remove else R.string.player_like_add
+                )
             ) {
-                val wasLiked = isLiked
-                LibraryStateHolder.setLiked(track.id, !wasLiked)
-                scope.launch {
-                    val result = if (wasLiked) trackRepository.unlikeTrack(track.id) else trackRepository.likeTrack(track.id)
-                    if (result is ApiResult.Error) LibraryStateHolder.revertLike(track.id, wasLiked)
-                }
+                likeController.toggle(track)
             }
 
-            ContextMenuAction(Icons.Outlined.PlaylistAdd, "Додати до плейлиста") {
+            ContextMenuAction(
+                icon = Icons.Outlined.PlaylistAdd,
+                label = stringResource(R.string.track_menu_add_to_playlist)
+            ) {
                 showAddToPlaylist = true
             }
 
-            ContextMenuAction(Icons.Filled.Share, "Поділитися") {
+            ContextMenuAction(Icons.Filled.Share, stringResource(R.string.track_menu_share)) {
                 val shareText = "${track.title} — ${track.artist?.name ?: track.artistName ?: ""}"
                 val sendIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
@@ -114,7 +116,7 @@ fun TrackContextMenu(
                 onDismiss()
             }
 
-            ContextMenuAction(Icons.Filled.Person, "Перейти до виконавця") {
+            ContextMenuAction(Icons.Filled.Person, stringResource(R.string.track_menu_go_artist)) {
                 track.artist?.id?.let(onGoToArtist)
                 onDismiss()
             }
@@ -126,16 +128,16 @@ fun TrackContextMenu(
             ContextMenuAction(
                 icon = if (isDownloaded) Icons.Outlined.DownloadDone else Icons.Outlined.Download,
                 label = when {
-                    isDownloaded -> "Видалити завантаження"
-                    isDownloading -> "Завантаження…"
-                    else -> "Завантажити"
+                    isDownloaded -> stringResource(R.string.track_download_remove)
+                    isDownloading -> stringResource(R.string.track_downloading)
+                    else -> stringResource(R.string.track_download)
                 }
             ) {
                 if (isDownloaded) DownloadManagerHolder.removeDownload(track.id)
                 else DownloadManagerHolder.downloadTrack(track)
             }
 
-            ContextMenuAction(Icons.Filled.Report, "Поскаржитися") {
+            ContextMenuAction(Icons.Filled.Report, stringResource(R.string.track_menu_report)) {
                 showReport = true
             }
         }
@@ -189,13 +191,13 @@ private fun AddToPlaylistDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Готово") } },
-        title = { Text("Додати до плейлиста") },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_done)) } },
+        title = { Text(stringResource(R.string.track_menu_add_to_playlist)) },
         text = {
             if (isLoading) {
-                Text("Завантаження…")
+                Text(stringResource(R.string.common_loading))
             } else if (playlists.isEmpty()) {
-                Text("У вас ще немає плейлистів")
+                Text(stringResource(R.string.playlist_picker_empty))
             } else {
                 LazyColumn {
                     items(playlists) { playlist ->
@@ -219,7 +221,7 @@ private fun ReportTrackDialog(onDismiss: () -> Unit, onSubmit: (ReportReason) ->
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Поскаржитися на трек") },
+        title = { Text(stringResource(R.string.player_report_track)) },
         text = {
             Column {
                 ReportReason.entries.forEach { reason ->
@@ -230,12 +232,23 @@ private fun ReportTrackDialog(onDismiss: () -> Unit, onSubmit: (ReportReason) ->
                         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                     ) {
                         RadioButton(selected = reason == selected, onClick = { selected = reason })
-                        Text(reason.label, style = MaterialTheme.typography.bodyMedium)
+                        Text(reportReasonLabel(reason), style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
         },
-        confirmButton = { TextButton(onClick = { onSubmit(selected) }) { Text("Надіслати") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Скасувати") } }
+        confirmButton = { TextButton(onClick = { onSubmit(selected) }) { Text(stringResource(R.string.report_submit)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } }
     )
 }
+
+@Composable
+private fun reportReasonLabel(reason: ReportReason): String = stringResource(
+    when (reason) {
+        ReportReason.EXPLICIT_CONTENT -> R.string.report_reason_explicit
+        ReportReason.COPYRIGHT -> R.string.report_reason_copyright
+        ReportReason.WRONG_METADATA -> R.string.report_reason_metadata
+        ReportReason.SPAM -> R.string.report_reason_spam
+        ReportReason.OTHER -> R.string.report_reason_other
+    }
+)

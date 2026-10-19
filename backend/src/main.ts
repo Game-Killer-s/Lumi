@@ -1,15 +1,26 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { resolve } from 'node:path';
 
 import { AppModule } from './app.module';
 import { setupApp } from './app.setup';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
   setupApp(app);
+
+  // Медіафайли (аудіо та обкладинки) віддаються статикою під /media/*.
+  // У БД зберігається шлях виду /media/audio/2026/10/<uuid>.flac
+  // (див. mediaPublicUrl), тому префікс тут має збігатися.
+  // Статика не потрапляє під global prefix 'api' - це окремий middleware.
+  app.useStaticAssets(
+    resolve(configService.get<string>('storage.uploadDir') ?? 'storage'),
+    { prefix: '/media/', index: false },
+  );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Lumi API')

@@ -359,7 +359,7 @@ private fun CommentRow(
  * не видалив випадково не той рядок.
  */
 @Composable
-private fun DeleteCommentDialog(
+internal fun DeleteCommentDialog(
     comment: Comment,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit

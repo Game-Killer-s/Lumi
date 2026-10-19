@@ -15,7 +15,11 @@ object ApiConstants {
     const val AUTH_REFRESH = "auth/refresh"
     const val AUTH_GOOGLE = "auth/google"
     const val AUTH_FORGOT_PASSWORD = "auth/forgot-password"
-    const val USERS_PROFILE = "users/profile"
+    // Backend ProfileController exposes GET/PATCH /api/profile.
+    // The old /api/users/profile path no longer exists.
+    const val USERS_PROFILE = "profile"
+    const val USERS_PROFILE_PRIVACY = "profile/privacy"
+    const val USERS_PROFILE_AVATAR = "profile/avatar"
     const val TRACKS = "tracks"
     const val TRACKS_POPULAR = "tracks/popular"
     const val TRACKS_NEW = "tracks/new"
@@ -63,6 +67,32 @@ object ApiConstants {
     const val COMMENTS = "comments"
     const val REPORTS = "reports"
 
+
+    /**
+     * Абсолютний URL медіафайлу для плеєра/Coil.
+     *
+     * Бекенд зберігає у БД відносний шлях (див. mediaPublicUrl):
+     * "/media/audio/2026/10/<uuid>.flac". API живе під .../api/, а
+     * статика під префіксом /media/ віддається з кореня, тому суфікс
+     * "api/" відрізаємо. Абсолютні URL (http/https, content://, file://)
+     * повертаємо як є.
+     */
+    fun mediaUrl(path: String?): String? {
+        val value = path?.trim().orEmpty()
+        if (value.isEmpty()) return null
+
+        if (value.startsWith("http://", ignoreCase = true) ||
+            value.startsWith("https://", ignoreCase = true) ||
+            value.startsWith("content://", ignoreCase = true) ||
+            value.startsWith("file://", ignoreCase = true) ||
+            value.startsWith("android.resource://", ignoreCase = true)
+        ) {
+            return value
+        }
+
+        val root = BASE_URL.trimEnd('/').removeSuffix("/api").trimEnd('/')
+        return "$root/${value.trimStart('/')}"
+    }
 
     // Timeouts
     const val CONNECT_TIMEOUT = 30L

@@ -23,15 +23,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.lumi.app.R
 import com.lumi.app.player.PlaybackLogic
 import com.lumi.app.util.DurationFormatter
 
@@ -51,7 +56,15 @@ fun PlayerSeekBar(
     bufferedPositionMs: Long,
     onSeek: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    activeColor: Color = MaterialTheme.colorScheme.primary,
+    bufferedColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+    inactiveColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f),
+    trackHeight: Dp = 4.dp,
+    thumbRadius: Dp = 7.dp,
+    dragThumbRadius: Dp = 9.dp,
+    horizontalPadding: Dp = 8.dp,
+    timeTextStyle: TextStyle = MaterialTheme.typography.labelMedium
 ) {
     var dragFraction by remember { mutableStateOf<Float?>(null) }
     val currentOnSeek by rememberUpdatedState(onSeek)
@@ -62,22 +75,23 @@ fun PlayerSeekBar(
     val shownPositionMs = dragFraction
         ?.let { PlaybackLogic.fractionToPosition(it, durationMs) }
         ?: positionMs
-
-    val activeColor = MaterialTheme.colorScheme.primary
-    val bufferedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-    val inactiveColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.16f)
+    val progressDescription = stringResource(R.string.player_progress_description)
+    val progressState = stringResource(
+        R.string.player_progress_state,
+        DurationFormatter.formatMillis(shownPositionMs),
+        DurationFormatter.formatMillis(durationMs)
+    )
 
     Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = horizontalPadding)
                 .height(32.dp)
                 .testTag("player_progress_bar")
                 .semantics {
-                    contentDescription = "Прогрес відтворення"
-                    stateDescription = "${DurationFormatter.formatMillis(shownPositionMs)} з " +
-                        DurationFormatter.formatMillis(durationMs)
+                    contentDescription = progressDescription
+                    stateDescription = progressState
                     progressBarRangeInfo = ProgressBarRangeInfo(playedFraction, 0f..1f)
                     if (seekEnabled) {
                         setProgress { target ->
@@ -113,49 +127,50 @@ fun PlayerSeekBar(
                 }
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val trackHeight = 4.dp.toPx()
-                val top = (size.height - trackHeight) / 2f
-                val radius = CornerRadius(trackHeight / 2f)
+                val barHeight = trackHeight.toPx()
+                val top = (size.height - barHeight) / 2f
+                val radius = CornerRadius(barHeight / 2f)
                 val width = size.width
 
                 drawRoundRect(
                     color = inactiveColor,
                     topLeft = Offset(0f, top),
-                    size = Size(width, trackHeight),
+                    size = Size(width, barHeight),
                     cornerRadius = radius
                 )
                 drawRoundRect(
                     color = bufferedColor,
                     topLeft = Offset(0f, top),
-                    size = Size(width * bufferedFraction, trackHeight),
+                    size = Size(width * bufferedFraction, barHeight),
                     cornerRadius = radius
                 )
                 drawRoundRect(
                     color = activeColor,
                     topLeft = Offset(0f, top),
-                    size = Size(width * playedFraction, trackHeight),
+                    size = Size(width * playedFraction, barHeight),
                     cornerRadius = radius
                 )
-                val thumbRadius = if (dragFraction != null) 9.dp.toPx() else 7.dp.toPx()
+                val currentThumbRadius = if (dragFraction != null) dragThumbRadius.toPx()
+                else thumbRadius.toPx()
                 drawCircle(
                     color = activeColor,
-                    radius = thumbRadius,
+                    radius = currentThumbRadius,
                     center = Offset(width * playedFraction, size.height / 2f)
                 )
             }
         }
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = DurationFormatter.formatMillis(shownPositionMs),
-                style = MaterialTheme.typography.labelMedium,
+                style = timeTextStyle,
                 modifier = Modifier.testTag("player_current_time")
             )
             Text(
                 text = DurationFormatter.formatMillis(durationMs),
-                style = MaterialTheme.typography.labelMedium,
+                style = timeTextStyle,
                 modifier = Modifier.testTag("player_total_time")
             )
         }

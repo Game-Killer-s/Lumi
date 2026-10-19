@@ -60,10 +60,16 @@ class LyricsViewModel(
                     )
                 }
 
-                is ApiResult.Error -> uiState = uiState.copy(
-                    isLoading = false,
-                    error = uiText(R.string.lyrics_error)
-                )
+                is ApiResult.Error -> {
+                    // 404 — треку немає або текст ще не додали: це не збій
+                    // мережі, тож показуємо заглушку «текст ще не додали»
+                    // замість «не вдалося завантажити».
+                    val notFound = result.error.statusCode == 404
+                    uiState = uiState.copy(
+                        isLoading = false,
+                        error = if (notFound) null else uiText(R.string.lyrics_error)
+                    )
+                }
             }
         }
     }

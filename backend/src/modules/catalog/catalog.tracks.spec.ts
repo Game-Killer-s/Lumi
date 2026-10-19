@@ -118,4 +118,113 @@ describe('CatalogService (public /tracks part from main)', () => {
       expect(cache.set).toHaveBeenCalledWith('catalog:all', [publishedTrack]);
     });
   });
+
+  // Стрічки, які читає Android-клієнт (TracksApi.getPopularTracks/getNewTracks).
+  // Контракт: TrackListResponse { tracks, total, page, limit }, а поля
+  // genre/album — пласкі рядки (див. data/model/Models.kt у клієнті).
+  describe('мобільні стрічки /tracks/popular та /tracks/new', () => {
+    const feedTrack = {
+      id: 'track-1',
+      title: 'Neon Overflow',
+      duration: 16,
+      coverUrl: '/media/cover/demo/neon-nights.png',
+      audioUrl: '/media/audio/demo/neon-overflow.wav',
+      playCount: 1280,
+      likeCount: 84,
+      status: TrackStatus.PUBLISHED,
+      artist: {
+        id: 'artist-1',
+        name: 'Neon Sky',
+        photoUrl: null,
+        description: 'Синтвейв і ретро-електроніка',
+      },
+      genre: { id: 'genre-1', name: 'Electronic', color: '#40C4FF' },
+      album: {
+        id: 'album-1',
+        title: 'Neon Nights',
+        coverUrl: '/media/cover/demo/neon-nights.png',
+      },
+    };
+
+    it('returns popular tracks wrapped into TrackListResponse', async () => {
+      prisma.track.findMany.mockResolvedValue([feedTrack]);
+
+      const feed = await service.getPopularFeed(4);
+
+      expect(prisma.track.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ status: TrackStatus.PUBLISHED }),
+          orderBy: { playCount: 'desc' },
+          take: 4,
+        }),
+      );
+
+      expect(feed).toEqual({
+        tracks: [
+          {
+            id: 'track-1',
+            title: 'Neon Overflow',
+            artist: {
+              id: 'artist-1',
+              name: 'Neon Sky',
+              imageUrl: null,
+              bio: 'Синтвейв і ретро-електроніка',
+            },
+            artistName: 'Neon Sky',
+            album: 'Neon Nights',
+            albumCoverUrl: '/media/cover/demo/neon-nights.png',
+            coverUrl: '/media/cover/demo/neon-nights.png',
+            duration: 16,
+            genre: 'Electronic',
+            audioUrl: '/media/audio/demo/neon-overflow.wav',
+            playCount: 1280,
+            likesCount: 84,
+            isLiked: false,
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 4,
+      });
+    });
+
+    it('returns new releases ordered by createdAt desc', async () => {
+      prisma.track.findMany.mockResolvedValue([]);
+
+      const feed = await service.getNewFeed(10);
+
+      expect(prisma.track.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ status: TrackStatus.PUBLISHED }),
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        }),
+      );
+      expect(feed).toEqual({ tracks: [], total: 0, page: 1, limit: 10 });
+    });
+
+    it('keeps nulls when artist/album/genre are missing', async () => {
+      prisma.track.findMany.mockResolvedValue([
+        {
+          ...feedTrack,
+          artist: null,
+          genre: null,
+          album: null,
+          coverUrl: null,
+          audioUrl: null,
+        },
+      ]);
+
+      const feed = await service.getPopularFeed(1);
+
+      expect(feed.tracks[0]).toMatchObject({
+        artist: null,
+        artistName: null,
+        album: null,
+        albumCoverUrl: null,
+        genre: null,
+        audioUrl: null,
+      });
+    });
+  });
 });

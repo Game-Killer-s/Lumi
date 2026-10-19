@@ -1,5 +1,6 @@
 package com.lumi.app.network
 
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -25,8 +26,14 @@ object NetworkModule {
             .addInterceptor { chain ->
                 val original = chain.request()
                 val requestBuilder = original.newBuilder()
-                    .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
+
+                // Не перезаписуємо Content-Type для multipart-завантажень:
+                // Retrofit сам додає boundary, а заголовок application/json
+                // ламає аватар та інші файлові запити.
+                if (original.body !is MultipartBody) {
+                    requestBuilder.header("Content-Type", "application/json")
+                }
 
                 // Add auth token if available
                 TokenManager.getToken()?.let { token ->

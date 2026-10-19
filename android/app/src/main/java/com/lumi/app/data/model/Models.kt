@@ -45,14 +45,21 @@ data class UserProfile(
     @SerializedName("email") val email: String,
     @SerializedName("avatarUrl") val avatarUrl: String? = null,
     @SerializedName("role") val role: String = "listener",
+    @SerializedName("isPublic") val isPublic: Boolean = true,
+    @SerializedName("showCurrentListening") val showCurrentListening: Boolean = true,
     @SerializedName("createdAt") val createdAt: String? = null
 ) {
     val username: String get() = nickname
 }
 
 data class UpdateProfileRequest(
-    @SerializedName("username") val username: String? = null,
-    @SerializedName("avatarUrl") val avatarUrl: String? = null
+    @SerializedName("nickname") val nickname: String? = null,
+    @SerializedName("email") val email: String? = null
+)
+
+data class UpdatePrivacyRequest(
+    @SerializedName("isPublic") val isPublic: Boolean? = null,
+    @SerializedName("showCurrentListening") val showCurrentListening: Boolean? = null
 )
 
 // ==================== TRACK MODELS ====================

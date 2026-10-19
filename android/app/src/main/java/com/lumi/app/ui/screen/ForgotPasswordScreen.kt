@@ -35,8 +35,6 @@ import com.lumi.app.R
 import com.lumi.app.ui.auth.AuthBackground
 import com.lumi.app.ui.auth.AuthEvent
 import com.lumi.app.ui.auth.AuthViewModel
-import com.lumi.app.ui.auth.BottomEqualizer
-import com.lumi.app.ui.auth.BottomEqualizerHeight
 import com.lumi.app.ui.auth.LockIcon
 import com.lumi.app.ui.auth.LumiTextField
 import com.lumi.app.ui.auth.MinTouchTarget
@@ -77,9 +75,8 @@ fun ForgotPasswordScreen(onBack: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    // Лишаємо місце під еквалайзер, щоб бари не наповзали
-                    // на кнопку та посилання внизу екрана.
-                    .padding(bottom = BottomEqualizerHeight)
+                    // Еквалайзер — фоновий шар (див. AuthBackground), тому
+                    // вміст може прокручуватись поверх нього без відступу.
                     .verticalScroll(rememberScrollState())
                     .imePadding()
                     .padding(horizontal = 16.dp),
@@ -166,8 +163,6 @@ fun ForgotPasswordScreen(onBack: () -> Unit) {
 
                 Spacer(Modifier.height(24.dp))
             }
-
-            BottomEqualizer(Modifier.align(Alignment.BottomCenter))
 
             SnackbarHost(
                 hostState = snackbarHostState,

@@ -46,4 +46,42 @@ class LibraryStateHolderTest {
         LibraryStateHolder.revertFollow("artist-1", wasFollowed = false)
         assertFalse(LibraryStateHolder.isFollowed("artist-1"))
     }
+
+    @Test
+    fun `applyLikedSnapshot removes tracks the server no longer reports as liked`() {
+        LibraryStateHolder.setLiked("track-snap-1", true)
+        LibraryStateHolder.setLiked("track-snap-2", true)
+
+        LibraryStateHolder.applyLikedSnapshot(listOf("track-snap-1"))
+
+        assertTrue(LibraryStateHolder.isLiked("track-snap-1"))
+        assertFalse(LibraryStateHolder.isLiked("track-snap-2"))
+    }
+
+    @Test
+    fun `applyLikedSnapshot keeps an optimistic like while the request is in flight`() {
+        LibraryStateHolder.markLikePending("track-snap-3", pending = true)
+        try {
+            LibraryStateHolder.setLiked("track-snap-3", true)
+
+            // Відповідь сервера ще не містить треку, але локальний стан новіший.
+            LibraryStateHolder.applyLikedSnapshot(emptyList())
+
+            assertTrue(LibraryStateHolder.isLiked("track-snap-3"))
+        } finally {
+            LibraryStateHolder.markLikePending("track-snap-3", pending = false)
+        }
+    }
+
+    @Test
+    fun `applyLikedSnapshot ignores a response started before the latest toggle`() {
+        LibraryStateHolder.setLiked("track-snap-4", false)
+        val revisionBeforeRequest = LibraryStateHolder.likedRevision()
+
+        // Поки запит летів, користувач поставив лайк.
+        LibraryStateHolder.setLiked("track-snap-4", true)
+        LibraryStateHolder.applyLikedSnapshot(emptyList(), revisionBeforeRequest)
+
+        assertTrue(LibraryStateHolder.isLiked("track-snap-4"))
+    }
 }

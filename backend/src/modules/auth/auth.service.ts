@@ -10,6 +10,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { randomBytes, randomUUID } from 'crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import { DEFAULT_PROFILE_PRIVACY } from '../profile/profile.constants';
 
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { PasswordService } from './services/password.service';
@@ -128,6 +129,7 @@ export class AuthService {
           email: normalizedEmail,
           passwordHash,
           nickname: nickname.trim(),
+          ...DEFAULT_PROFILE_PRIVACY,
         },
       });
     } catch (error) {
@@ -190,6 +192,7 @@ export class AuthService {
           email: normalizedEmail,
           passwordHash,
           nickname,
+          ...DEFAULT_PROFILE_PRIVACY,
         },
       });
     }
@@ -346,15 +349,20 @@ export class AuthService {
   }
 
   async logout(sessionId: string, userId: string): Promise<void> {
-    await this.prisma.client.authSession.updateMany({
-      where: {
-        id: sessionId,
-        userId,
-        revokedAt: null,
-      },
-      data: {
-        revokedAt: new Date(),
-      },
+    await this.prisma.transaction(async (tx) => {
+      await tx.authSession.updateMany({
+        where: {
+          id: sessionId,
+          userId,
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: new Date(),
+        },
+      });
+
+      // Вихід з акаунта не повинен лишати публічний presence.
+      await tx.currentListening.deleteMany({ where: { userId } });
     });
   }
 

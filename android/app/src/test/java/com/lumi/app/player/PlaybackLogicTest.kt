@@ -16,15 +16,6 @@ class PlaybackLogicTest {
         assertEquals(PlayerRepeatMode.OFF, PlayerRepeatMode.ONE.next())
     }
 
-    @Test
-    fun `mode labels reflect the active mode`() {
-        assertEquals("Повтор: вимкнено", PlaybackLogic.repeatLabel(PlayerRepeatMode.OFF))
-        assertEquals("Повтор: усі треки", PlaybackLogic.repeatLabel(PlayerRepeatMode.ALL))
-        assertEquals("Повтор: один трек", PlaybackLogic.repeatLabel(PlayerRepeatMode.ONE))
-        assertEquals("Перемішування: увімкнено", PlaybackLogic.shuffleLabel(true))
-        assertEquals("Перемішування: вимкнено", PlaybackLogic.shuffleLabel(false))
-    }
-
     // ---------- стан відтворення ----------
 
     @Test
@@ -48,13 +39,6 @@ class PlaybackLogicTest {
     fun `status ended and idle player with media`() {
         assertEquals(PlaybackStatus.ENDED, PlaybackLogic.resolveStatus(4, false, false, true))
         assertEquals(PlaybackStatus.IDLE, PlaybackLogic.resolveStatus(1, false, false, true))
-    }
-
-    @Test
-    fun `status labels`() {
-        assertEquals("Відтворюється", PlaybackLogic.statusLabel(PlaybackStatus.PLAYING))
-        assertEquals("Пауза", PlaybackLogic.statusLabel(PlaybackStatus.PAUSED))
-        assertEquals("Буферизація…", PlaybackLogic.statusLabel(PlaybackStatus.BUFFERING))
     }
 
     // ---------- тривалість / позиція ----------

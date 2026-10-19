@@ -21,9 +21,13 @@ model User {
   role         Role     @default(LISTENER)
   avatarUrl    String?
   isPublic     Boolean  @default(true)
+  // Чи можна публікувати поточний трек у presence ("слухає зараз").
+  showCurrentListening Boolean @default(true)
   isBlocked    Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  currentListening CurrentListening?
 
   playlists      Playlist[]
   likes          Like[]
@@ -40,6 +44,21 @@ model User {
   userSubscriptions    UserSubscription[]
   paymentMethods       PaymentMethod[]
   payments             Payment[]
+}
+
+// Присутність "слухає зараз".
+// TTL рахується від updatedAt, окремого job очищення немає:
+// прострочені записи прибираються під час читання.
+model CurrentListening {
+  userId    String   @id
+  trackId   String
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@index([trackId])
+  @@index([updatedAt])
 }
 
 model AuthSession {
@@ -157,6 +176,7 @@ model Track {
   reports        Report[]
   auditLogs      TrackAuditLog[]
   mediaAssets    MediaAsset[]
+  currentListening CurrentListening[]
 }
 
 // Журнал дій над треком (хто, коли, що і чому змінив)

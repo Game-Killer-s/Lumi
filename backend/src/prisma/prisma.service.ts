@@ -58,8 +58,20 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.trackAuditLog;
   }
 
+  get like() {
+    return this.client.like;
+  }
+
+  get comment() {
+    return this.client.comment;
+  }
+
   get authSession() {
     return this.client.authSession;
+  }
+
+  get currentListening() {
+    return this.client.currentListening;
   }
 
   get mediaAsset() {

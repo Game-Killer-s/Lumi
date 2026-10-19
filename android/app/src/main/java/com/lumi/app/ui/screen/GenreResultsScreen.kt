@@ -17,15 +17,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.lumi.app.R
 import com.lumi.app.data.model.Track
 import com.lumi.app.player.PlayerController
 import com.lumi.app.state.TrackLikeController
@@ -44,7 +45,6 @@ fun GenreResultsScreen(genre: String, onOpenArtist: (String) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     var menuTrack by remember { mutableStateOf<Track?>(null) }
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
     val likeController = remember { TrackLikeController() }
 
     Column(Modifier.fillMaxSize().testTag("genre_results")) {
@@ -60,18 +60,18 @@ fun GenreResultsScreen(genre: String, onOpenArtist: (String) -> Unit) {
                 Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(state.message)
                     Button(onClick = { viewModel.load() }, modifier = Modifier.padding(top = 12.dp)) {
-                        Text("Спробувати знову")
+                        Text(stringResource(R.string.common_retry))
                     }
                 }
             is GenreResultsUiState.Empty ->
-                Box(Modifier.fillMaxSize(), Alignment.Center) { Text("У цьому жанрі поки немає треків") }
+                Box(Modifier.fillMaxSize(), Alignment.Center) { Text(stringResource(R.string.genre_empty)) }
             is GenreResultsUiState.Loaded ->
                 LazyColumn {
                     itemsIndexed(state.tracks) { index, track ->
                         TrackRow(
                             track = track,
                             onClick = { PlayerController.playQueue(state.tracks, index) },
-                            onToggleLike = { likeController.toggle(track, scope) },
+                            onToggleLike = { likeController.toggle(track) },
                             onOpenMenu = { menuTrack = track }
                         )
                     }

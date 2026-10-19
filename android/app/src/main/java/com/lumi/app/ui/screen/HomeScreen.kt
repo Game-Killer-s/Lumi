@@ -32,10 +32,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.lumi.app.R
 import com.lumi.app.data.model.Track
 import com.lumi.app.player.PlayerController
 import com.lumi.app.ui.component.SkeletonCarouselRow
@@ -48,6 +51,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val genres = stringArrayResource(R.array.home_genres).toList()
 
     PullToRefreshBox(
         isRefreshing = uiState.isRefreshing,
@@ -58,7 +62,7 @@ fun HomeScreen(
             uiState.isLoading -> HomeSkeleton()
             uiState.errorMessage != null && uiState.recommended.isEmpty() && uiState.newReleases.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(uiState.errorMessage ?: "Помилка завантаження")
+                    Text(stringResource(R.string.home_load_error))
                 }
             }
             else -> {
@@ -74,10 +78,10 @@ fun HomeScreen(
                                 modifier = Modifier.weight(1f)
                             )
                             IconButton(onClick = {}) {
-                                Icon(Icons.Filled.Notifications, contentDescription = "Сповіщення")
+                                Icon(Icons.Filled.Notifications, contentDescription = stringResource(R.string.home_notifications))
                             }
                             IconButton(onClick = {}) {
-                                Icon(Icons.Filled.Person, contentDescription = "Профіль")
+                                Icon(Icons.Filled.Person, contentDescription = stringResource(R.string.nav_profile))
                             }
                         }
                     }
@@ -88,7 +92,7 @@ fun HomeScreen(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             modifier = Modifier.padding(bottom = 12.dp)
                         ) {
-                            items(listOf("Поп", "Рок", "Електронна", "Реп", "Джаз", "Інді", "Ambient")) { genre ->
+                            items(genres) { genre ->
                                 AssistChip(
                                     onClick = {},
                                     label = { Text(genre) },
@@ -100,7 +104,7 @@ fun HomeScreen(
 
                     if (uiState.recommended.isNotEmpty()) {
                         item {
-                            SectionTitle("Популярно зараз")
+                            SectionTitle(stringResource(R.string.home_section_popular))
                             TrackCarousel(tracks = uiState.recommended) { index ->
                                 PlayerController.playQueue(uiState.recommended, index)
                             }
@@ -109,7 +113,7 @@ fun HomeScreen(
 
                     if (uiState.newReleases.isNotEmpty()) {
                         item {
-                            SectionTitle("Свіжі релізи")
+                            SectionTitle(stringResource(R.string.home_section_new_releases))
                             TrackCarousel(tracks = uiState.newReleases) { index ->
                                 PlayerController.playQueue(uiState.newReleases, index)
                             }
@@ -117,14 +121,14 @@ fun HomeScreen(
                     }
 
                     item {
-                        SectionTitle("Твої найкращі мікси")
+                        SectionTitle(stringResource(R.string.home_section_mixes))
                         TrackCarousel(tracks = uiState.recommended.shuffled()) { index ->
                             PlayerController.playQueue(uiState.recommended, index)
                         }
                     }
 
                     item {
-                        SectionTitle("Нещодавно відтворене")
+                        SectionTitle(stringResource(R.string.home_section_recent))
                         TrackCarousel(tracks = uiState.newReleases.shuffled()) { index ->
                             PlayerController.playQueue(uiState.newReleases, index)
                         }
@@ -190,10 +194,10 @@ private fun TrackCarousel(
 @Composable
 private fun HomeSkeleton() {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
-        SectionTitle("Популярно зараз")
+        SectionTitle(stringResource(R.string.home_section_popular))
         SkeletonCarouselRow()
         Spacer(modifier = Modifier.height(16.dp))
-        SectionTitle("Свіжі релізи")
+        SectionTitle(stringResource(R.string.home_section_new_releases))
         SkeletonCarouselRow()
     }
 }

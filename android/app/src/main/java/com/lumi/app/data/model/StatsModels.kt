@@ -9,10 +9,10 @@ import java.time.YearMonth
 // TODO(backend): ендпоінт GET /statistics/summary ще не реалізований.
 
 /** Період, за який показується статистика. */
-enum class StatsPeriod(val apiValue: String, val label: String) {
-    WEEK("week", "Тиждень"),
-    MONTH("month", "Місяць"),
-    ALL_TIME("all", "Весь час")
+enum class StatsPeriod(val apiValue: String) {
+    WEEK("week"),
+    MONTH("month"),
+    ALL_TIME("all")
 }
 
 // ---------- DTO (як приходить з бекенду; усі поля nullable, бо Gson ігнорує дефолти Kotlin) ----------

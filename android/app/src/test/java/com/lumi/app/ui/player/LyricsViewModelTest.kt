@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -23,12 +24,17 @@ import retrofit2.Response
 /** Фейк мережі: текст пісні без HTTP (за замовчуванням — помилка мережі). */
 private class FakeLyricsApi(
     var lyrics: String? = null,
-    var fails: Boolean = false
+    var fails: Boolean = false,
+    var notFound: Boolean = false
 ) : LyricsApi {
 
     override suspend fun getTrackLyrics(trackId: String): Response<LyricsResponse> {
         if (fails) {
             throw IllegalStateException("network is down")
+        }
+
+        if (notFound) {
+            return Response.error(404, "".toResponseBody())
         }
 
         return Response.success(LyricsResponse(trackId = trackId, lyrics = lyrics))
@@ -88,6 +94,18 @@ class LyricsViewModelTest {
         assertTrue(viewModel.uiState.lines.isEmpty())
         assertFalse(viewModel.uiState.isLoading)
         assertNull(viewModel.uiState.error)
+    }
+
+    @Test
+    fun `missing lyrics (404) show the empty state instead of an error`() = runTest {
+        val viewModel = viewModel(FakeLyricsApi(notFound = true))
+
+        viewModel.load("t1")
+
+        assertTrue(viewModel.uiState.lines.isEmpty())
+        assertFalse(viewModel.uiState.isLoading)
+        assertNull(viewModel.uiState.error)
+        assertEquals("t1", viewModel.uiState.trackId)
     }
 
     @Test

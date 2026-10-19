@@ -72,6 +72,20 @@ object TokenManager {
 
     fun getCurrentUser(): UserProfile? = currentUser
 
+    /**
+     * Оновлює збережений профіль після PATCH /profile, зміни приватності
+     * чи завантаження аватара. Інакше після перезапуску застосунку
+     * екран показував би старі дані.
+     */
+    suspend fun updateCurrentUser(user: UserProfile) {
+        currentUser = user
+        if (accessToken != null) {
+            appContext.sessionDataStore.edit { prefs ->
+                prefs[KEY_USER] = gson.toJson(user)
+            }
+        }
+    }
+
     fun isLoggedIn(): Boolean = accessToken != null
 
     fun getEntitlement(): Entitlement? = currentEntitlement

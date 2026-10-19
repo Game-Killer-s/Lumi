@@ -23,9 +23,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.lumi.app.R
 import com.lumi.app.data.model.Track
 import com.lumi.app.state.LibraryStateHolder
 import com.lumi.app.util.DurationFormatter
@@ -95,12 +97,14 @@ fun TrackRow(
         IconButton(onClick = onToggleLike) {
             Icon(
                 imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = if (isLiked) "Прибрати з улюблених" else "Додати в улюблені",
+                contentDescription = stringResource(
+                    if (isLiked) R.string.player_like_remove else R.string.player_like_add
+                ),
                 tint = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
         }
         IconButton(onClick = onOpenMenu) {
-            Icon(Icons.Filled.MoreVert, contentDescription = "Ще")
+            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.track_more_actions))
         }
     }
 }
