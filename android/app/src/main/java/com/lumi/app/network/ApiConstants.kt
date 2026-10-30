@@ -59,12 +59,9 @@ object ApiConstants {
     // UserRepository.followArtist()/unfollowArtist() stub these locally.
     const val ARTISTS_FOLLOW = "artists/{id}/follow"
 
-    // TODO(backend): report endpoint does not exist yet.
-    // ReportRepository.reportTrack() stubs this locally.
-    const val REPORT = "report/track"
-
     // Текст пісні, коментарі та скарги (екран плеєра)
     const val COMMENTS = "comments"
+    // POST /api/reports — скарга на трек або коментар (ReportRepository).
     const val REPORTS = "reports"
 
 

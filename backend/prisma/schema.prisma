@@ -294,11 +294,15 @@ model Comment {
 }
 
 // ============================================================
-// Скарга на трек
+// Скарга на трек або коментар під треком (ТЗ 6.3.12)
+// target = "track" | "comment", targetId — id треку або коментаря.
 // ============================================================
 model Report {
   id        String       @id @default(uuid())
+  target    String       @default("track")
+  targetId  String?
   reason    String
+  comment   String?
   userId    String
   trackId   String
   status    ReportStatus @default(NEW)
@@ -306,6 +310,11 @@ model Report {
 
   user  User  @relation(fields: [userId], references: [id])
   track Track @relation(fields: [trackId], references: [id])
+
+  // Індекси створені в міграції 20261026120000 — тримаємо їх і в схемі,
+  // інакше `prisma migrate dev` бачить drift і пропонує дропнути їх.
+  @@index([status])
+  @@index([trackId])
 }
 
 enum ReportStatus {

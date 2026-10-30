@@ -43,14 +43,14 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -83,6 +83,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.lumi.app.R
 import com.lumi.app.data.model.Comment
+import com.lumi.app.data.model.Track
 import com.lumi.app.data.repository.TrackRepository
 import com.lumi.app.network.ApiResult
 import com.lumi.app.network.TokenManager
@@ -97,6 +98,7 @@ import com.lumi.app.ui.auth.AuthGradient
 import com.lumi.app.ui.auth.AuthTextColor
 import com.lumi.app.ui.auth.Montserrat
 import com.lumi.app.ui.component.PlayerSeekBar
+import com.lumi.app.ui.component.TrackContextMenu
 import com.lumi.app.ui.i18n.LumiFormatters
 import com.lumi.app.ui.i18n.currentAppLocale
 import com.lumi.app.ui.i18n.localized
@@ -151,7 +153,11 @@ private val PlayerTimeTextStyle = TextStyle(
  * у ViewModel-ях, тому перехід між треками не скидає стан екрана.
  */
 @Composable
-fun PlayerScreen(onBack: () -> Unit) {
+fun PlayerScreen(
+    onBack: () -> Unit,
+    onOpenArtist: (String) -> Unit = {},
+    onOpenAlbum: (String) -> Unit = {}
+) {
     val state by PlayerController.state.collectAsState()
     val lyricsViewModel: LyricsViewModel = viewModel()
     val commentsViewModel: CommentsViewModel = viewModel()
@@ -251,7 +257,9 @@ fun PlayerScreen(onBack: () -> Unit) {
             onRetryComments = commentsViewModel::retry,
             currentUserId = currentUser?.id,
             currentNickname = currentUser?.nickname.orEmpty(),
-            onReportTrack = { trackId?.let(reportViewModel::openTrackReport) }
+            onReportTrack = { trackId?.let(reportViewModel::openTrackReport) },
+            onGoToArtist = onOpenArtist,
+            onGoToAlbum = onOpenAlbum
         )
 
         SnackbarHost(
@@ -285,6 +293,7 @@ fun PlayerScreen(onBack: () -> Unit) {
  * Вміст плеєра без прив'язки до ViewModel-ей: його легко перевіряти в тестах
  * і рендерити в прев'ю.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PlayerContent(
     state: PlayerUiState,
@@ -309,9 +318,13 @@ internal fun PlayerContent(
     currentUserId: String? = null,
     currentNickname: String = "",
     onReportTrack: () -> Unit = {},
+    onGoToArtist: (String) -> Unit = {},
+    onGoToAlbum: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val track = state.currentTrack
+    var menuTrack by remember { mutableStateOf<Track?>(null) }
+    val menuSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Column(
         modifier = modifier
@@ -321,7 +334,10 @@ internal fun PlayerContent(
             .padding(horizontal = PlayerHorizontalPadding)
     ) {
         Spacer(modifier = Modifier.height(8.dp))
-        PlayerTopBar(onBack = onBack, onReportTrack = onReportTrack)
+        PlayerTopBar(
+            onBack = onBack,
+            onOpenMenu = { track?.let { menuTrack = it } }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         if (track == null) {
@@ -479,18 +495,30 @@ internal fun PlayerContent(
                 .navigationBarsPadding()
         )
     }
+
+    menuTrack?.let { menuTrackItem ->
+        TrackContextMenu(
+            track = menuTrackItem,
+            sheetState = menuSheetState,
+            onDismiss = { menuTrack = null },
+            onGoToArtist = onGoToArtist,
+            onGoToAlbum = onGoToAlbum,
+            onReportTrack = {
+                menuTrack = null
+                onReportTrack()
+            }
+        )
+    }
 }
 
 
-/** Верхня панель: згортання плеєра та меню зі скаргою на трек. */
+/** Верхня панель: згортання плеєра та меню дій з треком. */
 @Composable
 private fun PlayerTopBar(
     onBack: () -> Unit,
-    onReportTrack: () -> Unit,
+    onOpenMenu: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -510,39 +538,18 @@ private fun PlayerTopBar(
             )
         }
 
-        Box {
-            IconButton(
-                onClick = { menuExpanded = true },
-                modifier = Modifier
-                    .size(48.dp)
-                    .testTag("player_menu")
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = stringResource(R.string.player_menu),
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            DropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { menuExpanded = false }
-            ) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(R.string.player_report_track),
-                            fontFamily = Montserrat,
-                            fontSize = 14.sp
-                        )
-                    },
-                    onClick = {
-                        menuExpanded = false
-                        onReportTrack()
-                    }
-                )
-            }
+        IconButton(
+            onClick = onOpenMenu,
+            modifier = Modifier
+                .size(48.dp)
+                .testTag("player_menu")
+        ) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(R.string.player_menu),
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }

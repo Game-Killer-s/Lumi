@@ -1,6 +1,7 @@
 package com.lumi.app.state
 
 import com.lumi.app.data.model.Track
+import com.lumi.app.data.local.LibraryLocalStore
 import com.lumi.app.data.repository.TrackRepository
 import com.lumi.app.network.ApiResult
 import kotlinx.coroutines.CoroutineScope
@@ -20,10 +21,15 @@ class TrackLikeController(private val repository: TrackRepository = TrackReposit
         val wasLiked = LibraryStateHolder.isLiked(track.id)
         val nowLiked = !wasLiked
         LibraryStateHolder.setLiked(track.id, nowLiked)
+        // Зберігаємо одразу: інакше після перезапуску «Улюблені» були б порожні.
+        LibraryLocalStore.setLiked(track, nowLiked)
         LibraryStateHolder.markLikePending(track.id, pending = true)
         appScope.launch {
             val result = if (nowLiked) repository.likeTrack(track.id) else repository.unlikeTrack(track.id)
-            if (result is ApiResult.Error) LibraryStateHolder.revertLike(track.id, wasLiked)
+            if (result is ApiResult.Error) {
+                LibraryStateHolder.revertLike(track.id, wasLiked)
+                LibraryLocalStore.setLiked(track, wasLiked)
+            }
             LibraryStateHolder.markLikePending(track.id, pending = false)
         }
     }

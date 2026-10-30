@@ -13,6 +13,7 @@ import { MediaModule } from './modules/media/media.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -37,6 +38,7 @@ import { PrismaModule } from './prisma/prisma.module';
     SubscriptionsModule,
     LikesModule,
     CommentsModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

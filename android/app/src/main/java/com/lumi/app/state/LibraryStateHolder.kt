@@ -102,4 +102,14 @@ object LibraryStateHolder {
     }
 
     fun revertFollow(artistId: String, wasFollowed: Boolean) = setFollowed(artistId, wasFollowed)
+
+    /**
+     * Замінює обидва набори після зміни акаунта або завантаження локальної
+     * медіатеки. Використовується лише сховищем [com.lumi.app.data.local.LibraryLocalStore].
+     */
+    fun replaceAll(likedIds: Collection<String>, followedIds: Collection<String>) {
+        likeRevision++
+        _likedTrackIds.value = likedIds.toSet()
+        _followedArtistIds.value = followedIds.toSet()
+    }
 }

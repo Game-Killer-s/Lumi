@@ -1,5 +1,6 @@
 package com.lumi.app.data.repository
 
+import com.lumi.app.data.local.LibraryLocalStore
 import com.lumi.app.data.mock.MockDataStore
 import com.lumi.app.data.model.*
 import com.lumi.app.network.*
@@ -60,8 +61,33 @@ class TrackRepository(
     }
 
     suspend fun getLikedTracks(page: Int = 1, limit: Int = 20): ApiResult<TrackListResponse> {
-        if (MockDataStore.ENABLED) return ApiResult.Success(MockDataStore.liked(page, limit))
-        return safeApiCall { api.getLikedTracks(page, limit) }
+        if (MockDataStore.ENABLED) {
+            val mock = MockDataStore.liked(page, limit)
+            LibraryLocalStore.replaceLikedFromServer(mock.tracks)
+            return ApiResult.Success(mock)
+        }
+        return when (val result = safeApiCall { api.getLikedTracks(page, limit) }) {
+            is ApiResult.Success -> {
+                LibraryLocalStore.replaceLikedFromServer(result.data.tracks)
+                result
+            }
+            is ApiResult.Error -> {
+                // Без мережі показуємо збережені лайки замість порожнього екрана.
+                val cached = LibraryLocalStore.likedTracks()
+                if (cached.isEmpty()) {
+                    result
+                } else {
+                    ApiResult.Success(
+                        TrackListResponse(
+                            tracks = cached,
+                            total = cached.size,
+                            page = page,
+                            limit = limit
+                        )
+                    )
+                }
+            }
+        }
     }
 
     suspend fun likeTrack(trackId: String): ApiResult<Unit> {
@@ -81,6 +107,17 @@ class TrackRepository(
     }
 
     suspend fun getHistory(page: Int = 1, limit: Int = 20): ApiResult<TrackListResponse> {
+        val local = LibraryLocalStore.history()
+        if (local.isNotEmpty()) {
+            return ApiResult.Success(
+                TrackListResponse(
+                    tracks = local.map { it.track },
+                    total = local.size,
+                    page = page,
+                    limit = limit
+                )
+            )
+        }
         if (MockDataStore.ENABLED) return ApiResult.Success(MockDataStore.history(page, limit))
         return safeApiCall { api.getHistory(page, limit) }
     }
@@ -93,3 +130,4 @@ class TrackRepository(
         return safeApiCall { api.addToHistory(AddHistoryRequest(trackId)) }
     }
 }
+

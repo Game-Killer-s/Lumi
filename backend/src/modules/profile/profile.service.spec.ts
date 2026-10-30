@@ -186,13 +186,86 @@ describe('ProfileService', () => {
   });
 
   it('rejects an email taken by another user', async () => {
-    prisma.user.findUnique.mockResolvedValue({ id: 'u2' });
+    prisma.user.findUnique
+      .mockResolvedValueOnce(profile) // поточний профіль користувача
+      .mockResolvedValueOnce({ id: 'u2' }); // email належить іншому користувачу
 
     await expect(
       service.updateProfile('u1', { email: 'taken@example.com' }),
     ).rejects.toBeInstanceOf(ConflictException);
 
     expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+
+  it('saves other fields when the unchanged nickname has a legacy duplicate', async () => {
+    // У БД є другий користувач із тим самим імʼям (реєстрація це дозволяє).
+    prisma.user.findFirst.mockResolvedValue({ id: 'u2' });
+    prisma.user.update.mockResolvedValue({
+      ...profile,
+      email: 'fresh@example.com',
+    });
+
+    const result = await service.updateProfile('u1', {
+      nickname: 'Vasyl',
+      email: 'fresh@example.com',
+    });
+
+    // Незмінене імʼя навіть не перевіряємо — інакше 409 на рівному місці.
+    expect(prisma.user.findFirst).not.toHaveBeenCalled();
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { email: 'fresh@example.com' } }),
+    );
+    expect(result.email).toBe('fresh@example.com');
+  });
+
+  it('ignores a case-only nickname clash caused by legacy duplicates', async () => {
+    prisma.user.findFirst.mockResolvedValue({ id: 'u2' });
+    prisma.user.update.mockResolvedValue({
+      ...profile,
+      email: 'fresh@example.com',
+    });
+
+    await service.updateProfile('u1', {
+      nickname: 'VASYL',
+      email: 'fresh@example.com',
+    });
+
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { email: 'fresh@example.com' } }),
+    );
+  });
+
+  it('applies a different nickname spelling when it is free', async () => {
+    prisma.user.update.mockResolvedValue({ ...profile, nickname: 'Vasylko' });
+
+    const result = await service.updateProfile('u1', {
+      nickname: '  Vasylko ',
+    });
+
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { nickname: 'Vasylko' } }),
+    );
+    expect(result.nickname).toBe('Vasylko');
+  });
+
+  it('returns the profile unchanged when nothing actually changed', async () => {
+    const result = await service.updateProfile('u1', {
+      nickname: ' Vasyl ',
+      email: 'VASYL@example.com',
+    });
+
+    expect(prisma.user.findFirst).not.toHaveBeenCalled();
+    expect(prisma.user.update).not.toHaveBeenCalled();
+    expect(result.nickname).toBe('Vasyl');
+    expect(result.email).toBe('vasyl@example.com');
+  });
+
+  it('throws 404 when the profile to update is missing', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.updateProfile('u1', { nickname: 'Vasylko' }),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('maps a database unique violation to 409', async () => {

@@ -12,6 +12,7 @@ import com.lumi.app.network.ApiResult
 import com.lumi.app.network.TokenManager
 import com.lumi.app.ui.i18n.UiText
 import com.lumi.app.ui.i18n.uiText
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -65,6 +66,12 @@ class CommentsViewModel(
     val events = _events.receiveAsFlow()
 
     /**
+     * Запит сторінки коментарів. Попередній скасовуємо, коли трек
+     * змінився, інакше відповідь старого треку дописалась би в новий список.
+     */
+    private var loadJob: Job? = null
+
+    /**
      * Готує шторку до показу.
      *
      * Повторне відкриття того самого треку нічого не перечитує: чернетка
@@ -79,6 +86,8 @@ class CommentsViewModel(
             return
         }
 
+        // Новий трек — стара сторінка коментарів уже неактуальна.
+        loadJob?.cancel()
         uiState = CommentsUiState(trackId = trackId)
         loadPage(page = CommentsRepository.FIRST_PAGE)
     }
@@ -112,7 +121,15 @@ class CommentsViewModel(
         uiState = uiState.copy(isSending = true, error = null)
 
         viewModelScope.launch {
-            when (val result = repository.addComment(trackId, text)) {
+            val result = repository.addComment(trackId, text)
+
+            // Трек змінився, поки коментар летів на бекенд — у чужий
+            // список його не додаємо.
+            if (uiState.trackId != trackId) {
+                return@launch
+            }
+
+            when (result) {
                 is ApiResult.Success -> {
                     uiState = uiState.copy(
                         comments = CommentsRules.merge(listOf(result.data), uiState.comments),
@@ -209,8 +226,16 @@ class CommentsViewModel(
             uiState.copy(isLoadingMore = true, error = null)
         }
 
-        viewModelScope.launch {
+        // Запит цієї сторінки скасовує попередній: відповідь, що прийшла
+        // після зміни треку, не повинна потрапити в чужий список.
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             val result = repository.getComments(trackId, page, CommentsRepository.PAGE_SIZE)
+
+            // Поки чекали відповідь, користувач міг відкрити інший трек.
+            if (uiState.trackId != trackId) {
+                return@launch
+            }
 
             when (result) {
                 is ApiResult.Success -> uiState = uiState.copy(

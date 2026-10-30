@@ -66,6 +66,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.comment;
   }
 
+  get report() {
+    return this.client.report;
+  }
+
   get authSession() {
     return this.client.authSession;
   }

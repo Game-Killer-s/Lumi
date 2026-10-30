@@ -81,6 +81,24 @@ export class CatalogController {
     return this.catalogService.getNewFeed(query.limit);
   }
 
+  // ============================================================
+  // Публічні /albums endpoints для Android-бібліотеки.
+  // AlbumDetailScreen і вкладка «Альбоми» читають саме цей контракт:
+  // AlbumListResponse { albums, total, page, limit } та Album.
+  // ============================================================
+
+  @Public()
+  @Get('albums')
+  getAlbums(@Query() query: FeedQueryDto) {
+    return this.catalogService.getAlbums(query.limit);
+  }
+
+  @Public()
+  @Get('albums/:id')
+  getAlbum(@Param('id') id: string) {
+    return this.catalogService.findAlbum(id);
+  }
+
   // GET /api/tracks — усі опубліковані треки
   @Public()
   @Get('tracks')

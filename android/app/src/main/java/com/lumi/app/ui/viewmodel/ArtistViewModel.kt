@@ -2,6 +2,7 @@ package com.lumi.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lumi.app.data.local.LibraryLocalStore
 import com.lumi.app.data.model.Album
 import com.lumi.app.data.model.Artist
 import com.lumi.app.data.model.Track
@@ -45,7 +46,16 @@ class ArtistViewModel(
             when (val artistResult = userRepository.getArtist(artistId)) {
                 is ApiResult.Success -> {
                     val artist = artistResult.data
-                    LibraryStateHolder.seedFollowed(listOf(artist.id), artist.isFollowed)
+                    val local = LibraryLocalStore.snapshot()
+                    val followedLocally = local.followedArtists.any { it.id == artist.id }
+                    val isFollowed = followedLocally ||
+                        (artist.isFollowed && artist.id !in local.unfollowedArtistIds)
+                    if (isFollowed) {
+                        LibraryLocalStore.followArtist(artist)
+                        LibraryStateHolder.setFollowed(artist.id, true)
+                    } else {
+                        LibraryStateHolder.setFollowed(artist.id, false)
+                    }
 
                     // TODO(backend): no /artists/{id}/tracks or artist-filtered
                     // /albums endpoint exists yet. Using search-by-name and an
@@ -76,6 +86,11 @@ class ArtistViewModel(
         val nowFollowed = !wasFollowed
 
         LibraryStateHolder.setFollowed(current.artist.id, nowFollowed)
+        if (nowFollowed) {
+            LibraryLocalStore.followArtist(current.artist)
+        } else {
+            LibraryLocalStore.unfollowArtist(current.artist.id)
+        }
         _uiState.value = current.copy(isFollowed = nowFollowed)
 
         viewModelScope.launch {
@@ -87,6 +102,11 @@ class ArtistViewModel(
             if (result is ApiResult.Error) {
                 // revert optimistic update on failure
                 LibraryStateHolder.revertFollow(current.artist.id, wasFollowed)
+                if (wasFollowed) {
+                    LibraryLocalStore.followArtist(current.artist)
+                } else {
+                    LibraryLocalStore.unfollowArtist(current.artist.id)
+                }
                 _uiState.value = current.copy(isFollowed = wasFollowed)
             }
         }

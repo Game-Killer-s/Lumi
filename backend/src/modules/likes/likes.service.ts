@@ -106,6 +106,7 @@ export class LikesService {
         : null,
       artistName: track.artist?.name ?? null,
       album: track.album?.title ?? null,
+      albumId: track.album?.id ?? null,
       albumCoverUrl: track.album?.coverUrl ?? null,
       coverUrl: track.coverUrl,
       duration: track.duration,

@@ -334,6 +334,7 @@ export class CatalogService {
         : null,
       artistName: track.artist?.name ?? null,
       album: track.album?.title ?? null,
+      albumId: track.album?.id ?? null,
       albumCoverUrl: track.album?.coverUrl ?? null,
       coverUrl: track.coverUrl,
       duration: track.duration,
@@ -342,6 +343,82 @@ export class CatalogService {
       playCount: track.playCount,
       likesCount: track.likeCount,
       isLiked: false,
+    };
+  }
+
+  /**
+   * GET /api/albums — список альбомів для бібліотеки.
+   * Повертає лише опубліковані треки всередині кожного альбому.
+   */
+  async getAlbums(limit: number) {
+    const albums = await this.prisma.album.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: {
+        artist: true,
+        tracks: {
+          where: this.wherePublished(),
+          orderBy: { createdAt: 'desc' },
+          include: { artist: true, genre: true, album: true },
+        },
+      },
+    });
+
+    return {
+      albums: albums.map((album) => this.toClientAlbum(album)),
+      total: albums.length,
+      page: 1,
+      limit,
+    };
+  }
+
+  /** GET /api/albums/:id — один альбом з треками. */
+  async findAlbum(id: string) {
+    const album = await this.prisma.album.findUnique({
+      where: { id },
+      include: {
+        artist: true,
+        tracks: {
+          where: this.wherePublished(),
+          orderBy: { createdAt: 'desc' },
+          include: { artist: true, genre: true, album: true },
+        },
+      },
+    });
+
+    if (!album) {
+      throw new NotFoundException('Album not found');
+    }
+
+    return this.toClientAlbum(album);
+  }
+
+  /** Prisma-альбом → формат Android-моделі Album. */
+  private toClientAlbum(
+    album: Prisma.AlbumGetPayload<{
+      include: {
+        artist: true;
+        tracks: {
+          include: { artist: true; genre: true; album: true };
+        };
+      };
+    }>,
+  ) {
+    return {
+      id: album.id,
+      title: album.title,
+      artist: {
+        id: album.artist.id,
+        name: album.artist.name,
+        imageUrl: album.artist.photoUrl,
+        bio: album.artist.description,
+      },
+      artistName: album.artist.name,
+      coverUrl: album.coverUrl,
+      releaseDate: album.releaseYear?.toString() ?? null,
+      tracks: album.tracks.map((track) => this.toClientTrack(track)),
+      tracksCount: album.tracks.length,
+      duration: album.tracks.reduce((sum, track) => sum + track.duration, 0),
     };
   }
 

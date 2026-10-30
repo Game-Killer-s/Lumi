@@ -77,7 +77,9 @@ data class Track(
     @SerializedName("audioUrl") val audioUrl: String? = null,
     @SerializedName("playCount") val playCount: Int = 0,
     @SerializedName("likesCount") val likesCount: Int = 0,
-    @SerializedName("isLiked") val isLiked: Boolean = false
+    @SerializedName("isLiked") val isLiked: Boolean = false,
+    /** Id альбому, якщо бекенд його віддає (потрібен для «Перейти до альбому»). */
+    @SerializedName("albumId") val albumId: String? = null
 )
 
 data class TrackListResponse(
@@ -378,9 +380,8 @@ data class CommentListResponse(
 )
 
 // ==================== REPORT MODELS ====================
-// TODO(backend): no /report endpoint exists yet. Kept here so the UI
-// (reason picker in the track context menu) has a stable contract to
-// build against; ReportRepository currently just logs the request.
+// Скарги приймає POST /api/reports (backend: modules/reports).
+// target каже, на що скаржимось: "track" або "comment", targetId — id цілі.
 
 enum class ReportReason(val label: String) {
     EXPLICIT_CONTENT("Неприйнятний контент"),
@@ -389,12 +390,6 @@ enum class ReportReason(val label: String) {
     SPAM("Спам"),
     OTHER("Інше")
 }
-
-data class ReportTrackRequest(
-    @SerializedName("trackId") val trackId: String,
-    @SerializedName("reason") val reason: String,
-    @SerializedName("comment") val comment: String? = null
-)
 
 data class CreateCommentRequest(
     @SerializedName("text") val text: String

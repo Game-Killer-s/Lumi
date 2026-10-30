@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.lumi.app.data.local.LibraryLocalStore
 import com.lumi.app.data.repository.AuthRepository
 import com.lumi.app.network.ApiResult
 import com.lumi.app.network.TokenManager
@@ -47,6 +48,8 @@ fun LumiApp() {
             }
         }
 
+        // Локальна медіатека має належати саме відновленому користувачу.
+        LibraryLocalStore.activateForCurrentUser()
         sessionReady = true
     }
 
@@ -70,6 +73,7 @@ sealed class Screen(val route: String) {
     data object Home : Screen("home")
     data object Search : Screen("search")
     data object Library : Screen("library")
+    data object History : Screen("history")
     data object Player : Screen("player/{trackId}") {
         fun createRoute(trackId: String) = "player/$trackId"
     }

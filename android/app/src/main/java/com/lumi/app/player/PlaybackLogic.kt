@@ -98,6 +98,19 @@ object PlaybackLogic {
 
     fun shouldRestartTrackOnPrevious(positionMs: Long): Boolean =
         positionMs > PREVIOUS_RESTART_THRESHOLD_MS
+
+    /**
+     * Чи це та сама черга й той самий трек, що вже завантажені в плеєр.
+     * Тоді замість перезапуску з нуля продовжуємо збережену позицію.
+     */
+    fun isSameQueueAt(
+        currentQueue: List<Track>,
+        currentIndex: Int,
+        targetQueue: List<Track>,
+        targetIndex: Int
+    ): Boolean = currentIndex == targetIndex &&
+        currentQueue.size == targetQueue.size &&
+        currentQueue.map { it.id } == targetQueue.map { it.id }
 }
 
 /** Знімок черги й позиції, що зберігається між запусками застосунку. */

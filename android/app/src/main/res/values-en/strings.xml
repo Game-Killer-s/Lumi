@@ -488,17 +488,59 @@
     <string name="library_create">Create</string>
     <string name="library_empty_playlists">Create your first playlist</string>
     <string name="library_liked_empty">No liked tracks yet</string>
+    <string name="library_liked_tracks">Liked tracks</string>
     <string name="library_history_empty">Your listening history is empty</string>
     <string name="library_albums_empty">No albums yet</string>
+    <string name="library_tab_all">All</string>
     <string name="library_tab_playlists">Playlists</string>
     <string name="library_tab_liked">Liked</string>
+    <string name="library_tab_tracks">Tracks</string>
     <string name="library_tab_albums">Albums</string>
+    <string name="library_my_playlists">My playlists</string>
+    <string name="library_liked_playlists">Liked playlists</string>
+    <string name="library_liked_artists">Liked artists</string>
+    <string name="library_album_label">%1$s • Album</string>
+    <string name="library_album_type">Album</string>
+    <string name="library_add_playlist">Create playlist</string>
     <string name="library_tab_history">History</string>
     <string name="library_album_subtitle">%1$s · %2$s</string>
     <string name="library_playlist_subtitle">%1$s · %2$s</string>
     <string name="library_new_playlist">New playlist</string>
     <string name="library_name">Name</string>
     <string name="library_description">Description</string>
+    <string name="library_tab_artists">Artists</string>
+    <string name="library_artists_empty">You are not following any artists yet</string>
+    <string name="library_delete">Delete</string>
+    <string name="library_rename">Rename</string>
+    <string name="library_more_actions">Playlist actions</string>
+    <string name="library_save">Save</string>
+    <string name="library_rename_playlist">Rename playlist</string>
+    <string name="library_delete_playlist_title">Delete playlist?</string>
+    <string name="library_delete_playlist_message">“%1$s” will be deleted permanently. The tracks will stay in your library.</string>
+    <string name="library_title_required">Enter a playlist name</string>
+    <string name="library_title_too_long">The name must be at most %1$d characters</string>
+    <string name="library_description_too_long">The description must be at most %1$d characters</string>
+    <string name="library_unfollow">Unfollow</string>
+    <string name="library_history_title">Listening history</string>
+    <string name="history_clear">Clear history</string>
+    <string name="history_clear_confirm_title">Clear history?</string>
+    <string name="history_clear_confirm_message">All listening records will be deleted. This action cannot be undone.</string>
+    <string name="history_clear_action">Clear</string>
+    <string name="history_today">Today</string>
+    <string name="history_yesterday">Yesterday</string>
+    <string name="history_earlier">Earlier</string>
+    <string name="playlist_not_found">Playlist not found</string>
+
+    <plurals name="playlists_count">
+        <item quantity="one">%1$d playlist</item>
+        <item quantity="other">%1$d playlists</item>
+    </plurals>
+
+    <plurals name="artists_count">
+        <item quantity="one">%1$d artist</item>
+        <item quantity="other">%1$d artists</item>
+    </plurals>
+
     <plurals name="tracks_count">
         <item quantity="one">%1$d track</item>
         <item quantity="other">%1$d tracks</item>
@@ -518,8 +560,14 @@
     <string name="common_done">Done</string>
     <string name="track_more_actions">More</string>
     <string name="track_menu_add_to_playlist">Add to playlist</string>
+    <string name="track_menu_add_to_queue">Add to queue</string>
+    <string name="track_menu_remove_from_playlist">Remove from playlist</string>
     <string name="track_menu_share">Share</string>
     <string name="track_menu_go_artist">Go to artist</string>
+    <string name="track_menu_go_album">Go to album</string>
+    <string name="track_menu_remove_from_library">Remove from library</string>
+    <string name="track_menu_added_to_playlist">Added to playlist</string>
+    <string name="track_menu_album_not_found">Album not found</string>
     <string name="track_menu_report">Report</string>
     <string name="track_download">Download</string>
     <string name="track_download_remove">Remove download</string>

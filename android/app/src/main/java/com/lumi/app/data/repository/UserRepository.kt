@@ -3,6 +3,7 @@ package com.lumi.app.data.repository
 import com.lumi.app.data.mock.MockDataStore
 import com.lumi.app.data.model.*
 import com.lumi.app.network.*
+import kotlinx.coroutines.CancellationException
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -83,7 +84,18 @@ class UserRepository {
 
     private suspend fun persistProfile(result: ApiResult<UserProfile>): ApiResult<UserProfile> {
         if (result is ApiResult.Success) {
-            TokenManager.updateCurrentUser(result.data)
+            /*
+             * Кеш сесії не має «ламати» успішне збереження: на сервері дані
+             * вже оновлені, тож збій запису в DataStore не повинен
+             * перетворювати успіх на помилку в UI.
+             */
+            try {
+                TokenManager.updateCurrentUser(result.data)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                // Дані в памʼяті вже оновлені — просто ігноруємо збій кешу.
+            }
         }
         return result
     }

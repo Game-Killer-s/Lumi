@@ -73,6 +73,8 @@ import com.lumi.app.ui.profile.ProfileAvatar
 import com.lumi.app.ui.profile.ProfileBackground
 import com.lumi.app.ui.profile.ProfileCard
 import com.lumi.app.ui.profile.ProfileCardBorder
+import com.lumi.app.ui.profile.ProfileEditRules
+import com.lumi.app.ui.profile.ProfileField
 import com.lumi.app.ui.profile.ProfileMenuAction
 import com.lumi.app.ui.profile.ProfileMenuCard
 import com.lumi.app.ui.profile.ProfileMessageCard
@@ -82,6 +84,7 @@ import com.lumi.app.ui.profile.ProfileTextPrimary
 import com.lumi.app.ui.profile.ProfileTextSecondary
 import com.lumi.app.ui.profile.ProfileTextField
 import com.lumi.app.ui.profile.ProfileTopBar
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -505,13 +508,16 @@ private fun EditProfileContent(
     onPickAvatar: () -> Unit,
     onCancel: () -> Unit,
     onSaved: (UserProfile) -> Unit,
-    onSave: suspend (nickname: String, email: String) -> ApiResult<UserProfile>,
+    onSave: suspend (nickname: String?, email: String?) -> ApiResult<UserProfile>,
     onNotice: (Int) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    var name by remember(user.id) { mutableStateOf(user.nickname) }
-    var email by remember(user.id) { mutableStateOf(user.email) }
+    // Ключ — увесь профіль, а не лише id: якщо дані на сервері змінилися
+    // (GET після збереження), поля мають показати актуальні значення.
+    var name by remember(user) { mutableStateOf(user.nickname) }
+    var email by remember(user) { mutableStateOf(user.email) }
     var phone by remember(user.id) { mutableStateOf(ProfilePreferences.getPhone(user.id)) }
     var nameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
@@ -531,7 +537,7 @@ private fun EditProfileContent(
 
         nameError = when {
             trimmedName.isEmpty() -> nameRequired
-            trimmedName.length > 50 -> nameTooLong
+            trimmedName.length > ProfileEditRules.NAME_MAX_LENGTH -> nameTooLong
             else -> null
         }
         emailError = when {
@@ -555,13 +561,15 @@ private fun EditProfileContent(
         if (!saving && validate()) {
             scope.launch {
                 saving = true
-                val trimmedName = name.trim()
-                val trimmedEmail = email.trim()
-                val nameChanged = trimmedName != user.nickname
-                val emailChanged = !trimmedEmail.equals(user.email, ignoreCase = true)
+                val changes = ProfileEditRules.changes(
+                    currentNickname = user.nickname,
+                    currentEmail = user.email,
+                    typedName = name,
+                    typedEmail = email
+                )
 
                 try {
-                    if (!nameChanged && !emailChanged) {
+                    if (changes.isEmpty) {
                         val phoneChanged = phone.trim() != ProfilePreferences.getPhone(user.id)
                         if (phoneChanged) {
                             ProfilePreferences.setPhone(user.id, phone)
@@ -572,19 +580,33 @@ private fun EditProfileContent(
                         return@launch
                     }
 
-                    when (
-                        val result = onSave(
-                            if (nameChanged) trimmedName else user.nickname,
-                            if (emailChanged) trimmedEmail else user.email
-                        )
-                    ) {
+                    /*
+                     * Надсилаємо лише змінені поля: незмінене імʼя більше
+                     * не може спричинити 409 «імʼя вже зайняте» і збереження
+                     * email/інших даних не блокується.
+                     */
+                    when (val result = onSave(changes.nickname, changes.email)) {
                         is ApiResult.Success -> {
                             ProfilePreferences.setPhone(user.id, phone)
                             onSaved(result.data)
                         }
 
-                        is ApiResult.Error -> onNotice(R.string.profile_update_error)
+                        is ApiResult.Error -> {
+                            val failure = ProfileEditRules.failure(result.error)
+                            when (failure.field) {
+                                ProfileField.NICKNAME ->
+                                    nameError = context.getString(failure.messageRes)
+                                ProfileField.EMAIL ->
+                                    emailError = context.getString(failure.messageRes)
+                                null -> onNotice(failure.messageRes)
+                            }
+                        }
                     }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    // Непередбачений збій не має «тихо» ламати збереження.
+                    onNotice(R.string.profile_update_error)
                 } finally {
                     saving = false
                 }

@@ -36,6 +36,7 @@ import {
 import {
   normalizeEmail,
   normalizeNickname,
+  sameNickname,
   storageKeyFromUrl,
 } from './profile.utils';
 
@@ -210,6 +211,20 @@ export class ProfileService {
     userId: string,
     dto: UpdateProfileDto,
   ): Promise<ProfileDto> {
+    // Порожній body — це помилка клієнта: оновлювати нічого.
+    if (dto.nickname === undefined && dto.email === undefined) {
+      throw new BadRequestException('No profile fields to update');
+    }
+
+    const current = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: PROFILE_SELECT,
+    });
+
+    if (!current) {
+      throw new NotFoundException('Profile not found');
+    }
+
     const data: { nickname?: string; email?: string } = {};
     const changed: string[] = [];
 
@@ -220,39 +235,62 @@ export class ProfileService {
         throw new BadRequestException('Nickname must not be blank');
       }
 
-      const existing = await this.prisma.user.findFirst({
-        where: {
-          nickname: { equals: nickname, mode: 'insensitive' },
-          NOT: { id: userId },
-        },
-        select: { id: true },
-      });
+      /*
+       * Незмінене імʼя не перевіряємо на унікальність.
+       *
+       * Інакше користувач із легасі-дублем нікнейму (реєстрація не має
+       * unique-констрейнту) не міг би зберегти ЖОДНЕ поле профілю:
+       * PATCH приходив зі своїм же іменем і падав із 409.
+       */
+      if (nickname !== current.nickname) {
+        const existing = await this.prisma.user.findFirst({
+          where: {
+            nickname: { equals: nickname, mode: 'insensitive' },
+            NOT: { id: userId },
+          },
+          select: { id: true },
+        });
 
-      if (existing) {
-        throw new ConflictException('Nickname is already taken');
+        if (existing) {
+          /*
+           * Дубль знайдено. Якщо це лише інший регістр того самого імені —
+           * не блокуємо збереження інших полів, просто лишаємо імʼя як є.
+           */
+          if (!sameNickname(nickname, current.nickname)) {
+            throw new ConflictException('Nickname is already taken');
+          }
+        } else {
+          data.nickname = nickname;
+          changed.push('nickname');
+        }
       }
-
-      data.nickname = nickname;
-      changed.push('nickname');
     }
 
     if (dto.email !== undefined) {
       const email = normalizeEmail(dto.email);
-      const existing = await this.prisma.user.findUnique({
-        where: { email },
-        select: { id: true },
-      });
 
-      if (existing && existing.id !== userId) {
-        throw new ConflictException('Email is already in use');
+      // Той самий email не перевіряємо і не перезаписуємо.
+      if (email !== normalizeEmail(current.email)) {
+        const existing = await this.prisma.user.findUnique({
+          where: { email },
+          select: { id: true },
+        });
+
+        if (existing && existing.id !== userId) {
+          throw new ConflictException('Email is already in use');
+        }
+
+        data.email = email;
+        changed.push('email');
       }
-
-      data.email = email;
-      changed.push('email');
     }
 
+    /*
+     * Значення збігаються з тими, що вже в БД, — це не помилка:
+     * клієнт міг надіслати незмінені поля. Повертаємо поточний профіль.
+     */
     if (changed.length === 0) {
-      throw new BadRequestException('No profile fields to update');
+      return toProfileDto(current);
     }
 
     try {
