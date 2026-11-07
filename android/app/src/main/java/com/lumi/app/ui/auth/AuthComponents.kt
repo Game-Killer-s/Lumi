@@ -104,7 +104,11 @@ private val Blobs = listOf(
 val MinTouchTarget = 48.dp
 
 /**
- * Фон екрана: колір #190E38 + дві оранжеві розмиті плями #FFA26B (blur 52.1px).
+ * Фон екрана: колір #190E38 + дві оранжеві розмиті плями #FFA26B (blur 52.1px)
+ * + еквалайзер уздовж нижнього краю.
+ *
+ * Еквалайзер малюється тут, до [content], тому він завжди лежить ПІД вмістом
+ * (кнопками й текстами) і не залежить від прокрутки конкретного екрана.
  */
 @Composable
 fun AuthBackground(content: @Composable BoxScope.() -> Unit) {
@@ -138,6 +142,9 @@ fun AuthBackground(content: @Composable BoxScope.() -> Unit) {
                 )
             }
         }
+        // Фоновий шар: еквалайзер прибитий до низу екрана, вміст екранів
+        // (кнопки, поля, тексти) малюється поверх нього.
+        BottomEqualizer(Modifier.align(Alignment.BottomCenter))
         CompositionLocalProvider(
             LocalDensity provides Density(
                 density = designDensity.density,
@@ -151,7 +158,10 @@ fun AuthBackground(content: @Composable BoxScope.() -> Unit) {
 
 
 /**
- * Логотип Lumi: Montserrat 800 / 80px + «Steam Your Sound» 600 / 16px.
+ * Логотип Lumi: Montserrat 800 / 64px + «Steam Your Sound» 600 / 13px.
+ *
+ * Розмір зменшено з макетних 80/16, щоб екрани входу й реєстрації
+ * вміщалися на телефоні 360x800 без прокрутки.
  */
 @Composable
 fun AuthLogo(modifier: Modifier = Modifier) {
@@ -160,25 +170,25 @@ fun AuthLogo(modifier: Modifier = Modifier) {
             text = stringResource(R.string.app_name),
             fontFamily = Montserrat,
             color = Color.White,
-            fontSize = 80.sp,
-            lineHeight = 98.sp,
+            fontSize = 64.sp,
+            lineHeight = 78.sp,
             fontWeight = FontWeight.ExtraBold
         )
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(6.dp))
         Text(
             // Слоган бренду — один і той самий для всіх мов (translatable="false")
             text = stringResource(R.string.brand_tagline),
             fontFamily = Montserrat,
             color = Color.White,
-            fontSize = 16.sp,
-            lineHeight = 20.sp,
+            fontSize = 13.sp,
+            lineHeight = 16.sp,
             fontWeight = FontWeight.SemiBold
         )
     }
 }
 
 /**
- * Підпис над полем (Email / Пароль / Ім'я ...): Montserrat 15px, #DDE6FF.
+ * Підпис над полем (Email / Пароль / Ім'я ...): Montserrat 14px, #DDE6FF.
  */
 @Composable
 fun AuthFieldLabel(text: String, modifier: Modifier = Modifier) {
@@ -186,8 +196,8 @@ fun AuthFieldLabel(text: String, modifier: Modifier = Modifier) {
         text = text,
         fontFamily = Montserrat,
         color = AuthTextColor,
-        fontSize = 15.sp,
-        lineHeight = 14.sp,
+        fontSize = 14.sp,
+        lineHeight = 13.sp,
         fontWeight = FontWeight.SemiBold,
         modifier = modifier.fillMaxWidth()
     )
@@ -218,7 +228,13 @@ fun LumiTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     leadingIcon: (@Composable () -> Unit)? = null,
-    trailingIcon: (@Composable () -> Unit)? = null
+    trailingIcon: (@Composable () -> Unit)? = null,
+    /**
+     * Скільки рядків вміщає поле: 1 — звичайне однорядкове (форми входу),
+     * більше — багаторядкове (коментар, деталі скарги). Поле малюється
+     * рівно на [maxLines] рядків, тому висота не «стрибає» під час вводу.
+     */
+    maxLines: Int = 1
 ) {
     val labelText = label.localized()
     val placeholderText = placeholder?.localized().orEmpty()
@@ -226,11 +242,13 @@ fun LumiTextField(
 
     Column(modifier = modifier.fillMaxWidth()) {
         AuthFieldLabel(labelText, modifier = Modifier.clearAndSetSemantics { })
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(3.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                // Однорядкове поле тримає 44dp (стиснуто з макетних 50dp),
+                // багаторядкове виростає під текст — тому обмеження саме знизу.
+                .heightIn(min = 44.dp)
                 .background(AuthGradient, RoundedCornerShape(10.dp))
                 .then(
                     if (isError) {
@@ -242,8 +260,15 @@ fun LumiTextField(
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .fillMaxWidth()
+                    .heightIn(min = 44.dp)
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        // Текст у кілька рядків не має впиратись у краї поля.
+                        top = if (maxLines > 1) 8.dp else 0.dp,
+                        bottom = if (maxLines > 1) 8.dp else 0.dp
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (leadingIcon != null) {
@@ -269,7 +294,11 @@ fun LumiTextField(
                             color = AuthTextColor,
                             fontSize = 14.sp
                         ),
-                        singleLine = true,
+                        singleLine = maxLines == 1,
+                        // minLines == maxLines: багаторядкове поле не «стрибає»
+                        // у висоті, поки користувач набирає текст.
+                        minLines = maxLines,
+                        maxLines = maxLines,
                         cursorBrush = SolidColor(AuthTextColor),
                         visualTransformation = visualTransformation,
                         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -584,11 +613,15 @@ private val EqualizerBars = listOf(
 )
 
 /**
- * Висота смуги еквалайзера внизу екрана (135dp за макетом).
- * Екрани автори лишають цей простір вільним, щоб бари ніколи
- * не наповзали на кнопки та поля вводу.
+ * Висота смуги еквалайзера внизу екрана — макетні 135dp.
+ *
+ * Смуга є частиною фону ([AuthBackground]), тому вміст екранів може
+ * прокручуватись поверх неї й не потребує відступу знизу.
  */
 val BottomEqualizerHeight = 135.dp
+
+/** Висота, під яку намальовані бари в [EqualizerBars] (координати макета 917dp). */
+private val EqualizerDesignHeight = 135.dp
 
 /**
  * Еквалайзер внизу екрана: прямокутники rgba(56,37,112,0.63),
@@ -599,12 +632,15 @@ fun BottomEqualizer(modifier: Modifier = Modifier) {
     val barColor = Color(0xFF382570).copy(alpha = 0.63f)
     Canvas(modifier = modifier.fillMaxWidth().height(BottomEqualizerHeight)) {
         val scaleX = size.width / 412.dp.toPx()
+        // Бари описані в координатах макета (135dp заввишки) — стискаємо їх
+        // по вертикалі під фактичну висоту смуги, щоб вони не обрізались.
+        val scaleY = size.height / EqualizerDesignHeight.toPx()
         EqualizerBars.forEach { b ->
             drawRoundRect(
                 color = barColor,
-                topLeft = Offset((b.left).dp.toPx() * scaleX, (b.top - 782).dp.toPx()),
-                size = Size((b.w).dp.toPx() * scaleX, (b.h).dp.toPx()),
-                cornerRadius = CornerRadius(13.dp.toPx(), 13.dp.toPx())
+                topLeft = Offset((b.left).dp.toPx() * scaleX, (b.top - 782).dp.toPx() * scaleY),
+                size = Size((b.w).dp.toPx() * scaleX, (b.h).dp.toPx() * scaleY),
+                cornerRadius = CornerRadius(13.dp.toPx() * scaleY, 13.dp.toPx() * scaleY)
             )
         }
     }

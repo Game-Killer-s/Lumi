@@ -15,6 +15,8 @@
     <string name="common_or">або</string>
     <string name="common_ok">Зрозуміло</string>
     <string name="common_close">Закрити</string>
+    <string name="common_cancel">Скасувати</string>
+    <string name="common_retry">Спробувати ще раз</string>
     <string name="common_loading">Завантаження…</string>
 
     <!-- ===== Поля вводу ===== -->
@@ -165,6 +167,26 @@
     <string name="subscription_cta_refresh">Оновити стан оплати</string>
     <string name="subscription_recovered">Оплату прийнято — преміум-доступ відновлено</string>
 
+    <!-- ===== Екран «Управління підпискою» (Figma) ===== -->
+    <string name="subscription_manage_title">Управління підпискою</string>
+    <string name="subscription_active_badge">Активна</string>
+    <string name="subscription_inactive_badge">Не активна</string>
+    <string name="subscription_inactive_hint">Підписка не активна</string>
+    <string name="subscription_buy">Купити Premium</string>
+    <string name="subscription_buy_hint">Введіть дані картки для оплати</string>
+    <string name="subscription_active_until">Ваша підписка активна до %1$s</string>
+    <string name="subscription_info_section">Інформація про підписку</string>
+    <string name="subscription_plan_row">План</string>
+    <string name="subscription_plan_premium_individual">Premium Individual</string>
+    <string name="subscription_price_row">Ціна</string>
+    <string name="subscription_next_charge_row">Дата наступного списання</string>
+    <string name="subscription_payment_row">Спосіб оплати</string>
+    <string name="subscription_manage_row">Керувати підпискою</string>
+    <string name="subscription_manage_row_hint">Змінити план або скасувати підписку</string>
+    <string name="subscription_history_section">Історія транзакцій</string>
+    <string name="subscription_history_item">Підписка Premium</string>
+    <string name="subscription_cancel_note_date">Після скасування ви зможете користуватися Premium до %1$s</string>
+
     <!-- ===== Paywall (Story 2) ===== -->
     <string name="paywall_feature_hq">HQ-якість</string>
     <string name="paywall_feature_lossless">Lossless-якість</string>
@@ -216,6 +238,8 @@
     <string name="settings_section_language">Мова інтерфейсу</string>
     <string name="settings_section_theme">Тема інтерфейсу</string>
     <string name="settings_section_account">Акаунт</string>
+    <string name="settings_section_general">Загальні</string>
+    <string name="settings_section_playback">Відтворення й дані</string>
     <string name="settings_clear_cache">Очистити локальний кеш</string>
     <string name="settings_clear_cache_sub">Видалити тимчасові файли застосунку</string>
     <string name="settings_cache_cleared">Локальний кеш очищено</string>
@@ -251,4 +275,370 @@
     <string name="track_unfollow">Не стежити за виконавцем</string>
     <string name="track_following_state">Ви стежите</string>
     <string name="track_not_following_state">Ви не стежите</string>
+    <!-- ===== Плеєр: текст пісні, коментарі, скарги (ТЗ 6.3.11, 6.7.2) ===== -->
+    <string name="player_section">Відтворення</string>
+    <string name="player_open">Відкрити плеєр</string>
+    <string name="player_topbar">Плеєр</string>
+    <string name="player_loading">Завантажуємо трек…</string>
+    <string name="player_error_no_tracks">Немає доступних треків</string>
+    <string name="player_error_track">Не вдалося завантажити трек</string>
+    <string name="player_lyrics">Текст пісні</string>
+    <string name="player_menu">Інші дії з треком</string>
+    <string name="player_report_track">Поскаржитися на трек</string>
+    <string name="player_comments">Коментарі</string>
+    <string name="player_no_audio">Аудіо цього треку недоступне</string>
+    <string name="player_collapse">Згорнути плеєр</string>
+    <string name="player_like_add">Додати в улюблені</string>
+    <string name="player_like_remove">Прибрати з улюблених</string>
+    <string name="player_comment_hint">Написати коментар…</string>
+    <string name="player_lyrics_collapse">Згорнути текст</string>
+    <string name="player_lyrics_expand">Розгорнути текст</string>
+    <string name="player_shuffle">Перемішати</string>
+    <string name="player_repeat_off">Повтор вимкнено</string>
+    <string name="player_repeat_all">Повторювати чергу</string>
+    <string name="player_repeat_one">Повторювати трек</string>
+    <string name="player_empty_state">Нічого не відтворюється</string>
+
+    <!-- Текст пісні -->
+    <string name="lyrics_loading">Завантажуємо текст пісні…</string>
+    <string name="lyrics_error">Не вдалося завантажити текст пісні</string>
+    <string name="lyrics_empty">Текст цієї пісні ще не додали</string>
+    <string name="lyrics_hint">Рядок підсвічується в такт музиці</string>
+
+    <!-- Коментарі -->
+    <plurals name="comments_count">
+        <item quantity="one">%1$d коментар</item>
+        <item quantity="few">%1$d коментарі</item>
+        <item quantity="many">%1$d коментарів</item>
+        <item quantity="other">%1$d коментаря</item>
+    </plurals>
+    <string name="comments_loading">Завантажуємо коментарі…</string>
+    <string name="comments_error">Не вдалося завантажити коментарі</string>
+    <string name="comments_empty">Коментарів ще немає — напишіть перший</string>
+    <string name="comments_load_more">Показати ще</string>
+    <string name="comments_input_label">Новий коментар</string>
+    <string name="comments_input_hint">Що ви думаєте про цей трек?</string>
+    <string name="comments_send">Надіслати</string>
+    <string name="comments_added">Коментар додано</string>
+    <string name="comments_deleted">Коментар видалено</string>
+    <string name="comments_error_send">Не вдалося надіслати коментар</string>
+    <string name="comments_error_delete">Не вдалося видалити коментар</string>
+    <string name="comments_error_too_long">Максимум %1$d символів</string>
+    <string name="comments_delete">Видалити</string>
+    <string name="comments_delete_confirm_title">Видалити коментар?</string>
+    <string name="comments_delete_confirm_text">Коментар зникне з треку для всіх. Скасувати цю дію не можна.</string>
+    <string name="comments_delete_confirm_action">Видалити</string>
+    <string name="comments_report">Поскаржитися</string>
+    <string name="comments_own_label">Ваш коментар</string>
+    <string name="comments_hidden_label">Приховано модератором</string>
+    <string name="comments_author_unknown">Слухач Lumi</string>
+
+    <!-- Скарги -->
+    <string name="report_title_track">Скарга на трек</string>
+    <string name="report_title_comment">Скарга на коментар</string>
+    <string name="report_reason_label">Причина скарги</string>
+    <string name="report_details_label">Деталі (необов’язково)</string>
+    <string name="report_details_hint">Опишіть проблему — так модератор швидше розбереться</string>
+    <string name="report_details_too_long">Максимум %1$d символів</string>
+    <string name="report_submit">Надіслати скаргу</string>
+    <string name="report_sent">Дякуємо! Скаргу надіслано модератору</string>
+    <string name="report_error_send">Не вдалося надіслати скаргу</string>
+    <string name="report_error_reason_required">Оберіть причину скарги</string>
+    <string name="report_reason_copyright">Порушення авторських прав</string>
+    <string name="report_reason_quality">Погана якість звуку</string>
+    <string name="report_reason_spam">Спам або реклама</string>
+    <string name="report_reason_offensive">Образа чи мова ворожнечі</string>
+    <string name="report_reason_other">Інше</string>
+
+    <!-- Профіль -->
+    <string name="profile_title">Профіль</string>
+    <string name="profile_edit_action">Редагувати профіль</string>
+    <string name="profile_menu_statistics">Статистика прослуховування</string>
+    <string name="profile_menu_subscription">Управління підпискою</string>
+    <string name="profile_menu_support">Онлайн-чат підтримки</string>
+    <string name="profile_menu_settings">Налаштування</string>
+    <string name="profile_premium_title">Premium</string>
+    <string name="profile_premium_active">Активно</string>
+    <string name="profile_premium_inactive">Не активно</string>
+    <string name="profile_premium_caption">Керуйте підпискою в один клік</string>
+    <string name="profile_premium_next_charge">Наступне списання: %1$s</string>
+    <string name="profile_premium_free">Без підписки • базові можливості</string>
+    <string name="profile_premium_subscribe">Оформити Premium</string>
+    <string name="profile_role_listener">Слухач</string>
+    <string name="profile_role_artist">Артист</string>
+    <string name="profile_role_admin">Адміністратор</string>
+    <string name="profile_loading">Завантаження профілю…</string>
+    <string name="profile_error_title">Не вдалося завантажити профіль</string>
+    <string name="profile_error_message">Перевірте з’єднання та спробуйте ще раз.</string>
+    <string name="profile_error_session_title">Потрібен вхід</string>
+    <string name="profile_error_session_message">Сесія завершилася. Увійдіть, щоб побачити профіль.</string>
+    <string name="profile_retry">Повторити</string>
+    <string name="profile_login">Увійти</string>
+    <string name="profile_cached_notice">Показано збережені дані профілю</string>
+    <string name="profile_update_success">Профіль оновлено</string>
+    <string name="profile_update_error">Не вдалося зберегти зміни</string>
+    <string name="profile_avatar_updated">Аватар оновлено</string>
+    <string name="profile_avatar_error">Не вдалося завантажити аватар</string>
+    <string name="profile_avatar_invalid">Оберіть зображення до 5 МБ</string>
+    <string name="profile_avatar_change">Змінити фото</string>
+    <string name="profile_edit_title">Редагування профілю</string>
+    <string name="profile_edit_section">Особиста інформація</string>
+    <string name="profile_edit_name">Ім’я</string>
+    <string name="profile_edit_email">Email</string>
+    <string name="profile_edit_phone">Телефон</string>
+    <string name="profile_edit_phone_hint">+380 XX XXX XX XX</string>
+    <string name="profile_edit_phone_note">Номер зберігається лише на цьому пристрої.</string>
+    <string name="profile_edit_save">Зберегти</string>
+    <string name="profile_edit_name_required">Введіть ім’я</string>
+    <string name="profile_edit_name_too_long">Максимум 50 символів</string>
+    <string name="profile_edit_email_required">Введіть email</string>
+    <string name="profile_edit_email_invalid">Некоректний email</string>
+    <string name="profile_edit_phone_invalid">Введіть коректний номер телефону</string>
+    <string name="profile_edit_name_taken">Це ім’я вже зайняте</string>
+    <string name="profile_edit_email_taken">Цей email вже використовується</string>
+    <string name="profile_edit_conflict">Перевірте ім’я та email</string>
+    <string name="profile_edit_unchanged">Немає змін для збереження</string>
+
+    <!-- Налаштування (Figma) -->
+    <string name="settings_row_language">Мова</string>
+    <string name="settings_row_theme">Тема</string>
+    <string name="settings_row_notifications">Сповіщення</string>
+    <string name="settings_row_privacy">Дані й конфіденційність</string>
+    <string name="settings_row_sound">Параметри звуку</string>
+    <string name="settings_row_data_saver">Заощадження трафіку</string>
+    <string name="settings_row_cache">Очищення кешу</string>
+    <string name="settings_row_account">Акаунт</string>
+    <string name="settings_value_public">Публічний</string>
+    <string name="settings_value_private">Приватний</string>
+    <string name="settings_value_on">Увімкнено</string>
+    <string name="settings_value_off">Вимкнено</string>
+    <string name="settings_value_manage">Керувати</string>
+    <string name="settings_value_standard">Standard</string>
+    <string name="settings_dialog_language_title">Мова інтерфейсу</string>
+    <string name="settings_dialog_theme_title">Тема інтерфейсу</string>
+    <string name="settings_dialog_privacy_title">Дані й конфіденційність</string>
+    <string name="settings_privacy_public">Публічний профіль</string>
+    <string name="settings_privacy_public_desc">Інші слухачі можуть знайти ваш профіль</string>
+    <string name="settings_privacy_listening">Показувати, що я слухаю</string>
+    <string name="settings_privacy_listening_desc">Друзі бачать ваш поточний трек</string>
+    <string name="settings_privacy_guest">Увійдіть, щоб керувати приватністю профілю.</string>
+    <string name="settings_privacy_error">Не вдалося оновити налаштування</string>
+    <string name="settings_dialog_notifications_title">Сповіщення</string>
+    <string name="settings_notifications_label">Push-сповіщення</string>
+    <string name="settings_notifications_desc">Новинки, релізи улюблених артистів і стан підписки.</string>
+    <string name="settings_dialog_done">Готово</string>
+    <string name="settings_dialog_sound_title">Параметри звуку</string>
+    <string name="settings_sound_quality">Якість звуку</string>
+    <string name="settings_sound_quality_desc">Доступна якість залежить від вашого тарифу.</string>
+    <string name="settings_sound_hq">HQ</string>
+    <string name="settings_sound_lossless">Lossless</string>
+    <string name="settings_sound_plan_note">HQ і Lossless відкриваються з Premium.</string>
+    <string name="settings_dialog_data_saver_title">Заощадження трафіку</string>
+    <string name="settings_data_saver_label">Завантажувати лише через Wi-Fi</string>
+    <string name="settings_data_saver_desc">Обкладинки й аудіо не завантажуватимуться в мобільній мережі.</string>
+    <string name="settings_dialog_cache_title">Очистити кеш?</string>
+    <string name="settings_cache_dialog_text">Тимчасові файли застосунку буде видалено. Завантажені треки й налаштування залишаться.</string>
+    <string name="settings_dialog_account_title">Акаунт</string>
+    <string name="settings_account_signed_in">Ви увійшли як %1$s</string>
+    <string name="settings_account_guest">Гість Lumi</string>
+    <string name="settings_account_edit">Редагувати профіль</string>
+    <string name="settings_dialog_logout_title">Вийти з акаунта?</string>
+    <string name="settings_logout_dialog_text">Щоб слухати музику знову, знадобиться вхід.</string>
+    <string name="settings_dialog_close">Закрити</string>
+    <string name="settings_dialog_cancel">Скасувати</string>
+    <string name="settings_dialog_clear">Очистити</string>
+
+    <!-- Плеєр: стан відтворення та режими -->
+    <string name="player_status_idle">Зупинено</string>
+    <string name="player_status_buffering">Буферизація…</string>
+    <string name="player_status_playing">Відтворюється</string>
+    <string name="player_status_paused">Пауза</string>
+    <string name="player_status_ended">Завершено</string>
+    <string name="player_repeat_state_off">Повтор: вимкнено</string>
+    <string name="player_repeat_state_all">Повтор: усі треки</string>
+    <string name="player_repeat_state_one">Повтор: один трек</string>
+    <string name="player_shuffle_state_on">Перемішування: увімкнено</string>
+    <string name="player_shuffle_state_off">Перемішування: вимкнено</string>
+    <string name="player_mode_summary">%1$s · %2$s</string>
+    <string name="player_progress_description">Прогрес відтворення</string>
+
+    <!-- Головна -->
+    <string name="home_load_error">Не вдалося завантажити</string>
+    <string name="home_section_popular">Популярно зараз</string>
+    <string name="home_section_new_releases">Свіжі релізи</string>
+    <string name="home_section_mixes">Твої найкращі мікси</string>
+    <string name="home_section_recent">Нещодавно відтворене</string>
+    <string-array name="home_genres">
+        <item>Поп</item>
+        <item>Рок</item>
+        <item>Електронна</item>
+        <item>Реп</item>
+        <item>Джаз</item>
+        <item>Інді</item>
+        <item>Ambient</item>
+    </string-array>
+
+    <!-- Пошук -->
+    <string name="search_placeholder">Трек, виконавець або альбом</string>
+    <string name="search_title">Пошукаємо музику</string>
+    <string name="search_hint">Введіть назву треку, виконавця або альбому</string>
+    <string name="search_empty">Нічого не знайдено</string>
+    <string name="search_section_artists">Виконавці</string>
+    <string name="search_section_albums">Альбоми</string>
+    <string name="search_section_tracks">Треки</string>
+    <plurals name="listeners_per_month">
+        <item quantity="one">%1$d слухач на місяць</item>
+        <item quantity="few">%1$d слухачі на місяць</item>
+        <item quantity="many">%1$d слухачів на місяць</item>
+        <item quantity="other">%1$d слухача на місяць</item>
+    </plurals>
+
+    <!-- Медіатека -->
+    <string name="library_title">Бібліотека</string>
+    <string name="library_playlists_title">Ваші плейлисти</string>
+    <string name="library_create">Створити</string>
+    <string name="library_empty_playlists">Створіть перший плейлист</string>
+    <string name="library_liked_empty">Улюблених треків поки немає</string>
+    <string name="library_liked_tracks">Улюблені треки</string>
+    <string name="library_history_empty">Історія прослуховування порожня</string>
+    <string name="library_albums_empty">Альбомів поки немає</string>
+    <string name="library_tab_all">Всі</string>
+    <string name="library_tab_playlists">Плейлисти</string>
+    <string name="library_tab_liked">Улюблені</string>
+    <string name="library_tab_tracks">Треки</string>
+    <string name="library_tab_albums">Альбоми</string>
+    <string name="library_my_playlists">Мої плейлисти</string>
+    <string name="library_liked_playlists">Улюблені плейлисти</string>
+    <string name="library_liked_artists">Улюблені виконавці</string>
+    <string name="library_album_label">%1$s • Альбом</string>
+    <string name="library_album_type">Альбом</string>
+    <string name="library_add_playlist">Створити плейлист</string>
+    <string name="library_tab_history">Історія</string>
+    <string name="library_album_subtitle">%1$s · %2$s</string>
+    <string name="library_playlist_subtitle">%1$s · %2$s</string>
+    <string name="library_new_playlist">Новий плейлист</string>
+    <string name="library_name">Назва</string>
+    <string name="library_description">Опис</string>
+    <string name="library_tab_artists">Виконавці</string>
+    <string name="library_artists_empty">Ви ще не підписані на жодного виконавця</string>
+    <string name="library_delete">Видалити</string>
+    <string name="library_rename">Перейменувати</string>
+    <string name="library_more_actions">Дії з плейлистом</string>
+    <string name="library_save">Зберегти</string>
+    <string name="library_rename_playlist">Перейменувати плейлист</string>
+    <string name="library_delete_playlist_title">Видалити плейлист?</string>
+    <string name="library_delete_playlist_message">«%1$s» буде видалено назавжди. Треки залишаться в бібліотеці.</string>
+    <string name="library_title_required">Введіть назву плейлиста</string>
+    <string name="library_title_too_long">Назва має містити не більше %1$d символів</string>
+    <string name="library_description_too_long">Опис має містити не більше %1$d символів</string>
+    <string name="library_unfollow">Відписатися</string>
+    <string name="library_history_title">Історія прослуховувань</string>
+    <string name="history_clear">Очистити історію</string>
+    <string name="history_clear_confirm_title">Очистити історію?</string>
+    <string name="history_clear_confirm_message">Усі записи прослуховувань буде видалено. Цю дію не можна скасувати.</string>
+    <string name="history_clear_action">Очистити</string>
+    <string name="history_today">Сьогодні</string>
+    <string name="history_yesterday">Вчора</string>
+    <string name="history_earlier">Раніше</string>
+    <string name="playlist_not_found">Плейлист не знайдено</string>
+
+    <plurals name="playlists_count">
+        <item quantity="one">%1$d плейлист</item>
+        <item quantity="few">%1$d плейлисти</item>
+        <item quantity="many">%1$d плейлистів</item>
+        <item quantity="other">%1$d плейлиста</item>
+    </plurals>
+
+    <plurals name="artists_count">
+        <item quantity="one">%1$d виконавець</item>
+        <item quantity="few">%1$d виконавці</item>
+        <item quantity="many">%1$d виконавців</item>
+        <item quantity="other">%1$d виконавця</item>
+    </plurals>
+
+    <plurals name="tracks_count">
+        <item quantity="one">%1$d трек</item>
+        <item quantity="few">%1$d треки</item>
+        <item quantity="many">%1$d треків</item>
+        <item quantity="other">%1$d треку</item>
+    </plurals>
+
+    <!-- Альбоми, плейлисти, виконавці, жанри -->
+    <string name="play_all">Відтворити все</string>
+    <string name="album_empty_tracks">У цьому альбомі ще немає треків</string>
+    <string name="playlist_empty_tracks">У цьому плейлисті ще немає треків</string>
+    <string name="artist_following">Ви підписані</string>
+    <string name="artist_follow">Підписатися</string>
+    <string name="artist_top_tracks">Топ треки</string>
+    <string name="artist_releases">Релізи</string>
+    <string name="genre_empty">У цьому жанрі поки немає треків</string>
+
+    <!-- Меню треку -->
+    <string name="common_done">Готово</string>
+    <string name="track_more_actions">Ще</string>
+    <string name="track_menu_add_to_playlist">Додати до плейлиста</string>
+    <string name="track_menu_add_to_queue">Додати в чергу</string>
+    <string name="track_menu_remove_from_playlist">Прибрати з плейлиста</string>
+    <string name="track_menu_share">Поділитися</string>
+    <string name="track_menu_go_artist">Перейти до виконавця</string>
+    <string name="track_menu_go_album">Перейти до альбому</string>
+    <string name="track_menu_remove_from_library">Видалити з бібліотеки</string>
+    <string name="track_menu_added_to_playlist">Додано до плейлиста</string>
+    <string name="track_menu_album_not_found">Альбом не знайдено</string>
+    <string name="track_menu_report">Поскаржитися</string>
+    <string name="track_download">Завантажити</string>
+    <string name="track_download_remove">Видалити завантаження</string>
+    <string name="track_downloading">Завантаження…</string>
+    <string name="playlist_picker_empty">У вас ще немає плейлистів</string>
+    <string name="report_reason_explicit">Неприйнятний контент</string>
+    <string name="report_reason_metadata">Некоректні дані про трек</string>
+
+    <!-- Статистика -->
+    <string name="stats_title">Статистика</string>
+    <string name="stats_period_week">Тиждень</string>
+    <string name="stats_period_month">Місяць</string>
+    <string name="stats_period_all">Весь час</string>
+    <string name="stats_tracks_played">Прослухано треків</string>
+    <string name="stats_listening_time">Час прослуховування</string>
+    <string name="stats_playlists">Плейлистів</string>
+    <string name="stats_top_genre">Топ жанр</string>
+    <string name="stats_top_artist">Топ виконавець</string>
+    <string name="stats_activity">Активність</string>
+    <string name="stats_top_tracks">Топ треки</string>
+    <string name="stats_top_artists">Топ виконавці</string>
+    <string name="stats_top_genres">Топ жанри</string>
+    <string name="stats_top_tracks_empty">Поки немає топ-треків за цей період</string>
+    <string name="stats_top_artists_empty">Поки немає топ-виконавців за цей період</string>
+    <string name="stats_top_genres_empty">Поки немає топ-жанрів за цей період</string>
+    <string name="stats_error">Не вдалося завантажити статистику</string>
+    <string name="stats_retry">Спробувати знову</string>
+    <string name="stats_refresh">Оновити</string>
+    <string name="stats_refresh_failed">Не вдалося оновити: %1$s</string>
+    <string name="stats_empty">За цей період ви ще нічого не слухали. Увімкніть трек — і тут з\'явиться ваша статистика.</string>
+    <string name="stats_chart_description">Графік активності: %1$d точок, максимум %2$s</string>
+    <string name="stats_less_than_minute">менше 1 хв</string>
+    <string name="stats_time_minutes">%1$s хв</string>
+    <string name="stats_time_hours">%1$s год</string>
+    <string name="stats_time_hours_minutes">%1$s %2$s</string>
+    <string name="stats_count_millions">%1$s млн</string>
+    <plurals name="stats_plays">
+        <item quantity="one">%1$s прослуховування</item>
+        <item quantity="few">%1$s прослуховування</item>
+        <item quantity="many">%1$s прослуховувань</item>
+        <item quantity="other">%1$s прослуховування</item>
+    </plurals>
+
+    <!-- Онлайн-чат підтримки -->
+    <string name="support_chat_title">Онлайн-чат підтримки</string>
+    <string name="support_chat_greeting">Привіт! Чим можемо допомогти?</string>
+    <string name="support_chat_ack">Дякуємо! Ваше питання передано фахівцю.</string>
+    <string name="support_chat_input_hint">Напишіть повідомлення…</string>
+    <string name="common_send">Надіслати</string>
+
+    <!-- Оформлення підписки -->
+    <string name="subscription_success_title">Підписку оформлено!</string>
+    <string name="subscription_success_body">Тепер у вас є доступ до всіх преміум можливостей.</string>
+    <string name="subscription_success_done">Перейти в застосунок</string>
+    <string name="subscription_mock_amount">250 ₴</string>
+    <string name="subscription_active_until_value">3 серпня 2026</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.lumi.app.player
 
+import com.lumi.app.data.model.Track
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -14,15 +15,6 @@ class PlaybackLogicTest {
         assertEquals(PlayerRepeatMode.ALL, PlayerRepeatMode.OFF.next())
         assertEquals(PlayerRepeatMode.ONE, PlayerRepeatMode.ALL.next())
         assertEquals(PlayerRepeatMode.OFF, PlayerRepeatMode.ONE.next())
-    }
-
-    @Test
-    fun `mode labels reflect the active mode`() {
-        assertEquals("Повтор: вимкнено", PlaybackLogic.repeatLabel(PlayerRepeatMode.OFF))
-        assertEquals("Повтор: усі треки", PlaybackLogic.repeatLabel(PlayerRepeatMode.ALL))
-        assertEquals("Повтор: один трек", PlaybackLogic.repeatLabel(PlayerRepeatMode.ONE))
-        assertEquals("Перемішування: увімкнено", PlaybackLogic.shuffleLabel(true))
-        assertEquals("Перемішування: вимкнено", PlaybackLogic.shuffleLabel(false))
     }
 
     // ---------- стан відтворення ----------
@@ -48,13 +40,6 @@ class PlaybackLogicTest {
     fun `status ended and idle player with media`() {
         assertEquals(PlaybackStatus.ENDED, PlaybackLogic.resolveStatus(4, false, false, true))
         assertEquals(PlaybackStatus.IDLE, PlaybackLogic.resolveStatus(1, false, false, true))
-    }
-
-    @Test
-    fun `status labels`() {
-        assertEquals("Відтворюється", PlaybackLogic.statusLabel(PlaybackStatus.PLAYING))
-        assertEquals("Пауза", PlaybackLogic.statusLabel(PlaybackStatus.PAUSED))
-        assertEquals("Буферизація…", PlaybackLogic.statusLabel(PlaybackStatus.BUFFERING))
     }
 
     // ---------- тривалість / позиція ----------
@@ -161,4 +146,36 @@ class PlaybackLogicTest {
         val result = PlaybackLogic.bufferAfterSeek(10_000, 60_000, 500_000, 100_000)
         assertEquals(100_000L, result)
     }
+
+    // ---------- відновлення черги ----------
+
+    @Test
+    fun `same queue at detects an identical queue and index`() {
+        val queue = listOf(track("a"), track("b"), track("c"))
+
+        assertTrue(PlaybackLogic.isSameQueueAt(queue, 1, queue, 1))
+        assertFalse(PlaybackLogic.isSameQueueAt(queue, 1, queue, 2))
+        assertFalse(
+            PlaybackLogic.isSameQueueAt(
+                queue,
+                1,
+                listOf(track("a"), track("c"), track("b")),
+                1
+            )
+        )
+    }
+
+    @Test
+    fun `same queue at rejects queues of different size`() {
+        assertFalse(
+            PlaybackLogic.isSameQueueAt(
+                currentQueue = listOf(track("a")),
+                currentIndex = 0,
+                targetQueue = listOf(track("a"), track("b")),
+                targetIndex = 0
+            )
+        )
+    }
+
+    private fun track(id: String) = Track(id = id, title = "Track $id", artist = null)
 }

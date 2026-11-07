@@ -48,8 +48,6 @@ import com.lumi.app.ui.auth.AuthLogo
 import com.lumi.app.ui.auth.AuthMutedLinkColor
 import com.lumi.app.ui.auth.AuthTextColor
 import com.lumi.app.ui.auth.AuthViewModel
-import com.lumi.app.ui.auth.BottomEqualizer
-import com.lumi.app.ui.auth.BottomEqualizerHeight
 import com.lumi.app.ui.auth.GoogleAuthButton
 import com.lumi.app.ui.auth.LumiTextField
 import com.lumi.app.ui.auth.MinTouchTarget
@@ -106,21 +104,20 @@ fun LoginScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    // Лишаємо місце під еквалайзер: бари більше не наповзають
-                    // на кнопки навіть на коротших екранах.
-                    .padding(bottom = BottomEqualizerHeight)
+                    // Еквалайзер — фоновий шар (див. AuthBackground), тому
+                    // вміст може прокручуватись поверх нього без відступу.
                     .verticalScroll(rememberScrollState())
                     .imePadding()
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Відступ зверху = 141px (з CSS)
-                Spacer(Modifier.height(141.dp))
+                // Відступ зверху = 120dp (стиснуто з макетних 141dp,
+                // щоб екран вміщався на 360x800 без прокрутки)
+                Spacer(Modifier.height(120.dp))
 
                 AuthLogo()
 
-                // 284 - (141 + 119) = 24
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(20.dp))
 
                 LumiTextField(
                     value = state.email,
@@ -132,8 +129,8 @@ fun LoginScreen(
                     keyboardType = KeyboardType.Email
                 )
 
-                // 383 - (305 + 50 + 6) = 22
-                Spacer(Modifier.height(22.dp))
+                // 14dp між полями (стиснуто з макетних 22dp)
+                Spacer(Modifier.height(14.dp))
 
                 LumiTextField(
                     value = state.password,
@@ -171,7 +168,6 @@ fun LoginScreen(
                 )
 
                 // «Забули пароль?» — праворуч, під полем пароля
-                Spacer(Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -191,8 +187,8 @@ fun LoginScreen(
                     )
                 }
 
-                // 502 - (404 + 50 + 4 + 11 + 8) = 25
-                Spacer(Modifier.height(17.dp))
+                // 12dp до кнопки (стиснуто з макетних 17dp)
+                Spacer(Modifier.height(12.dp))
 
                 PrimaryAuthButton(
                     text = uiText(R.string.login_submit),
@@ -202,9 +198,7 @@ fun LoginScreen(
                     height = 50.dp
                 )
 
-                // «Ще немає акаунту? Зареєструватися» (top 568)
-                // 8dp замість 16dp — компенсація збільшеної зони дотику посилання
-                Spacer(Modifier.height(8.dp))
+                // «Ще немає акаунту? Зареєструватися»
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -232,21 +226,19 @@ fun LoginScreen(
                     )
                 }
 
-                // розділювач «або» (top 607)
-                Spacer(Modifier.height(18.dp))
+                // розділювач «або»
+                Spacer(Modifier.height(12.dp))
                 OrDivider()
 
-                // кнопка Google (top 646)
-                Spacer(Modifier.height(25.dp))
+                // кнопка Google
+                Spacer(Modifier.height(16.dp))
                 GoogleAuthButton(
                     text = uiText(R.string.login_google),
                     onClick = { launchGoogle() }
                 )
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(8.dp))
             }
-
-            BottomEqualizer(Modifier.align(Alignment.BottomCenter))
 
             SnackbarHost(
                 hostState = snackbarHostState,

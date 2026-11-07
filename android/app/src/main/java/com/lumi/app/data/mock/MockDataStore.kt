@@ -213,9 +213,21 @@ object MockDataStore {
         return currentUser
     }
 
-    fun updateProfile(username: String?, avatarUrl: String?): UserProfile {
-        currentUser = currentUser.copy(nickname = username?.trim().takeUnless { it.isNullOrEmpty() } ?: currentUser.nickname, avatarUrl = avatarUrl ?: currentUser.avatarUrl)
+    fun updateProfile(username: String?, email: String? = null, avatarUrl: String? = null): UserProfile {
+        currentUser = currentUser.copy(
+            nickname = username?.trim().takeUnless { it.isNullOrEmpty() } ?: currentUser.nickname,
+            email = email?.trim().takeUnless { it.isNullOrEmpty() } ?: currentUser.email,
+            avatarUrl = avatarUrl ?: currentUser.avatarUrl
+        )
         playlists.replaceAll { it.copy(owner = currentUser, ownerName = currentUser.username) }
+        return currentUser
+    }
+
+    fun updatePrivacy(isPublic: Boolean? = null, showCurrentListening: Boolean? = null): UserProfile {
+        currentUser = currentUser.copy(
+            isPublic = isPublic ?: currentUser.isPublic,
+            showCurrentListening = showCurrentListening ?: currentUser.showCurrentListening
+        )
         return currentUser
     }
 

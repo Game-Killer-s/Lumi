@@ -99,22 +99,18 @@ object PlaybackLogic {
     fun shouldRestartTrackOnPrevious(positionMs: Long): Boolean =
         positionMs > PREVIOUS_RESTART_THRESHOLD_MS
 
-    fun statusLabel(status: PlaybackStatus): String = when (status) {
-        PlaybackStatus.IDLE -> "Зупинено"
-        PlaybackStatus.BUFFERING -> "Буферизація…"
-        PlaybackStatus.PLAYING -> "Відтворюється"
-        PlaybackStatus.PAUSED -> "Пауза"
-        PlaybackStatus.ENDED -> "Завершено"
-    }
-
-    fun repeatLabel(mode: PlayerRepeatMode): String = when (mode) {
-        PlayerRepeatMode.OFF -> "Повтор: вимкнено"
-        PlayerRepeatMode.ALL -> "Повтор: усі треки"
-        PlayerRepeatMode.ONE -> "Повтор: один трек"
-    }
-
-    fun shuffleLabel(enabled: Boolean): String =
-        if (enabled) "Перемішування: увімкнено" else "Перемішування: вимкнено"
+    /**
+     * Чи це та сама черга й той самий трек, що вже завантажені в плеєр.
+     * Тоді замість перезапуску з нуля продовжуємо збережену позицію.
+     */
+    fun isSameQueueAt(
+        currentQueue: List<Track>,
+        currentIndex: Int,
+        targetQueue: List<Track>,
+        targetIndex: Int
+    ): Boolean = currentIndex == targetIndex &&
+        currentQueue.size == targetQueue.size &&
+        currentQueue.map { it.id } == targetQueue.map { it.id }
 }
 
 /** Знімок черги й позиції, що зберігається між запусками застосунку. */

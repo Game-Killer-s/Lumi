@@ -9,6 +9,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
 import com.lumi.app.data.model.Track
+import com.lumi.app.data.repository.HistoryRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -72,6 +73,10 @@ object PlayerController {
     private var connecting = false
     private var store: PlaybackSnapshotStore? = null
     private val pendingActions = ArrayDeque<() -> Unit>()
+    private val historyRepository = HistoryRepository()
+
+    /** Останній трек, записаний в історію, щоб повторні події плеєра не дублювали рядок. */
+    private var lastRecordedTrackId: String? = null
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var progressJob: Job? = null
@@ -111,6 +116,13 @@ object PlayerController {
                     _state.update { it.copy(positionMs = 0L, bufferedPositionMs = 0L) }
                 }
                 syncFromController(c)
+                if (events.containsAny(
+                        Player.EVENT_IS_PLAYING_CHANGED,
+                        Player.EVENT_MEDIA_ITEM_TRANSITION
+                    )
+                ) {
+                    recordHistoryIfPlaying(c)
+                }
                 if (events.containsAny(
                         Player.EVENT_IS_PLAYING_CHANGED,
                         Player.EVENT_MEDIA_ITEM_TRANSITION,
@@ -169,6 +181,15 @@ object PlayerController {
                 hasPrevious = c.hasPreviousMediaItem()
             )
         }
+    }
+
+    /** Пишемо трек в історію лише коли він реально почав відтворюватися. */
+    private fun recordHistoryIfPlaying(c: MediaController) {
+        if (!c.isPlaying && !c.playWhenReady) return
+        val track = _state.value.currentTrack ?: return
+        if (track.id == lastRecordedTrackId) return
+        lastRecordedTrackId = track.id
+        historyRepository.record(track)
     }
 
     /** Поки є завантажений медіаконтент, опитуємо позицію/буфер (частіше під час відтворення). */
@@ -255,6 +276,22 @@ object PlayerController {
     // ------------------------------------------------------------------
 
     /**
+     * Запускає трек зі списку. Якщо це вже поточна черга й пауза — просто
+     * продовжує збережену позицію (пункт ТЗ «продовжити з місця зупинки»).
+     */
+    fun playQueueOrResume(tracks: List<Track>, startIndex: Int = 0) {
+        val deduped = QueueBuilder.dedupeById(tracks)
+        if (deduped.isEmpty()) return
+        val clampedStart = startIndex.coerceIn(0, deduped.lastIndex)
+        val s = _state.value
+        if (PlaybackLogic.isSameQueueAt(s.queue, s.currentIndex, deduped, clampedStart)) {
+            if (!s.isPlaying) togglePlayPause()
+            return
+        }
+        playQueue(deduped, clampedStart)
+    }
+
+    /**
      * Plays [tracks] starting at [startIndex]. Tracks are de-duplicated
      * by id first so a queue built from e.g. a playlist that references
      * the same track twice never plays/repeats it back to back.
@@ -266,6 +303,7 @@ object PlayerController {
         if (deduped.isEmpty()) return
         val clampedStart = startIndex.coerceIn(0, deduped.lastIndex)
         val startTrack = deduped[clampedStart]
+        lastRecordedTrackId = null
 
         _state.update {
             it.copy(
@@ -299,6 +337,14 @@ object PlayerController {
         val shuffled = QueueBuilder.shuffledQueue(tracks)
         if (shuffled.isEmpty()) return
         playQueue(shuffled, startIndex = 0, shuffle = true)
+    }
+
+    /** Додає трек у кінець поточної черги (пункт контекстного меню). */
+    fun addToQueue(track: Track) {
+        if (_state.value.queue.any { it.id == track.id }) return
+        _state.update { it.copy(queue = it.queue + track) }
+        runWhenConnected { c -> c.addMediaItem(DownloadManagerHolder.mediaItemFor(track)) }
+        persist()
     }
 
     private fun runWhenConnected(block: (MediaController) -> Unit) {

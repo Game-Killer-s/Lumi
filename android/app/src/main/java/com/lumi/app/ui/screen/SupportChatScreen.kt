@@ -7,21 +7,30 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.lumi.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SupportChatScreen(onBack: () -> Unit) {
     var message by remember { mutableStateOf("") }
-    val messages = remember { mutableStateOf(listOf("Привіт! Чим можемо допомогти?", "Дякуємо! Ваше питання передано фахівцю.")) }
+    val greeting = stringResource(R.string.support_chat_greeting)
+    val acknowledgement = stringResource(R.string.support_chat_ack)
+    val messages = remember(greeting, acknowledgement) {
+        mutableStateOf(listOf(greeting, acknowledgement))
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Онлайн-чат підтримки") },
+                title = { Text(stringResource(R.string.support_chat_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 }
             )
@@ -40,7 +49,7 @@ fun SupportChatScreen(onBack: () -> Unit) {
                     value = message,
                     onValueChange = { message = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Напишіть повідомлення...") }
+                    placeholder = { Text(stringResource(R.string.support_chat_input_hint)) }
                 )
                 Button(onClick = {
                     if (message.isNotBlank()) {
@@ -48,7 +57,7 @@ fun SupportChatScreen(onBack: () -> Unit) {
                         message = ""
                     }
                 }) {
-                    Text("Надіслати")
+                    Text(stringResource(R.string.common_send))
                 }
             }
         }

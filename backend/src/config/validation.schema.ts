@@ -41,4 +41,12 @@ export const validationSchema = Joi.object({
     .default('card'),
 
   PAYMENT_WEBHOOK_SECRET: Joi.string().min(8).default('lumi-webhook-secret'),
+
+  // Presence "слухає зараз".
+  CURRENT_LISTENING_TTL_SECONDS: Joi.number().integer().min(60).default(1800),
+  PRESENCE_RATE_LIMIT_MAX: Joi.number().integer().min(1).default(30),
+  PRESENCE_RATE_LIMIT_WINDOW_MS: Joi.number()
+    .integer()
+    .min(1000)
+    .default(60000),
 });

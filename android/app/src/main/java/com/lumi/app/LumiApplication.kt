@@ -1,8 +1,11 @@
 package com.lumi.app
 
 import android.app.Application
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.map.Mapper
 import com.lumi.app.ui.i18n.AppSettingsStore
-import com.lumi.app.network.TokenManager
+import com.lumi.app.network.ApiConstants
 import com.lumi.app.player.DownloadManagerHolder
 import com.lumi.app.player.PlayerController
 
@@ -10,7 +13,7 @@ import com.lumi.app.player.PlayerController
  * Lumi Application class.
  * Initializes app-wide dependencies and configurations.
  */
-class LumiApplication : Application() {
+class LumiApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
@@ -21,13 +24,25 @@ class LumiApplication : Application() {
         DownloadManagerHolder.init(this)
         PlayerController.init(this)
 
-        // TODO(auth): no login screen is wired up yet (see backlog decision
-        // to ship Home/Playlist/Album/Artist first with a mock session).
-        // Replace with a real AuthRepository.login() flow + persisted tokens
-        // (TokenManager currently only holds tokens in memory) before shipping.
-        if (!TokenManager.isLoggedIn()) {
-            TokenManager.saveTokens(access = "mock-access-token", refresh = "mock-refresh-token")
-        }
+        // Токени відновлює TokenManager.init() під час старту UI (LumiApp),
+        // щойно стає доступним Context. Фейкову сесію тут не створюємо:
+        // інакше екран профілю вважав би користувача залогіненим без токена.
+    }
+
+    /**
+     * Coil має вміти вантажити обкладинки за відносними шляхами з БД
+     * ("/media/cover/..."), тому всі String-моделі проходимо через
+     * [ApiConstants.mediaUrl].
+     */
+    override fun newImageLoader(): ImageLoader =
+        ImageLoader.Builder(this)
+            .components { add(MediaUrlMapper()) }
+            .crossfade(true)
+            .build()
+
+    private class MediaUrlMapper : Mapper<String, String> {
+        override fun map(data: String, options: coil.request.Options): String =
+            ApiConstants.mediaUrl(data) ?: data
     }
 
     companion object {

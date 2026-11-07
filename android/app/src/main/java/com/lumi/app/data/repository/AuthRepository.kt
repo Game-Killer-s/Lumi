@@ -1,5 +1,6 @@
 package com.lumi.app.data.repository
 
+import com.lumi.app.data.local.LibraryLocalStore
 import com.lumi.app.data.model.*
 import com.lumi.app.network.*
 
@@ -48,6 +49,9 @@ class AuthRepository {
      */
     suspend fun saveSession(authResponse: AuthResponse, rememberMe: Boolean = true) {
         TokenManager.saveSession(authResponse, rememberMe)
+        // Локальна медіатека має перемкнутися на щойно авторизованого користувача
+        // ще до першого відкриття «Бібліотеки».
+        LibraryLocalStore.activateForCurrentUser()
 
         // Після входу одразу знаємо, що дозволено тарифом користувача (ТЗ 4.2).
         refreshEntitlement()

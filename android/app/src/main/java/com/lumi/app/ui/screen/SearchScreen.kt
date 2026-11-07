@@ -31,12 +31,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.lumi.app.R
 import com.lumi.app.data.mock.MockDataStore
 import com.lumi.app.data.model.Album
 import com.lumi.app.data.model.Artist
@@ -57,7 +59,6 @@ fun SearchScreen(
     var tracks by remember { mutableStateOf<List<Track>>(emptyList()) }
     var artists by remember { mutableStateOf<List<Artist>>(emptyList()) }
     var albums by remember { mutableStateOf<List<Album>>(emptyList()) }
-    val scope = rememberCoroutineScope()
     val likeController = remember { TrackLikeController() }
     var menuTrack by remember { mutableStateOf<Track?>(null) }
     val sheetState = rememberModalBottomSheetState()
@@ -80,10 +81,10 @@ fun SearchScreen(
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                placeholder = { Text("Трек, виконавець або альбом") },
+                placeholder = { Text(stringResource(R.string.search_placeholder)) },
                 shape = RoundedCornerShape(18.dp)
             )
-            IconButton(onClick = onOpenProfile) { Icon(Icons.Filled.Person, contentDescription = "Профіль") }
+            IconButton(onClick = onOpenProfile) { Icon(Icons.Filled.Person, contentDescription = stringResource(R.string.nav_profile)) }
         }
 
         if (query.isBlank()) {
@@ -91,8 +92,8 @@ fun SearchScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(56.dp))
                     Spacer(Modifier.size(12.dp))
-                    Text("Пошукаємо музику", style = MaterialTheme.typography.titleLarge)
-                    Text("Введіть назву треку, виконавця або альбому", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.search_title), style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.search_hint), style = MaterialTheme.typography.bodyMedium)
                 }
             }
             return
@@ -100,14 +101,14 @@ fun SearchScreen(
 
         if (tracks.isEmpty() && artists.isEmpty() && albums.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Нічого не знайдено")
+                Text(stringResource(R.string.search_empty))
             }
             return
         }
 
         LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
             if (artists.isNotEmpty()) {
-                item { SearchSectionTitle("Виконавці") }
+                item { SearchSectionTitle(stringResource(R.string.search_section_artists)) }
                 items(artists) { artist ->
                     Row(
                         Modifier.fillMaxWidth().clickable { onOpenArtist(artist.id) }.padding(horizontal = 16.dp, vertical = 9.dp),
@@ -117,14 +118,21 @@ fun SearchScreen(
                         Spacer(Modifier.size(12.dp))
                         Column(Modifier.weight(1f)) {
                             Text(artist.name, style = MaterialTheme.typography.titleMedium)
-                            Text("${artist.monthlyListeners} слухачів на місяць", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                pluralStringResource(
+                                    R.plurals.listeners_per_month,
+                                    artist.monthlyListeners,
+                                    artist.monthlyListeners
+                                ),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                         Icon(Icons.Filled.Person, contentDescription = null)
                     }
                 }
             }
             if (albums.isNotEmpty()) {
-                item { SearchSectionTitle("Альбоми") }
+                item { SearchSectionTitle(stringResource(R.string.search_section_albums)) }
                 items(albums) { album ->
                     Row(
                         Modifier.fillMaxWidth().clickable { onOpenAlbum(album.id) }.padding(horizontal = 16.dp, vertical = 9.dp),
@@ -141,12 +149,12 @@ fun SearchScreen(
                 }
             }
             if (tracks.isNotEmpty()) {
-                item { SearchSectionTitle("Треки") }
+                item { SearchSectionTitle(stringResource(R.string.search_section_tracks)) }
                 items(tracks, key = { it.id }) { track ->
                     TrackRow(
                         track = track,
                         onClick = { com.lumi.app.player.PlayerController.playQueue(tracks, tracks.indexOf(track)) },
-                        onToggleLike = { likeController.toggle(track, scope) },
+                        onToggleLike = { likeController.toggle(track) },
                         onOpenMenu = { menuTrack = track }
                     )
                 }

@@ -10,6 +10,7 @@ import { Request } from 'express';
 
 import { PrismaService } from '../../../prisma/prisma.service';
 
+import { IS_OPTIONAL_AUTH_KEY } from '../decorators/optional-auth.decorator';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { TokenService } from '../services/token.service';
 
@@ -33,15 +34,35 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     }
 
+    const isOptionalAuth = this.reflector.getAllAndOverride<boolean>(
+      IS_OPTIONAL_AUTH_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     const token = this.extractBearerToken(request);
 
     if (!token) {
+      if (isOptionalAuth) {
+        return true;
+      }
+
       throw new UnauthorizedException('Bearer token is required');
     }
 
-    const payload = await this.tokenService.verifyAccessToken(token);
+    let payload: Awaited<ReturnType<TokenService['verifyAccessToken']>>;
+
+    try {
+      payload = await this.tokenService.verifyAccessToken(token);
+    } catch (error) {
+      // Для public endpoint невалідний токен означає анонімний запит.
+      if (isOptionalAuth && error instanceof UnauthorizedException) {
+        return true;
+      }
+
+      throw error;
+    }
 
     const session = await this.prisma.client.authSession.findUnique({
       where: {
@@ -65,9 +86,25 @@ export class JwtAuthGuard implements CanActivate {
       !session ||
       session.userId !== payload.sub ||
       session.revokedAt ||
-      session.expiresAt <= new Date() ||
-      session.user.isBlocked
+      session.expiresAt <= new Date()
     ) {
+      if (isOptionalAuth) {
+        return true;
+      }
+
+      throw new UnauthorizedException('Session is invalid or revoked');
+    }
+
+    if (session.user.isBlocked) {
+      // Бан має одразу прибирати presence, навіть якщо сесію ще не відкликали.
+      await this.prisma.currentListening.deleteMany({
+        where: { userId: payload.sub },
+      });
+
+      if (isOptionalAuth) {
+        return true;
+      }
+
       throw new UnauthorizedException('Session is invalid or revoked');
     }
 

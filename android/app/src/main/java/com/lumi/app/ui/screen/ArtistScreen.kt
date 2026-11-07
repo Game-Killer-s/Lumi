@@ -26,17 +26,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
+import com.lumi.app.R
 import com.lumi.app.data.model.Track
 import com.lumi.app.player.PlayerController
 import com.lumi.app.state.TrackLikeController
@@ -55,7 +57,6 @@ fun ArtistScreen(artistId: String, onOpenArtist: (String) -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     var menuTrack by remember { mutableStateOf<Track?>(null) }
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
     val likeController = remember { TrackLikeController() }
 
     when (val state = uiState) {
@@ -73,15 +74,23 @@ fun ArtistScreen(artistId: String, onOpenArtist: (String) -> Unit) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(state.artist.name, style = MaterialTheme.typography.headlineMedium)
                             Text(
-                                text = "${state.artist.monthlyListeners} слухачів на місяць",
+                                text = pluralStringResource(
+                                    R.plurals.listeners_per_month,
+                                    state.artist.monthlyListeners,
+                                    state.artist.monthlyListeners
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             if (state.isFollowed) {
-                                OutlinedButton(onClick = { viewModel.toggleFollow() }) { Text("Ви підписані") }
+                                OutlinedButton(onClick = { viewModel.toggleFollow() }) {
+                                    Text(stringResource(R.string.artist_following))
+                                }
                             } else {
-                                Button(onClick = { viewModel.toggleFollow() }) { Text("Підписатися") }
+                                Button(onClick = { viewModel.toggleFollow() }) {
+                                    Text(stringResource(R.string.artist_follow))
+                                }
                             }
                         }
                     }
@@ -89,7 +98,7 @@ fun ArtistScreen(artistId: String, onOpenArtist: (String) -> Unit) {
                 if (state.topTracks.isNotEmpty()) {
                     item {
                         Text(
-                            "Топ треки",
+                            stringResource(R.string.artist_top_tracks),
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
@@ -100,7 +109,7 @@ fun ArtistScreen(artistId: String, onOpenArtist: (String) -> Unit) {
                             track = track,
                             index = index,
                             onClick = { PlayerController.playQueue(state.topTracks, index) },
-                            onToggleLike = { likeController.toggle(track, scope) },
+                            onToggleLike = { likeController.toggle(track) },
                             onOpenMenu = { menuTrack = track }
                         )
                     }
@@ -108,7 +117,7 @@ fun ArtistScreen(artistId: String, onOpenArtist: (String) -> Unit) {
                 if (state.releases.isNotEmpty()) {
                     item {
                         Text(
-                            "Релізи",
+                            stringResource(R.string.artist_releases),
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )

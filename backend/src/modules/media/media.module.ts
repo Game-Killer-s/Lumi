@@ -22,6 +22,6 @@ import { MediaUploadService } from './media-upload.service';
     MediaMetadataService,
     AudioToolchainService,
   ],
-  exports: [MediaProcessingJobService],
+  exports: [MediaProcessingJobService, MediaStorageService],
 })
 export class MediaModule {}
